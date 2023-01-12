@@ -39,6 +39,18 @@ list(
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tar_target(
+    subjs_info_clean,
+    data_clean |>
+      select(sub_id = ID, age_survey = Age, gender_survey = Gender) |>
+      correct_subjs_id(sub_id_transform) |>
+      full_join(subjs_info, by = "sub_id") |>
+      mutate(
+        age = coalesce(age, age_survey),
+        sex = coalesce(gender, gender_survey),
+        .keep = "unused"
+      )
+  ),
+  tar_target(
     indices_keepTrack,
     preproc_existed(
       data_clean,
@@ -80,8 +92,7 @@ list(
         indices_penncnp,
         indices_Raven
       ) |>
-      left_join(sub_id_transform, by = c("sub_id" = "behav_id")) |>
-      mutate(sub_id = coalesce(fmri_id, sub_id), .keep = "unused")
+      correct_subjs_id(sub_id_transform)
   ),
   tar_target(indices_clean, clean_indices(indices, indices_selection)),
   tar_target(

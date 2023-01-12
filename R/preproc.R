@@ -328,6 +328,16 @@ clean_indices <- function(indices, indices_selection) {
     ungroup()
 }
 
+#' Correct Subjects' identifier
+#'
+#' Some subjects have different identifier in behavior and fmri data. Here we
+#' correct them as fmri identifiers.
+correct_subjs_id <- function(data, sub_id_transform, name_id = "sub_id") {
+  data |>
+    left_join(sub_id_transform, by = set_names(nm = name_id, "behav_id")) |>
+    mutate(sub_id = coalesce(fmri_id, .data[[name_id]]), .keep = "unused")
+}
+
 reshape_data_wider <- function(indices, name_score = "score") {
   indices |>
     group_by(task) |>
