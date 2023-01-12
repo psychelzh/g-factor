@@ -46,9 +46,10 @@ list(
       full_join(subjs_info, by = "sub_id") |>
       mutate(
         age = coalesce(age, age_survey),
-        sex = coalesce(gender, gender_survey),
+        sex = c("M", "F")[coalesce(gender, gender_survey)],
         .keep = "unused"
-      )
+      ) |>
+      filter(!is.na(age), !is.na(sex))
   ),
   tar_target(
     indices_keepTrack,
@@ -112,7 +113,8 @@ list(
       filter(sub_id < 17000) |>
       rowwise() |>
       filter(mean(is.na(c_across(-sub_id))) < 0.2) |>
-      ungroup()
+      ungroup() |>
+      semi_join(subjs_info_clean, by = "sub_id")
   ),
   tarchetypes::tar_file_read(
     mdl_spec,
