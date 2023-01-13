@@ -15,10 +15,23 @@ execute:
 #| include: false
 
 library(tidyverse)
-library(umx)
+library(lavaan)
 ```
 
 # Data Inspection
+
+## Sample Description
+
+```{r}
+#| label: describe-sample
+targets::tar_load(subjs_info_clean)
+targets::tar_load(indices_wider_clean)
+subjs_descr <- subjs_info_clean |> 
+  semi_join(indices_wider_clean, by = "sub_id") |> 
+  report::report_participants()
+```
+
+The full sample contains `r subjs_descr`.
 
 ## Distribution
 
@@ -65,15 +78,15 @@ mdl_data |>
   corrr::correlate() |>
   corrr::autoplot(
     method = "HC",
-    low = "blue", 
+    low = "green", 
     high = "red", 
     mid = "white"
   )
 ```
 
-# Modeling
+# CFA Modeling
 
-## One factor model
+## Simple One-g CFA
 
 ```{r}
 #| label: fig-loading-one-factor
@@ -83,14 +96,19 @@ mdl_data |>
 #|   **Factor loadings for one factor only.** Note the largest loadings are 
 #|   mainly from response time tasks. The fit measures are also low.
 
-targets::tar_load(full_g_mdl)
-targets::tar_load(full_g_fitmeasure)
-df_print <- full_g_fitmeasure[c("CFI", "TLI", "RMSEA")] |> 
-  as_tibble() |> 
+mdl_one_g_spec <- paste(
+  "g =~", 
+  paste0("`", names(mdl_data), "`", collapse = " + ")
+)
+fitted_one_g <- cfa(mdl_one_g_spec, mdl_data, std.ov = TRUE, missing = "fiml")
+df_print <- fitMeasures(fitted_one_g, c("cfi", "tli", "rmsea")) |> 
+  as_tibble_row() |> 
+  rename_with(toupper) |> 
   mutate(across(.fns = ~ round(., 2)))
-loadings(full_g_mdl) |> 
-  as_tibble(rownames = "variable") |> 
-  ggplot(aes(g, fct_reorder(variable, g))) +
+standardizedSolution(fitted_one_g) |> 
+  filter(lhs == "g", op == "=~") |> 
+  select(variable = rhs, loading = est.std) |> 
+  ggplot(aes(loading, fct_reorder(variable, loading))) +
   geom_point() +
   ggpp::geom_table_npc(
     data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
@@ -100,32 +118,43 @@ loadings(full_g_mdl) |>
   theme_bw()
 ```
 
-## Bi-factor Model
+## Enhance Model Fitting
+
+Given the previous model does not fit well, item deletion and model re-factor (hierarchical model) are tried. The deleted items are:
+
+* All the inhibition tasks (anti-saccade, stop signal, stroop), because they do not fit well as an inhibition factor.
+* Penn line orientation task is related to perception, which does not have enough similar tasks.
+* Spatial 2-back task, because its correlation with other WM tasks is relatively low and its loading on WM factor is low.
+
+## Better Model {.smaller}
 
 ```{r}
-#| label: fig-loading-bifactor
+#| label: fig-better-model
 #| fig-width: 8
-#| fig-height: 6
+#| fig-height: 5
 #| fig-cap: >
-#|   **Loadings on g for bifactor model.**
+#|   **Visualization of the new model.**
 
-targets::tar_load(mdl_bifac)
-df_print <- lavaan::fitmeasures(mdl_bifac)[c("cfi", "tli", "rmsea")] |> 
+targets::tar_load(mdl_fitted)
+semPlot::semPaths(
+  mdl_fitted, 
+  whatLabels = "std", 
+  intercepts = FALSE, 
+  nCharNodes = 0,
+  edge.label.cex = 0.75
+)
+```
+
+```{r}
+#| label: tbl-fitmeasure-better-model
+#| tbl-cap: >
+#|   **Fit measures.**
+
+fitMeasures(mdl_fitted, c("cfi", "tli", "rmsea")) |> 
   as_tibble_row() |> 
   rename_with(toupper) |> 
-  mutate(across(.fns = ~ round(., 2)))
-lavaan::coef(mdl_bifac) |> 
-  enframe(name = "term", value = "loading") |> 
-  filter(str_starts(term, "g")) |> 
-  mutate(variable = str_extract(term, "(?<=~).+")) |> 
-  ggplot(aes(loading, fct_reorder(variable, loading))) +
-  geom_point() +
-  ggpp::geom_table_npc(
-    data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
-    mapping = aes(npcx = x, npcy = y, label = tb)
-  ) +
-  labs(x = "Loading", y = "Task Index") +
-  theme_bw()
+  mutate(across(.fns = ~ round(., 2))) |> 
+  knitr::kable()
 ```
 
 ## Correlation between two G factor scores
@@ -139,38 +168,8 @@ lavaan::coef(mdl_bifac) |>
 #|   the results can be similar.
 
 tibble(
-  score_g_one = umxFactorScores(full_g_mdl, type = "WeightedML", minManifests = 1)[, 1],
-  score_g_bifac = lavaan::predict(mdl_bifac)[, "g"]
+  score_g_one = lavPredict(fitted_one_g)[, "g"],
+  score_g_better = lavPredict(mdl_fitted)[, "g"]
 ) |> 
-  ggplot(aes(score_g_one, score_g_bifac)) +
-  geom_point() +
-  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p"))) +
-  theme_bw()
+  GGally::ggpairs()
 ```
-
-## Remove response time indices
-
-```{r}
-#| label: fig-mdl-no-resp
-#| fig-height: 6
-#| fig-width: 8
-#| fig-cap: >
-#|   **Factor loadings without response time indices.**
-
-targets::tar_load(mdl_no_rt)
-targets::tar_load(mdl_no_rt_fitmeasure)
-df_print <- mdl_no_rt_fitmeasure[c("CFI", "TLI", "RMSEA")] |> 
-  as_tibble() |> 
-  mutate(across(.fns = ~ round(., 2)))
-loadings(mdl_no_rt) |> 
-  as_tibble(rownames = "variable") |> 
-  ggplot(aes(g, fct_reorder(variable, g))) +
-  geom_point() +
-  ggpp::geom_table_npc(
-    data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
-    mapping = aes(npcx = x, npcy = y, label = tb)
-  ) +
-  labs(x = "Loading", y = "Task Index") +
-  theme_bw()
-```
-
