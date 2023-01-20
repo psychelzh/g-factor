@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/cpm.html",
       "/posts/check_model.html"
     ]
   }

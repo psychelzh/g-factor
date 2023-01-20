@@ -10,8 +10,7 @@
   <meta name="generator" content="quarto-1.2.313">
 
   <meta name="author" content="Liang Zhang">
-  <meta name="dcterms.date" content="2022-12-13">
-  <title>Intelligence and Its Neural Correlates - Modeling Behavior</title>
+  <title>Intelligence and Its Neural Correlates - Predict Intelligence by FC Network through CPM</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -28,6 +27,25 @@
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
+    }
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+    }
+    .hanging div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
     }
   </style>
   <link rel="stylesheet" href="../site_libs/revealjs/dist/theme/quarto.css" id="theme">
@@ -326,7 +344,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Modeling Behavior</h1>
+  <h1 class="title">Predict Intelligence by FC Network through CPM</h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -336,85 +354,90 @@ Liang Zhang
 </div>
 </div>
 
-  <p class="date">12/13/22</p>
+  <p class="date">1/10/23</p>
 </section>
-<section>
-<section id="data-inspection" class="title-slide slide level1 center">
-<h1>Data Inspection</h1>
+<section class="slide level2">
 
+<p>Here we use results from the better model from <a href="check_model.html">this post</a>.</p>
 </section>
-<section id="sample-description" class="slide level2">
-<h2>Sample Description</h2>
+<section id="fmri-sample-description" class="title-slide slide level1 center">
+<h1>FMRI Sample Description</h1>
 <div class="cell">
 
 </div>
-<p>The full sample contains 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other).</p>
-</section>
-<section id="distribution" class="slide level2">
-<h2>Distribution</h2>
-
-<img data-src="check_model_files/figure-revealjs/fig-distr-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;1: <strong>Distributions for All Tasks.</strong> They are all all fairly distributed as normal.</p></section>
-<section id="missing-pattern" class="slide level2">
-<h2>Missing Pattern</h2>
-
-<img data-src="check_model_files/figure-revealjs/fig-miss-pattern-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;2: <strong>Misssing pattern.</strong></p></section>
-<section id="correlation-matrix" class="slide level2">
-<h2>Correlation Matrix</h2>
-
-<img data-src="check_model_files/figure-revealjs/fig-correlation-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;3: <strong>Correlation Between Tasks</strong></p></section></section>
-<section>
-<section id="cfa-modeling" class="title-slide slide level1 center">
-<h1>CFA Modeling</h1>
-
-</section>
-<section id="simple-one-g-cfa" class="slide level2">
-<h2>Simple One-g CFA</h2>
-
-<img data-src="check_model_files/figure-revealjs/fig-loading-one-factor-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;4: <strong>Factor loadings for one factor only.</strong> Note the largest loadings are mainly from response time tasks. The fit measures are also low.</p></section>
-<section id="enhance-model-fitting" class="slide level2">
-<h2>Enhance Model Fitting</h2>
-<p>Given the previous model does not fit well, item deletion and model re-factor (hierarchical model) are tried. The deleted items are:</p>
 <ul>
-<li>All the inhibition tasks (anti-saccade, stop signal, stroop), because they do not fit well as an inhibition factor.</li>
-<li>Penn line orientation task is related to perception, which does not have enough similar tasks.</li>
-<li>Spatial 2-back task, because its correlation with other WM tasks is relatively low and its loading on WM factor is low.</li>
+<li>Task-modality data:
+<ul>
+<li>402 participants (Mean age = 21.7, SD = 2.3, range: [16.8, 29]; Sex: 50.0% females, 50.0% males, 0.0% other)</li>
+</ul></li>
+<li>Rest-modality data:
+<ul>
+<li>1524 participants (Mean age = 20.6, SD = 1.9, range: [16, 29]; Sex: 65.4% females, 34.6% males, 0.0% other)</li>
+</ul></li>
 </ul>
 </section>
-<section id="better-model" class="slide level2 smaller">
-<h2>Better Model</h2>
 
-<img data-src="check_model_files/figure-revealjs/fig-better-model-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;5: <strong>Visualization of the new model.</strong></p><div class="cell">
-<div class="cell-output-display">
-<div id="tbl-fitmeasure-better-model">
-<table>
-<caption>Table&nbsp;1: <strong>Fit measures.</strong></caption>
-<thead>
-<tr class="header">
-<th style="text-align: right;">CFI</th>
-<th style="text-align: right;">TLI</th>
-<th style="text-align: right;">RMSEA</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">0.93</td>
-<td style="text-align: right;">0.91</td>
-<td style="text-align: right;">0.04</td>
-</tr>
-</tbody>
-</table>
+<section>
+<section id="cpm-results" class="title-slide slide level1 center">
+<h1>CPM results</h1>
+<div class="cell">
+
 </div>
+</section>
+<section id="configurations" class="slide level2 smaller">
+<h2>Configurations</h2>
+<p>Parameters are as follows (mainly inspired by <span class="citation" data-cites="greene2018">Greene et al. (<a href="#/references" role="doc-biblioref" onclick="">2018</a>)</span>):</p>
+<ul>
+<li>FMRI data pre-processing: <code>with</code> or <code>without</code> global signal regression (GSR)</li>
+<li>Node parcellation: Power’s <em>264</em> nodes (<code>Power264</code>) or Shen’s <em>268</em> nodes (<code>nn268</code>)</li>
+<li>Modality:
+<ul>
+<li><code>emotion</code></li>
+<li><code>facename</code></li>
+<li><code>nback</code>, <code>Nbackrun1</code> and <code>Nbackrun2</code>: the n-back task contains two runs, and <code>nback</code> denotes that these two runs are combined.</li>
+<li><code>4tasks</code>: combines <code>emotion</code>, <code>facename</code>, <code>Nbackrun1</code> and <code>Nbackrun2</code></li>
+<li><code>rest</code></li>
+<li><code>4tasksrest</code>: combines all tasks and rest modality data</li>
+</ul></li>
+<li>Edge selection threshold method: correlation p.value based (<code>alpha</code>) or network sparsity based (<code>sparsity</code>)</li>
+</ul>
+</section>
+<section id="different-modality" class="slide level2">
+<h2>Different Modality</h2>
+
+<img data-src="cpm_files/figure-revealjs/fig-modality-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;1: <strong>CPM prediction among different modality.</strong> These results show task modality does have a better prediction than resting (<code>rest2</code>) modality. <code>rest2</code> means using subjects also having task data, while <code>rest</code> means using all subjects as long as they have resting data. Interestingly, negative edges (anti-correlation) predict better than postive edges for resting data (<code>rest2</code>).</p></section>
+<section id="the-influence-of-parcellation" class="slide level2">
+<h2>The influence of Parcellation</h2>
+
+<img data-src="cpm_files/figure-revealjs/fig-parcel-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;2: <strong>Investigate the influence of parcellation.</strong></p></section>
+<section id="the-influence-of-gsr" class="slide level2">
+<h2>The Influence of GSR</h2>
+
+<img data-src="cpm_files/figure-revealjs/fig-gsr-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;3: <strong>Investigate the influence of global signal regression.</strong></p></section>
+<section id="the-influence-of-edge-selection-method" class="slide level2">
+<h2>The Influence of Edge Selection Method</h2>
+
+<img data-src="cpm_files/figure-revealjs/fig-thresh-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;4: <strong>Investigate the influence of edge selection method.</strong></p></section>
+<section id="the-influence-of-latent-variable" class="slide level2">
+<h2>The Influence of Latent variable</h2>
+
+<img data-src="cpm_files/figure-revealjs/fig-latent-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;5: <strong>Investigate the predictability difference of different latent variable.</strong></p></section>
+<section id="the-influence-of-sex" class="slide level2">
+<h2>The Influence of Sex</h2>
+
+<img data-src="cpm_files/figure-revealjs/fig-sex-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Investigate the predictability difference of different sex</strong></p></section></section>
+<section id="references" class="title-slide slide level1 smaller scrollable">
+<h1>References</h1>
+
+<div class="footer footer-default">
+
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-greene2018" class="csl-entry" role="doc-biblioentry">
+Greene, Abigail S., Siyuan Gao, Dustin Scheinost, and R. Todd Constable. 2018. <span>“Task-Induced Brain State Manipulation Improves Prediction of Individual Traits.”</span> <em>Nature Communications</em> 9 (1): 2807. <a href="https://doi.org/10.1038/s41467-018-04920-3">https://doi.org/10.1038/s41467-018-04920-3</a>.
 </div>
 </div>
 </section>
-<section id="correlation-between-two-g-factor-scores" class="slide level2">
-<h2>Correlation between two G factor scores</h2>
-
-
-<img data-src="check_model_files/figure-revealjs/fig-cor-between-g-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Correlation between G factor scores.</strong> The correlation is very high, so the results can be similar.</p><div class="footer footer-default">
-
-</div>
-</section></section>
     </div>
   </div>
 

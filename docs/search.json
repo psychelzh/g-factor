@@ -4,7 +4,14 @@
     "href": "index.html",
     "title": "Intelligence and Its Neural Correlates",
     "section": "",
-    "text": "Modeling Behavior\n\n\n\n\n\n\n\n\n\n\n\n\nDec 13, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+    "text": "Predict Intelligence by FC Network through CPM\n\n\n\n\n\n\n\n\n\n\n\n\nJan 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\nModeling Behavior\n\n\n\n\n\n\n\n\n\n\n\n\nDec 13, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/check_model.html#sample-description",
+    "href": "posts/check_model.html#sample-description",
+    "title": "Modeling Behavior",
+    "section": "Sample Description",
+    "text": "Sample Description\n\n\n\nThe full sample contains 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)."
   },
   {
     "objectID": "posts/check_model.html#distribution",
@@ -28,31 +35,80 @@
     "text": "Correlation Matrix\n\nFigure 3: Correlation Between Tasks"
   },
   {
-    "objectID": "posts/check_model.html#one-factor-model",
-    "href": "posts/check_model.html#one-factor-model",
+    "objectID": "posts/check_model.html#simple-one-g-cfa",
+    "href": "posts/check_model.html#simple-one-g-cfa",
     "title": "Modeling Behavior",
-    "section": "One factor model",
-    "text": "One factor model\n\nFigure 4: Factor loadings for one factor only. Note the largest loadings are mainly from response time tasks. The fit measures are also low."
+    "section": "Simple One-g CFA",
+    "text": "Simple One-g CFA\n\nFigure 4: Factor loadings for one factor only. Note the largest loadings are mainly from response time tasks. The fit measures are also low."
   },
   {
-    "objectID": "posts/check_model.html#bi-factor-model",
-    "href": "posts/check_model.html#bi-factor-model",
+    "objectID": "posts/check_model.html#enhance-model-fitting",
+    "href": "posts/check_model.html#enhance-model-fitting",
     "title": "Modeling Behavior",
-    "section": "Bi-factor Model",
-    "text": "Bi-factor Model\n\nFigure 5: Loadings on g for bifactor model."
+    "section": "Enhance Model Fitting",
+    "text": "Enhance Model Fitting\nGiven the previous model does not fit well, item deletion and model re-factor (hierarchical model) are tried. The deleted items are:\n\nAll the inhibition tasks (anti-saccade, stop signal, stroop), because they do not fit well as an inhibition factor.\nPenn line orientation task is related to perception, which does not have enough similar tasks.\nSpatial 2-back task, because its correlation with other WM tasks is relatively low and its loading on WM factor is low."
+  },
+  {
+    "objectID": "posts/check_model.html#better-model",
+    "href": "posts/check_model.html#better-model",
+    "title": "Modeling Behavior",
+    "section": "Better Model",
+    "text": "Better Model\n\nFigure 5: Visualization of the new model.\n\n\n\nTable 1: Fit measures.\n\n\nCFI\nTLI\nRMSEA\n\n\n\n\n0.93\n0.91\n0.04"
   },
   {
     "objectID": "posts/check_model.html#correlation-between-two-g-factor-scores",
     "href": "posts/check_model.html#correlation-between-two-g-factor-scores",
     "title": "Modeling Behavior",
     "section": "Correlation between two G factor scores",
-    "text": "Correlation between two G factor scores\n\nFigure 6: Correlation between G factor scores. The correlation is very high, so the results can be similar."
+    "text": "Correlation between two G factor scores\n\n\nFigure 6: Correlation between G factor scores. The correlation is very high, so the results can be similar."
   },
   {
-    "objectID": "posts/check_model.html#remove-response-time-indices",
-    "href": "posts/check_model.html#remove-response-time-indices",
-    "title": "Modeling Behavior",
-    "section": "Remove response time indices",
-    "text": "Remove response time indices\n\n\nFigure 7: Factor loadings without response time indices."
+    "objectID": "posts/cpm.html#configurations",
+    "href": "posts/cpm.html#configurations",
+    "title": "Predict Intelligence by FC Network through CPM",
+    "section": "Configurations",
+    "text": "Configurations\nParameters are as follows (mainly inspired by Greene et al. (2018)):\n\nFMRI data pre-processing: with or without global signal regression (GSR)\nNode parcellation: Power’s 264 nodes (Power264) or Shen’s 268 nodes (nn268)\nModality:\n\nemotion\nfacename\nnback, Nbackrun1 and Nbackrun2: the n-back task contains two runs, and nback denotes that these two runs are combined.\n4tasks: combines emotion, facename, Nbackrun1 and Nbackrun2\nrest\n4tasksrest: combines all tasks and rest modality data\n\nEdge selection threshold method: correlation p.value based (alpha) or network sparsity based (sparsity)"
+  },
+  {
+    "objectID": "posts/cpm.html#different-modality",
+    "href": "posts/cpm.html#different-modality",
+    "title": "Predict Intelligence by FC Network through CPM",
+    "section": "Different Modality",
+    "text": "Different Modality\n\nFigure 1: CPM prediction among different modality. These results show task modality does have a better prediction than resting (rest2) modality. rest2 means using subjects also having task data, while rest means using all subjects as long as they have resting data. Interestingly, negative edges (anti-correlation) predict better than postive edges for resting data (rest2)."
+  },
+  {
+    "objectID": "posts/cpm.html#the-influence-of-parcellation",
+    "href": "posts/cpm.html#the-influence-of-parcellation",
+    "title": "Predict Intelligence by FC Network through CPM",
+    "section": "The influence of Parcellation",
+    "text": "The influence of Parcellation\n\nFigure 2: Investigate the influence of parcellation."
+  },
+  {
+    "objectID": "posts/cpm.html#the-influence-of-gsr",
+    "href": "posts/cpm.html#the-influence-of-gsr",
+    "title": "Predict Intelligence by FC Network through CPM",
+    "section": "The Influence of GSR",
+    "text": "The Influence of GSR\n\nFigure 3: Investigate the influence of global signal regression."
+  },
+  {
+    "objectID": "posts/cpm.html#the-influence-of-edge-selection-method",
+    "href": "posts/cpm.html#the-influence-of-edge-selection-method",
+    "title": "Predict Intelligence by FC Network through CPM",
+    "section": "The Influence of Edge Selection Method",
+    "text": "The Influence of Edge Selection Method\n\nFigure 4: Investigate the influence of edge selection method."
+  },
+  {
+    "objectID": "posts/cpm.html#the-influence-of-latent-variable",
+    "href": "posts/cpm.html#the-influence-of-latent-variable",
+    "title": "Predict Intelligence by FC Network through CPM",
+    "section": "The Influence of Latent variable",
+    "text": "The Influence of Latent variable\n\nFigure 5: Investigate the predictability difference of different latent variable."
+  },
+  {
+    "objectID": "posts/cpm.html#the-influence-of-sex",
+    "href": "posts/cpm.html#the-influence-of-sex",
+    "title": "Predict Intelligence by FC Network through CPM",
+    "section": "The Influence of Sex",
+    "text": "The Influence of Sex\n\nFigure 6: Investigate the predictability difference of different sex"
   }
 ]
