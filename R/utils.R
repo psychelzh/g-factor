@@ -85,16 +85,6 @@ id_cols <- function() {
   c("file", "sub_id", "task_datetime")
 }
 
-# special for paired analysis
-do_pairs <- function(.x, .fun, .at = c("first", "second"), ...,
-                     .bind = FALSE, .id = "part") {
-  res <- map_at(.x, .at, .fun, ...)
-  if (.bind) {
-    res <- bind_rows(res[.at], .id = .id)
-  }
-  res
-}
-
 clean_combined_cpm <- function(df, name) {
   df |>
     mutate(id = str_remove(id, name)) |>
