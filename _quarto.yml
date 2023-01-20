@@ -1,9 +1,13 @@
 project:
   type: website
   output-dir: docs
+  execute-dir: project
 
 comments:
   hypothesis: true
 
 execute:
   freeze: auto
+
+website:
+  title: "Intelligence and Its Neural Correlates"

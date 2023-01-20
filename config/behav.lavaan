@@ -1,0 +1,5 @@
+g =~ Speed + WM + Memory + Flex
+Speed =~ CRT + SRT + PCPT
+WM =~ OSPAN + SSPAN + `3BACK` + KPTRK
+Memory =~ FN + SYMMEM + MST
+Flex =~ SIZELIFE + COLSHP + NUMLET

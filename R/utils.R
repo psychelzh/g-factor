@@ -18,8 +18,8 @@ calc_auc_ltm <- function(data,
     mutate(
       acc = if_else(
         .data[[name_type]] == "s",
-        .data[[name_resp]] > crit,
-        .data[[name_resp]] <= crit
+        .data[[name_resp]] > crit & .data[[name_resp]] != 0,
+        .data[[name_resp]] <= crit & .data[[name_resp]] != 0
       )
     ) |>
     group_by(across(all_of(c(.by, "crit", name_type)))) |>
@@ -85,12 +85,12 @@ id_cols <- function() {
   c("file", "sub_id", "task_datetime")
 }
 
-# special for paired analysis
-do_pairs <- function(.x, .fun, .at = c("first", "second"), ...,
-                     .bind = FALSE, .id = "part") {
-  res <- map_at(.x, .at, .fun, ...)
-  if (.bind) {
-    res <- bind_rows(res[.at], .id = .id)
-  }
-  res
+clean_combined_cpm <- function(df, name) {
+  df |>
+    mutate(id = str_remove(id, name)) |>
+    separate(
+      id,
+      c(NA, "modal", "parcel", "gsr"),
+      convert = TRUE
+    )
 }

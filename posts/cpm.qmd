@@ -1,0 +1,240 @@
+---
+title: Predict Intelligence by FC Network through CPM
+author: Liang Zhang
+date: 2023-01-10
+format:
+  revealjs:
+    code-fold: false
+execute:
+  warning: false
+  message: false
+bibliography: references.bib
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+```
+
+Here we use results from the better model from [this post](check_model.html).
+
+# FMRI Sample Description
+
+```{r}
+#| label: describe-sample
+
+targets::tar_load(subjs_info_clean)
+subjs_tasks <- targets::tar_read(fc_data_4tasks_nn268_with) |>
+  select(sub_id)
+subjs_rest <- targets::tar_read(fc_data_rest_nn268_with) |>
+  select(sub_id)
+descr_tasks <- report::report_participants(
+  subjs_info_clean |> inner_join(subjs_tasks, by = "sub_id")
+)
+descr_rest <- report::report_participants(
+  subjs_info_clean |> inner_join(subjs_rest, by = "sub_id")
+)
+```
+
+-   Task-modality data:
+    -   `r descr_tasks`
+-   Rest-modality data:
+    -   `r descr_rest`
+
+# CPM results
+
+```{r}
+#| label: load-cpm-main-results
+
+cpm_pred <- bind_rows(
+  targets::tar_read(cpmcors),
+  targets::tar_read(cpmcors_rest2)
+) |> 
+  mutate(latent = factor(latent, c("g", "WM", "Speed", "Memory", "Flex")))
+```
+
+## Configurations {.smaller}
+
+Parameters are as follows (mainly inspired by @greene2018):
+
+-   FMRI data pre-processing: `with` or `without` global signal regression (GSR)
+-   Node parcellation: Power's *264* nodes (`Power264`) or Shen's *268* nodes (`nn268`)
+-   Modality:
+    -   `emotion`
+    -   `facename`
+    -   `nback`, `Nbackrun1` and `Nbackrun2`: the n-back task contains two runs, and `nback` denotes that these two runs are combined.
+    -   `4tasks`: combines `emotion`, `facename`, `Nbackrun1` and `Nbackrun2`
+    -   `rest`
+    -   `4tasksrest`: combines all tasks and rest modality data
+-   Edge selection threshold method: correlation p.value based (`alpha`) or network sparsity based (`sparsity`)
+
+## Different Modality
+
+```{r}
+#| label: fig-modality
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **CPM prediction among different modality.** These results show task
+#|   modality does have a better prediction than resting (`rest2`)
+#|   modality. `rest2` means using subjects also having task data, while 
+#|   `rest` means using all subjects as long as they have resting data.
+#|   Interestingly, negative edges (anti-correlation) predict better than 
+#|   postive edges for resting data (`rest2`).
+
+cpm_pred |> 
+  filter(
+    thresh_method == "alpha", 
+    parcel == "nn268",
+    gsr == "without",
+    latent == "g"
+  ) |>
+  ggplot(aes(modal, estimate)) +
+  ggdist::stat_slabinterval() +
+  facet_grid(rows = vars(edge_type)) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(x = "Modality", y = "Prediction (Pearson's Correlation)")
+```
+
+## The influence of Parcellation
+
+```{r}
+#| label: fig-parcel
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Investigate the influence of parcellation.**
+
+cpm_pred |> 
+  filter(
+    thresh_method == "alpha", 
+    # parcel == "nn268",
+    gsr == "without",
+    latent == "g"
+  ) |>
+  ggplot(aes(modal, estimate, color = parcel, fill = parcel)) +
+  ggdist::stat_slabinterval() +
+  facet_grid(rows = vars(edge_type)) +
+  theme_bw() +
+  ggthemes::scale_color_few() +
+  ggthemes::scale_fill_few() +
+  theme(legend.position = "top") +
+  labs(x = "Modality", y = "Prediction (Pearson's Correlation)", 
+       color = "Parcellation", fill = "Parcellation")
+```
+
+## The Influence of GSR
+
+```{r}
+#| label: fig-gsr
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Investigate the influence of global signal regression.**
+
+cpm_pred |> 
+  filter(
+    thresh_method == "alpha", 
+    parcel == "nn268",
+    # gsr == "without",
+    latent == "g"
+  ) |>
+  ggplot(aes(modal, estimate, color = gsr, fill = gsr)) +
+  ggdist::stat_slabinterval() +
+  facet_grid(rows = vars(edge_type)) +
+  theme_bw() +
+  scale_color_grey() +
+  scale_fill_grey() +
+  theme(legend.position = "top") +
+  labs(x = "Modality", y = "Prediction (Pearson's Correlation)", 
+       color = "GSR", fill = "GSR")
+```
+
+## The Influence of Edge Selection Method
+
+```{r}
+#| label: fig-thresh
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Investigate the influence of edge selection method.**
+
+cpm_pred |> 
+  filter(
+    # thresh_method == "alpha", 
+    parcel == "nn268",
+    gsr == "without",
+    latent == "g"
+  ) |>
+  ggplot(aes(modal, estimate, color = thresh_method, fill = thresh_method)) +
+  ggdist::stat_slabinterval() +
+  facet_grid(rows = vars(edge_type)) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(x = "Modality", y = "Prediction (Pearson's Correlation)", 
+       color = "Edge Selection Method", fill = "Edge Selection Method")
+```
+
+## The Influence of Latent variable
+
+```{r}
+#| label: fig-latent
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Investigate the predictability difference of different latent variable.**
+
+cpm_pred |> 
+  filter(
+    thresh_method == "alpha",
+    parcel == "nn268",
+    gsr == "without",
+    # latent == "g"
+  ) |>
+  ggplot(aes(modal, estimate, color = latent, fill = latent)) +
+  ggdist::stat_slabinterval() +
+  scale_color_viridis_d() +
+  scale_fill_viridis_d() +
+  facet_grid(rows = vars(edge_type)) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(x = "Modality", y = "Prediction (Pearson's Correlation)", 
+       color = "Latent", fill = "Latent")
+```
+
+## The Influence of Sex
+
+```{r}
+#| label: fig-sex
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Investigate the predictability difference of different sex**
+
+cpm_pred_sex <- bind_rows(
+  targets::tar_read(cpmcors_sex),
+  targets::tar_read(cpmcors_sex_rest2)
+) |> 
+  mutate(sex = factor(sex, c("M", "F")))
+cpm_pred_sex |> 
+  filter(
+    thresh_method == "alpha", 
+    parcel == "nn268",
+    gsr == "without",
+    latent == "g"
+  ) |>
+  ggplot(aes(modal, estimate, color = sex, fill = sex)) +
+  ggdist::stat_slabinterval() +
+  facet_grid(rows = vars(edge_type)) +
+  scale_color_brewer(palette = "Paired") +
+  scale_fill_brewer(palette = "Paired") +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(x = "Modality", y = "Prediction (Pearson's Correlation)", 
+       color = "Sex", fill = "Sex")
+```
+
+# References

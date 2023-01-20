@@ -1,5 +1,12 @@
+#' Anti-Saccade Task
+#'
+#' This task is relatively hard
 preproc_antisac <- function(data) {
-  calc_spd_acc(data, .by = id_cols())
+  data |>
+    group_by(across(all_of(id_cols()))) |>
+    filter(sum(acc == 1) > qbinom(0.95, n(), 1 / 3)) |>
+    ungroup() |>
+    calc_spd_acc(.by = id_cols())
 }
 
 #' Switch Cost
@@ -88,17 +95,15 @@ preproc_filtering <- function(data) {
 #' "FNRecog, KRecog"
 preproc_ltm <- function(data) {
   data |>
-    # remove subjects with too much quick responses
-    group_by(across(all_of(id_cols()))) |>
-    filter(mean(rt > 1) > 0.8) |>
+    group_by(across(id_cols())) |>
+    filter(mean(is.na(resp) | resp == 0) < 0.1) |>
     ungroup() |>
     mutate(type_sig = if_else(type == "old", "s", "n")) |>
     calc_auc_ltm(
       name_type = "type_sig",
       name_resp = "resp",
       .by = id_cols()
-    ) |>
-    filter(auc > 0.5)
+    )
 }
 #' Complex Span
 preproc_ospan <- function(data) {
@@ -167,9 +172,7 @@ preproc_spst <- function(data) {
 preproc_stopsignal <- function(data) {
   # remove negative ssd subjects
   data_clean <- data |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(!any(ssd < 0)) |>
-    ungroup()
+    mutate(ssd = if_else(ssd < 100 & is_stop == 1, 100, ssd))
   ssd <- data_clean |>
     filter(is_stop == 1) |>
     group_by(across(all_of(c(id_cols(), "stair_case")))) |>
@@ -247,6 +250,40 @@ preproc_stroop <- function(data) {
     )
 }
 
+preproc_penncnp <- function(data) {
+  cpt <- data |>
+    select(sub_id = tet_eion.ubid, starts_with("NUM6CPT")) |>
+    filter(NUM6CPT.CPN6_SEN > 0.5) |>
+    mutate(
+      across(
+        c(NUM6CPT.CPN6_TP, NUM6CPT.CPN6_FN),
+        ~ coalesce(., 0)  + 1 / 3
+      ),
+      across(
+        c(NUM6CPT.CPN6_FP, NUM6CPT.CPN6_TN),
+        ~ coalesce(., 0) + 2 / 3
+      ),
+      NUM6CPT.CPN6_HIT = NUM6CPT.CPN6_TP / (NUM6CPT.CPN6_TP + NUM6CPT.CPN6_FN),
+      NUM6CPT.CPN6_FA = NUM6CPT.CPN6_FP / (NUM6CPT.CPN6_FP + NUM6CPT.CPN6_TN),
+      NUM6CPT.dprime = qnorm(NUM6CPT.CPN6_HIT) - qnorm(NUM6CPT.CPN6_FA)
+    ) |>
+    select(sub_id, mrt = NUM6CPT.CPN6_TPRT, dprime = NUM6CPT.dprime) |>
+    pivot_longer(
+      -sub_id,
+      names_to = "index",
+      values_to = "score"
+    ) |>
+    add_column(
+      task = "NUM6CPT",
+      disp_name = "PCPT",
+      .after = "sub_id"
+    )
+  lot <- data |>
+    select(sub_id = tet_eion.ubid, score = VSPLOT24.VSPLOT_TC) |>
+    add_column(index = "nc", task = "VSPLOT24", disp_name = "PLOT")
+  bind_rows(cpt, lot)
+}
+
 preproc_existed <- function(data, ..., disp_name) {
   data |>
     select(sub_id = ID, ...) |>
@@ -291,12 +328,31 @@ clean_indices <- function(indices, indices_selection) {
     ungroup()
 }
 
-reshape_data_wider <- function(indices) {
+#' Correct Subjects' identifier
+#'
+#' Some subjects have different identifier in behavior and fmri data. Here we
+#' correct them as fmri identifiers.
+correct_subjs_id <- function(data, sub_id_transform, name_id = "sub_id") {
+  data |>
+    left_join(sub_id_transform, by = set_names(nm = name_id, "behav_id")) |>
+    mutate(sub_id = coalesce(fmri_id, .data[[name_id]]), .keep = "unused")
+}
+
+reshape_data_wider <- function(indices, name_score = "score") {
   indices |>
-    unite("task_index", disp_name, index, remove = FALSE) |>
+    group_by(task) |>
+    mutate(n_indices = n_distinct(index)) |>
+    ungroup() |>
+    mutate(
+      task_index = if_else(
+        n_indices == 1,
+        disp_name,
+        str_c(disp_name, index, sep = "-")
+      )
+    ) |>
     pivot_wider(
       id_cols = sub_id,
       names_from = task_index,
-      values_from = score_norm
+      values_from = all_of(name_score)
     )
 }
