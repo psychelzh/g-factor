@@ -78,6 +78,41 @@ targets_cpm <- tarchetypes::tar_map(
           .keep = "unused",
           .before = starts_with("tar")
         )
+    ),
+    tarchetypes::tar_map_rep(
+      result_cpm_sex,
+      command = {
+        scores_latent_match_sex <- scores_latent |>
+          tidytable::semi_join(
+            filter(subjs_info_clean, .data[["sex"]] == sex),
+            by = "sub_id"
+          )
+        do_cpm(
+          fc_data,
+          scores_latent_match_sex[, c("sub_id", latent)],
+          thresh_method,
+          thresh_level
+        )
+      },
+      values = tidyr::expand_grid(
+        tibble::tibble(
+          latent = "g",
+          sex = c("M", "F")
+        ),
+        hypers_thresh
+      ),
+      batches = 10,
+      reps = 10
+    ),
+    tar_target(
+      cpmcors_sex,
+      result_cpm_sex |>
+        select(-mask_prop, -behav_pred) |>
+        mutate(
+          map_df(cor, broom::tidy),
+          .keep = "unused",
+          .before = starts_with("tar")
+        )
     )
   )
 )
@@ -120,6 +155,41 @@ targets_cpm_rest2 <- tarchetypes::tar_map(
     tar_target(
       cpmcors,
       result_cpm |>
+        select(-mask_prop, -behav_pred) |>
+        mutate(
+          map_df(cor, broom::tidy),
+          .keep = "unused",
+          .before = starts_with("tar")
+        )
+    ),
+    tarchetypes::tar_map_rep(
+      result_cpm_sex,
+      command = {
+        scores_latent_match_sex <- scores_latent |>
+          tidytable::semi_join(
+            filter(subjs_info_clean, .data[["sex"]] == sex),
+            by = "sub_id"
+          )
+        do_cpm(
+          fc_data,
+          scores_latent_match_sex[, c("sub_id", latent)],
+          thresh_method,
+          thresh_level
+        )
+      },
+      values = tidyr::expand_grid(
+        tibble::tibble(
+          latent = "g",
+          sex = c("M", "F")
+        ),
+        hypers_thresh
+      ),
+      batches = 10,
+      reps = 10
+    ),
+    tar_target(
+      cpmcors_sex,
+      result_cpm_sex |>
         select(-mask_prop, -behav_pred) |>
         mutate(
           map_df(cor, broom::tidy),

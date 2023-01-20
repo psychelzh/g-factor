@@ -137,21 +137,25 @@ list(
     cpmcors,
     targets_cpm$cpmcors,
     command = bind_rows(!!!.x, .id = "id") |>
-      separate(
-        id,
-        c(NA, "modal", "parcel", "gsr"),
-        convert = TRUE
-      )
+      clean_combined_cpm("cpmcors")
+  ),
+  tarchetypes::tar_combine(
+    cpmcors_sex,
+    targets_cpm$cpmcors_sex,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined_cpm("cpmcors_sex")
   ),
   targets_cpm_rest2,
   tarchetypes::tar_combine(
     cpmcors_rest2,
     targets_cpm_rest2$cpmcors,
     command = bind_rows(!!!.x, .id = "id") |>
-      separate(
-        id,
-        c(NA, "modal", "parcel", "gsr"),
-        convert = TRUE
-      )
+      clean_combined_cpm("cpmcors")
+  ),
+  tarchetypes::tar_combine(
+    cpmcors_sex_rest2,
+    targets_cpm_rest2$cpmcors_sex,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined_cpm("cpmcors_sex")
   )
 )

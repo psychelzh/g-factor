@@ -94,3 +94,13 @@ do_pairs <- function(.x, .fun, .at = c("first", "second"), ...,
   }
   res
 }
+
+clean_combined_cpm <- function(df, name) {
+  df |>
+    mutate(id = str_remove(id, name)) |>
+    separate(
+      id,
+      c(NA, "modal", "parcel", "gsr"),
+      convert = TRUE
+    )
+}
