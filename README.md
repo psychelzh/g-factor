@@ -8,4 +8,4 @@ The project is pipelined with the help of R package {targets}. But a multiple-pr
 
 * The targets project is named with prefix of `project_`.
 * The targets data store is named with prefix of `_store_`.
-* The targets pipeline is named with prefix of `_targets_`.
+* The targets pipeline script is named with prefix of `_script_`.

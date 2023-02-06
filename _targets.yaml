@@ -1,6 +1,6 @@
 project_behav:
-  script: _targets_behav.R
+  script: _script_behav.R
   store: _store_behav
 project_task_fmri:
-  script: _targets_task_fmri.R
+  script: _script_task_fmri.R
   store: _store_task_fmri
