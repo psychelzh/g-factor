@@ -1,0 +1,3 @@
+project_behav:
+  script: _targets_behav.R
+  store: _store_behav
