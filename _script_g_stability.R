@@ -27,5 +27,8 @@ list(
     fs::path(store_fmri, "fc_data_rest_nn268_without"),
     read = qs::qread(!!.x)
   ),
+  # used for cpm batching (tar_rep cannot used with pattern)
+  tar_target(index_batch_cpm, seq_len(10)),
+  tar_target(index_rep_cpm, seq_len(10)),
   g_scores_pairs
 )

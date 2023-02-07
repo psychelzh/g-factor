@@ -62,7 +62,7 @@ do_cpm_pairs <- function(scores_pairs, ...) {
     rename_with(~ str_c(., "_last"), starts_with("tar"))
 }
 
-hypers_stability_pairs <- tibble::tibble(num_vars = 3:10)
+hypers_stability_pairs <- tibble::tibble(num_vars = 4:10)
 g_scores_pairs <- tarchetypes::tar_map(
   hypers_stability_pairs,
   list(
@@ -89,51 +89,39 @@ g_scores_pairs <- tarchetypes::tar_map(
       ),
       pattern = map(scores_g_pairs)
     ),
-    tarchetypes::tar_map_rep(
+    tar_target(
       result_cpm_pairs,
-      command = scores_g_pairs |>
-        map_df(
-          ~ do_cpm_pairs(
-            .,
-            fc_data = fc_data_rest_nn268_without,
-            thresh_method = thresh_method,
-            thresh_level = thresh_level
-          )
-        ),
-      values = tibble::tibble(
-        thresh_method = "sparsity",
-        thresh_level = 0.01
+      map_df(
+        index_rep_cpm,
+        ~ scores_g_pairs |>
+          map_df(
+            ~ do_cpm_pairs(
+              .,
+              fc_data = fc_data_rest_nn268_without,
+              thresh_method = "sparsity",
+              thresh_level = 0.01
+            )
+          ) |>
+          add_column(rep = ., batch = index_batch_cpm)
       ),
-      batches = 10,
-      reps = 10
+      pattern = cross(scores_g_pairs, index_batch_cpm)
     ),
     tar_target(
       mask_pairs,
       result_cpm_pairs |>
         filter(!map_lgl(mask_prop, is.null)) |>
-        nest(
-          .by = c(
-            ends_with("last"), edge_type, pair,
-            thresh_method, thresh_level
-          )
-        ) |>
+        nest(.by = c(pair, edge_type, ends_with("last"))) |>
         mutate(
           mask = map(
             data,
-            ~ {
-              mask_prop <- reduce(.$mask_prop, rbind)
-              if (is.vector(mask_prop)) {
-                mask_prop
-              } else {
-                colMeans(mask_prop)
-              }
-            }
+            ~ .$mask_prop |>
+              reduce(cbind) |>
+              rowMeans()
           ),
           .keep = "unused"
         ) |>
         pivot_wider(
-          id_cols = c(ends_with("last"), edge_type,
-                      thresh_method, thresh_level),
+          id_cols = c(ends_with("last"), edge_type),
           names_from = pair,
           values_from = mask
         )
