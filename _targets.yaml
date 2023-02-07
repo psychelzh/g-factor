@@ -4,3 +4,6 @@ project_behav:
 project_task_fmri:
   script: _script_task_fmri.R
   store: _store_task_fmri
+project_g_stability:
+  script: _script_g_stability.R
+  store: _store_g_stability
