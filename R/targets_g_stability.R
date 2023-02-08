@@ -109,6 +109,7 @@ g_scores_pairs <- tarchetypes::tar_map(
     tar_target(
       mask_pairs,
       result_cpm_pairs |>
+        select(pair, edge_type, ends_with("last"), mask_prop) |>
         filter(!map_lgl(mask_prop, is.null)) |>
         nest(.by = c(pair, edge_type, ends_with("last"))) |>
         mutate(
