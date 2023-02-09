@@ -85,12 +85,8 @@ id_cols <- function() {
   c("file", "sub_id", "task_datetime")
 }
 
-clean_combined_cpm <- function(df, name) {
+clean_combined <- function(df, name, to) {
   df |>
     mutate(id = str_remove(id, name)) |>
-    separate(
-      id,
-      c(NA, "modal", "parcel", "gsr"),
-      convert = TRUE
-    )
+    separate(id, c(NA, to), convert = TRUE)
 }
