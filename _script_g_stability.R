@@ -30,5 +30,14 @@ list(
   # used for cpm batching (tar_rep cannot used with pattern)
   tar_target(index_batch_cpm, seq_len(10)),
   tar_target(index_rep_cpm, seq_len(10)),
-  g_scores_pairs
+  g_scores_pairs,
+  tarchetypes::tar_combine(
+    dice_mask_pairs,
+    g_scores_pairs$dice_mask_pairs,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "dice_mask_pairs",
+        names(hypers_stability_pairs)
+      )
+  )
 )
