@@ -107,6 +107,17 @@ g_scores_pairs <- tarchetypes::tar_map(
       pattern = cross(scores_g_pairs, index_batch_cpm)
     ),
     tar_target(
+      cpm_pred_pairs,
+      result_cpm_pairs |>
+        select(pair, edge_type, contains(c("batch", "rep")), cor) |>
+        mutate(cor = map_dbl(cor, "estimate")) |>
+        pivot_wider(
+          id_cols = c(contains(c("batch", "rep")), edge_type),
+          names_from = pair,
+          values_from = cor
+        )
+    ),
+    tar_target(
       mask_pairs,
       result_cpm_pairs |>
         select(pair, edge_type, ends_with("last"), mask_prop) |>

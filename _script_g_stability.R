@@ -32,6 +32,24 @@ list(
   tar_target(index_rep_cpm, seq_len(10)),
   g_scores_pairs,
   tarchetypes::tar_combine(
+    cpm_pred_pairs,
+    g_scores_pairs$cpm_pred_pairs,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "cpm_pred_pairs",
+        names(hypers_stability_pairs)
+      )
+  ),
+  tarchetypes::tar_combine(
+    scores_g_pairs_cor,
+    g_scores_pairs$scores_g_pairs_cor,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "scores_g_pairs_cor",
+        names(hypers_stability_pairs)
+      )
+  ),
+  tarchetypes::tar_combine(
     dice_mask_pairs,
     g_scores_pairs$dice_mask_pairs,
     command = bind_rows(!!!.x, .id = "id") |>
