@@ -122,15 +122,11 @@ g_scores_pairs <- tarchetypes::tar_map(
       result_cpm_pairs |>
         select(pair, edge_type, ends_with("last"), mask_prop) |>
         filter(!map_lgl(mask_prop, is.null)) |>
-        nest(.by = c(pair, edge_type, ends_with("last"))) |>
-        mutate(
-          mask = map(
-            data,
-            ~ .$mask_prop |>
-              reduce(cbind) |>
-              rowMeans()
-          ),
-          .keep = "unused"
+        summarise(
+          mask = do.call(cbind, mask_prop) |>
+            rowMeans() |>
+            list(),
+          .by = c(pair, edge_type, ends_with("last"))
         ) |>
         pivot_wider(
           id_cols = c(ends_with("last"), edge_type),
