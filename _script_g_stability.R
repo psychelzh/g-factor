@@ -27,6 +27,26 @@ list(
     fs::path(store_fmri, "fc_data_rest_nn268_without"),
     read = qs::qread(!!.x)
   ),
+  tarchetypes::tar_file_read(
+    indices_rapm,
+    fs::path(store_behav, "indices_rapm"),
+    read = qs::qread(!!.x)
+  ),
+  tarchetypes::tar_map_rep(
+    result_cpm_rapm,
+    command = do_cpm(
+      fc_data_rest_nn268_without,
+      indices_rapm,
+      thresh_method,
+      thresh_level
+    ),
+    values = tidyr::expand_grid(
+      hypers_behav,
+      hypers_thresh
+    ),
+    batches = 10,
+    reps = 10
+  ),
   # used for cpm batching (tar_rep cannot used with pattern)
   tar_target(index_batch_cpm, seq_len(10)),
   tar_target(index_rep_cpm, seq_len(10)),
