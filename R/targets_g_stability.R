@@ -152,3 +152,52 @@ g_scores_pairs <- tarchetypes::tar_map(
     )
   )
 )
+
+hypers_stability_single <- tibble::tibble(num_vars = 11:18)
+g_scores_single <- tarchetypes::tar_map(
+  hypers_stability_single,
+  list(
+    tarchetypes::tar_rep(
+      data_single,
+      resample_vars(indices_wider_clean, num_vars),
+      batches = 10,
+      reps = 10,
+      iteration = "list"
+    ),
+    tar_target(
+      scores_g_single,
+      map(
+        data_single,
+        ~ . |>
+          select(!starts_with("tar")) |>
+          estimate_g_scores() |>
+          bind_cols(distinct(., pick(starts_with("tar"))))
+      ),
+      pattern = map(data_single)
+    ),
+    tar_target(
+      result_cpm_single,
+      map_df(
+        index_rep_cpm,
+        ~ scores_g_single |>
+          map_df(
+            ~ do_cpm(
+              select(., !starts_with("tar")),
+              fc_data = fc_data_rest_nn268_without,
+              thresh_method = "sparsity",
+              thresh_level = 0.01
+            ) |>
+              bind_cols(distinct(., pick(starts_with("tar"))))
+          ) |>
+          add_column(rep = ., batch = index_batch_cpm)
+      ),
+      pattern = cross(scores_g_single, index_batch_cpm)
+    ),
+    tar_target(
+      cpm_pred_single,
+      result_cpm_single |>
+        select(edge_type, contains(c("batch", "rep")), cor) |>
+        mutate(cor = map_dbl(cor, "estimate"))
+    )
+  )
+)

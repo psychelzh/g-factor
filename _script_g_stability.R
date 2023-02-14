@@ -77,5 +77,15 @@ list(
         "dice_mask_pairs",
         names(hypers_stability_pairs)
       )
+  ),
+  g_scores_single,
+  tarchetypes::tar_combine(
+    cpm_pred_single,
+    g_scores_single$cpm_pred_single,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "cpm_pred_single",
+        names(hypers_stability_pairs)
+      )
   )
 )
