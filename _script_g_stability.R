@@ -27,6 +27,25 @@ list(
     fs::path(store_fmri, "fc_data_rest_nn268_without"),
     read = qs::qread(!!.x)
   ),
+  tar_target(
+    scores_g_full,
+    estimate_g_scores(indices_wider_clean)
+  ),
+  tarchetypes::tar_map_rep(
+    result_cpm_g_full,
+    command = do_cpm(
+      fc_data_rest_nn268_without,
+      scores_g_full,
+      thresh_method,
+      thresh_level
+    ),
+    values = tidyr::expand_grid(
+      hypers_behav,
+      hypers_thresh
+    ),
+    batches = 10,
+    reps = 10
+  ),
   tarchetypes::tar_file_read(
     indices_rapm,
     fs::path(store_behav, "indices_rapm"),
