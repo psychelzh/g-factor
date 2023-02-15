@@ -1,6 +1,6 @@
 library(targets)
 tar_option_set(
-  packages = c("tidyverse", "lavaan", "conflicted"),
+  packages = c("tidyverse", "lavaan"),
   memory = "transient",
   garbage_collection = TRUE,
   error = "null",
