@@ -22,7 +22,7 @@ do_cpm <- function(fc_data, scores, thresh_method, thresh_level) {
 
 config_fc_data <- tidyr::expand_grid(
   modal = c("emotion", "facename",
-            "Nbackrun1", "Nbackrun2", "nback",
+            "Nbackrun1", "Nbackrun2", "nback", "nbackfull",
             "4tasks", "rest", "4tasksrest"),
   parcel = c("nn268", "Power264"),
   gsr = c("with", "without")
