@@ -63,7 +63,7 @@ do_cpm_pairs <- function(scores_pairs, ...) {
 }
 
 hypers_stability_pairs <- tibble::tibble(num_vars = 4:10)
-g_scores_pairs <- tarchetypes::tar_map(
+g_stability_pairs <- tarchetypes::tar_map(
   hypers_stability_pairs,
   list(
     tarchetypes::tar_rep(
@@ -154,7 +154,7 @@ g_scores_pairs <- tarchetypes::tar_map(
 )
 
 hypers_stability_single <- tibble::tibble(num_vars = 11:18)
-g_scores_single <- tarchetypes::tar_map(
+g_stability_single <- tarchetypes::tar_map(
   hypers_stability_single,
   list(
     tarchetypes::tar_rep(
