@@ -71,18 +71,11 @@ list(
   tar_target(index_rep_cpm, seq_len(10)),
   g_stability_pairs,
   tarchetypes::tar_combine(
-    cpm_pred_pairs,
-    g_stability_pairs$cpm_pred_pairs,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "cpm_pred_pairs",
-        names(hypers_stability_pairs)
-      )
-  ),
-  tarchetypes::tar_combine(
     scores_g_pairs,
     g_stability_pairs$scores_g_pairs,
-    command = bind_rows(!!!.x, .id = "id") |>
+    command = list(!!!.x) |>
+      map(~ map(., bind_pairs) |> bind_rows()) |>
+      bind_rows(.id = "id") |>
       clean_combined(
         "scores_g_pairs",
         names(hypers_stability_pairs)
@@ -94,6 +87,24 @@ list(
     command = bind_rows(!!!.x, .id = "id") |>
       clean_combined(
         "scores_g_pairs_cor",
+        names(hypers_stability_pairs)
+      )
+  ),
+  tarchetypes::tar_combine(
+    var_exp_pairs,
+    g_stability_pairs$var_exp_pairs,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "var_exp_pairs",
+        names(hypers_stability_pairs)
+      )
+  ),
+  tarchetypes::tar_combine(
+    cpm_pred_pairs,
+    g_stability_pairs$cpm_pred_pairs,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "cpm_pred_pairs",
         names(hypers_stability_pairs)
       )
   ),
@@ -110,9 +121,20 @@ list(
   tarchetypes::tar_combine(
     scores_g_single,
     g_stability_single$scores_g_single,
-    command = bind_rows(!!!.x, .id = "id") |>
+    command = list(!!!.x) |>
+      map(bind_rows) |>
+      bind_rows(.id = "id") |>
       clean_combined(
         "scores_g_single",
+        names(hypers_stability_pairs)
+      )
+  ),
+  tarchetypes::tar_combine(
+    var_exp_single,
+    g_stability_single$var_exp_single,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "var_exp_single",
         names(hypers_stability_pairs)
       )
   ),

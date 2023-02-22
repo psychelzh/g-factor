@@ -1,5 +1,18 @@
 name_pairs <- c("first", "second")
 
+fit_model <- function(data, id_cols = NULL) {
+  if (is.null(id_cols)) {
+    id_cols <- names(data)[[1]]
+  }
+  vars <- setdiff(names(data), id_cols)
+  mdl <- paste(
+    "g =~",
+    paste0("`", vars, "`", collapse = " + ")
+  )
+  cfa(mdl, data, std.ov = TRUE, missing = "ml")
+}
+
+# TODO: this is deprecated because model object is not returned
 estimate_g_scores <- function(data, id_cols = NULL) {
   if (is.null(id_cols)) {
     id_cols <- names(data)[[1]]
@@ -52,6 +65,14 @@ correlate_scores_pairs <- function(scores_pairs) {
     mutate(!!!meta)
 }
 
+bind_pairs <- function(pairs) {
+  data <- pairs[name_pairs]
+  meta <- pairs[setdiff(names(pairs), name_pairs)]
+  data |>
+    bind_rows(.id = "pair") |>
+    mutate(!!!meta)
+}
+
 do_cpm_pairs <- function(scores_pairs, ...) {
   data <- scores_pairs[name_pairs]
   meta <- scores_pairs[setdiff(names(scores_pairs), name_pairs)]
@@ -72,6 +93,22 @@ g_stability_pairs <- tarchetypes::tar_map(
       batches = 10,
       reps = 10,
       iteration = "list"
+    ),
+    tar_target(
+      mdl_fitted_pairs,
+      map(
+        data_pairs,
+        ~ map_at(., name_pairs, fit_model)
+      ),
+      pattern = map(data_pairs)
+    ),
+    tar_target(
+      var_exp_pairs,
+      map_df(
+        mdl_fitted_pairs,
+        ~ map_at(., name_pairs, semTools::AVE) |>
+          bind_pairs()
+      )
     ),
     tar_target(
       scores_g_pairs,
@@ -163,6 +200,21 @@ g_stability_single <- tarchetypes::tar_map(
       batches = 10,
       reps = 10,
       iteration = "list"
+    ),
+    tar_target(
+      mdl_fitted_single,
+      map_df(
+        data_single,
+        ~ . |>
+          nest(.by = starts_with("tar")) |>
+          mutate(cfa = map(data, fit_model), .keep = "unused")
+      ),
+      pattern = map(data_single)
+    ),
+    tar_target(
+      var_exp_single,
+      mdl_fitted_single |>
+        mutate(prop = map_dbl(cfa, semTools::AVE), .keep = "unused")
     ),
     tar_target(
       scores_g_single,
