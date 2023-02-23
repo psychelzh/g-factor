@@ -1,0 +1,426 @@
+---
+title: Intelligence and sampling of cognitive tasks
+author: Liang Zhang
+date: 2023-02-16
+format:
+    revealjs:
+        code-fold: false
+execute:
+  warning: false
+  message: false
+bibliography: references.bib
+csl: modified-chicago.csl
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(ggwordcloud)
+name_pairs <- c("first", "second")
+```
+
+# Issues on Intelligence
+
+## Definition {.smaller}
+
+::: notes
+The definition was never and probably won't be consistent.
+:::
+
+::: incremental
+-   Binet: "judgment, otherwise called good sense, practical sense, initiative, the faculty of adapting one's self to circumstances"
+-   Gardner: "the ability to solve problems, or to create products, that are valued within one or more cultural settings"
+-   "Ability to understand complex ideas, to adapt effectively to the environment, to learn from experience, to engage in various forms of reasoning, to overcome obstacles by taking thought." [@neisser1996]
+-   "\[A\] very general mental capability that, among other things, involves the ability to reason, plan, solve problems, think abstractly, comprehend complex ideas, learn quickly and learn from experience. It is not merely book learning, a narrow academic skill, or test-taking smarts. Rather, it reflects a broader and deeper capability for comprehending our surroundings catching on, making sense of things, or figuring out what to do." [@gottfredson1997]
+-   "A general cognitive ability related to solving problems efficiently and effectively" [@thecamb2021]
+:::
+
+## Intelligence and g
+
+::: incremental
+-   g-factor was first proposed by Spearman [-@spearman1904] to account for the "positive manifold" phenomenon of cognitive tests.
+
+-   Given the term "intelligence" is hard to define and easily leads to confusion, many researchers (see Jensen [-@jensen1998]) focused on the g (i.e., general intelligence) [@haier2017; @thecamb2021].
+:::
+
+## Diagram of g and its Relatives
+
+![Conceptual relationships among mental abilities, intelligence, IQ, and the g-factor [@theinte2013]](images/mental-ability-diagram.png){fig-align="center"}
+
+::: notes
+Savants are those with very high specific abilities but no general intelligence (e.g., Kim Peek, AI of current days).
+:::
+
+## Measure of g
+
+::: incremental
+-   Two major influences: **sampling of participants** and **sampling of cognitive tasks**
+
+-   Here we focus on the issue of tasks sampling
+
+    -   Task sampling representativeness
+
+    -   Factor analysis method
+:::
+
+## Invariance of g
+
+::: columns
+::: {.column width="50%"}
+![Test batteries used](images/johnson2004.png){alt="Test batteries used" fig-align="center"}
+:::
+
+::: {.column width="50%"}
+![Consistency between g estimated from three batteries [@johnson2004]](images/one-g-three-battery.png){fig-align="center"}
+:::
+:::
+
+## Invariance of g
+
+::: columns
+::: {.column width="50%"}
+![Test Batteries Used](images/johnson2008.png){fig-align="center"}
+:::
+
+::: {.column width="50%"}
+![Consistency between g estimated from five batteries [@johnson2008]](images/one-g-five-battery.png){fig-align="center"}
+:::
+:::
+
+## Factor Modeling
+
+-   There are several different factor analysis modeling method:
+
+    -   Spearman Model
+
+    -   Bifactor Model
+
+    -   Orthogonalized Hierarchical Model
+
+-   Jensen [-@jensen1998] found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000.
+
+## Sampling of tasks
+
+::: incremental
+-   What is the clear relationship between the invariance of g and task sampling?
+
+    -   Task number
+
+    -   Task domain
+
+    -   Neural predictability
+
+    -   Factor model selection
+
+    -   Relationship with the score of Raven's Advanced Progressive Matrices (RAPM)
+:::
+
+# Our Dataset
+
+## Cognitive Tasks {.smaller}
+
+-   19 Tasks (20 task indices) included
+    -   **Working Memory** (*5*): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span
+    -   **Response Inhibition** (*3*): Anti-Saccade (2 indices), Stop-Signal, Stroop
+    -   **Shifting** *(3*): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment
+    -   **Learning and Memory** (*3*): Face Name Association, Symbol Memory, Pattern Separation
+    -   **Attention and Speed** (*5*): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time
+
+## Sample Size
+
+```{r}
+targets::tar_load(
+  c(subjs_info_clean, indices_wider_clean),
+  store = "_store_behav"
+)
+subjs_fmri <- targets::tar_read(
+  fc_data_rest_nn268_without,
+  store = "_store_g_stability"
+) |>
+  select(sub_id) |>
+  inner_join(subjs_info_clean, by = "sub_id")
+subjs_info_full <- subjs_info_clean |>
+  semi_join(indices_wider_clean, by = "sub_id") |>
+  select(sub_id, age, sex)
+descr_behav <- report::report_participants(subjs_info_full)
+descr_fmri <- subjs_fmri |>
+  select(sub_id, age, sex) |>
+  report::report_participants()
+```
+
+-   Behavior sample: `r descr_behav`
+
+-   FMRI sample: `r descr_fmri`
+
+## Missing Pattern
+
+```{r}
+#| label: fig-miss-pat
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Behavior Data Missing Pattern**.
+
+indices_wider_clean |>
+  select(-sub_id) |>
+  naniar::vis_miss(sort_miss = TRUE, cluster = TRUE) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Data Distribution
+
+```{r}
+#| label: fig-dist-pat
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Behavior Performance Distribution**.
+
+indices_wider_clean |>
+  pivot_longer(-sub_id, names_to = "task_index", values_to = "score") |>
+  select(-sub_id) |>
+  ggplot(aes(score)) +
+  geom_histogram() +
+  facet_wrap(~ task_index, scales = "free") +
+  theme_bw()
+```
+
+# Task Number and Task Domain
+
+Basically, the direct method is to check g scores estimated from different number of tasks sampled from the test bank.
+
+::: notes
+Here we used 4 tasks at minimal, because g factor modeling from 3 tasks is a saturated model.
+:::
+
+## Explained Variance
+
+```{r}
+#| label: fig-var-exp
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Variance Explained by the g Factor.** The horizontal line gives the variance explained
+#|   by the g factor estimated from all the tasks.
+
+targets::tar_load(
+  c(var_exp_pairs, var_exp_single, var_exp_full),
+  store = "_store_g_stability"
+)
+var_exp_pairs |>
+  pivot_longer(all_of(name_pairs), names_to = "pair", values_to = "prop") |>
+  bind_rows(var_exp_single) |>
+  ggplot(aes(num_vars, prop)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  geomtextpath::geom_texthline(
+    yintercept = var_exp_full,
+    hjust = 1,
+    color = "blue4",
+    label = "All Tasks"
+  ) +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubclean() +
+  labs(x = "Number of Tasks", y = "Variance Explained")
+```
+
+## Correlation with RAPM
+
+```{r}
+#| label: fig-g-raven
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Correlation with Raven's Advanced Progressive Matrices (RAPM) scores**. The
+#|   horizontal line is the correlation between gF score estimated from all task
+#|   indices and RAPM.
+
+targets::tar_load(
+  c(scores_g_pairs, scores_g_single, scores_g_full),
+  store = "_store_g_stability"
+)
+targets::tar_load(indices_rapm, store = "_store_behav")
+cor_rapm_full <- scores_g_full |>
+  inner_join(indices_rapm, by = "sub_id") |>
+  summarise(cor = cor(g, RAPM, use = "pairwise"))
+cor_rapm_sampled <- bind_rows(scores_g_pairs, scores_g_single) |>
+  inner_join(indices_rapm, by = "sub_id") |>
+  summarise(
+    cor = cor(g, RAPM, use = "pairwise"),
+    .by = c(num_vars, pair, starts_with("tar"))
+  )
+cor_rapm_sampled |>
+  ggplot(aes(num_vars, cor)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  geomtextpath::geom_texthline(
+    yintercept = cor_rapm_full$cor,
+    hjust = 1,
+    color = "blue4",
+    label = "All Tasks"
+  ) +
+  ggpubr::theme_pubclean() +
+  labs(x = "Number of Tasks", y = "Correlation Coefficient")
+```
+
+## High RAPM Correlation tasks
+
+```{r}
+#| label: fig-rapm-cor-tasks
+#| fig-width: 15
+#| fig-height: 5
+#| fig-cap: >
+#|   **Top RAPM correlated tasks.** The tasks for each top 10 samples are displayed.
+#| cache: true
+
+data_names <- targets::tar_read(data_names_pairs, store = "_store_g_stability") |>
+  pivot_longer(all_of(name_pairs), names_to = "pair", values_to = "tasks") |>
+  bind_rows(targets::tar_read(data_names_single, store = "_store_g_stability"))
+targets::tar_load(c(data_names_pairs, data_names_single), store = "_store_g_stability")
+tasks_high_cor_rapm <- data_names |>
+  inner_join(
+    cor_rapm_sampled |>
+      slice_max(cor, n = 10, by = num_vars),
+    by = c("num_vars", "tar_batch", "tar_rep", "tar_seed", "pair")
+  ) |>
+  unnest(tasks)
+tasks_high_cor_rapm |>
+  group_by(num_vars, tasks) |>
+  summarise(n = n(), .groups = "drop_last") |>
+  mutate(prop = n / sum(n)) |>
+  ungroup() |>
+  ggplot(aes(label = tasks, size = prop)) +
+  geom_text_wordcloud_area(seed = 1) +
+  scale_size_area(max_size = 8) +
+  facet_grid(cols = vars(num_vars))
+```
+
+## Neural Predictability
+
+```{r}
+#| label: fig-pred-trend
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Prediction Trending (based on CPM)**.
+
+targets::tar_load(
+  c(cpm_pred_g_full, cpm_pred_rapm, cpm_pred_pairs, cpm_pred_single),
+  store = "_store_g_stability"
+)
+pred_g_full <- cpm_pred_g_full |>
+  filter(thresh_method == "sparsity") |>
+  summarise(cor = mean(cor), .by = edge_type)
+pred_rapm <- cpm_pred_rapm |>
+  filter(thresh_method == "sparsity") |>
+  summarise(cor = mean(cor), .by = edge_type)
+preds <- bind_rows(
+  `All Tasks` = pred_g_full,
+  RAPM = pred_rapm,
+  .id = "name"
+)
+pred_pairs <- cpm_pred_pairs |>
+  summarise(
+    across(all_of(name_pairs), mean),
+    .by = c(num_vars, edge_type, starts_with("tar"))
+  ) |>
+  pivot_longer(
+    all_of(name_pairs),
+    names_to = "pair",
+    values_to = "cor"
+  ) |>
+  rename_with(~ str_remove(., "_last"), starts_with("tar"))
+pred_single <- cpm_pred_single |>
+  summarise(
+    cor = mean(cor),
+    .by = c(num_vars, edge_type, starts_with("tar"))
+  )
+preds_sampled <- bind_rows(pred_pairs, pred_single)
+preds_sampled |>
+  ggplot(aes(num_vars, cor)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  geomtextpath::geom_texthline(
+    aes(label = name, yintercept = cor, color = name),
+    preds,
+    hjust = 1
+  ) +
+  scale_color_viridis_d(guide = "none") +
+  facet_grid(rows = vars(edge_type),
+             labeller = labeller(
+               edge_type = c(all = "Combined",
+                             neg = "Anti-Corr Networks",
+                             pos = "Pos-Corr Networks")
+             )) +
+  ggpubr::theme_pubclean() +
+  labs(x = "Number of Tasks", y = "Correlation Coefficient")
+```
+
+## High Neural Correlation Tasks {.smaller}
+
+```{r}
+#| label: fig-neural-pred-tasks
+#| fig-width: 15
+#| fig-height: 8
+#| fig-cap: >
+#|   **Top predictability tasks.** The tasks for each top 10 predictability samples are displayed.
+#| cache: true
+
+tasks_high_pred <- data_names |>
+  inner_join(
+    preds_sampled |>
+      slice_max(cor, n = 10, by = c(num_vars, edge_type)),
+    by = c("num_vars", "tar_batch", "tar_rep", "pair"),
+    multiple = "all"
+  ) |>
+  unnest(tasks)
+tasks_high_pred |>
+  group_by(num_vars, edge_type, tasks) |>
+  summarise(n = n(), .groups = "drop_last") |>
+  mutate(prop = n / sum(n)) |>
+  ungroup() |>
+  ggplot(aes(label = tasks, size = prop)) +
+  geom_text_wordcloud_area(seed = 1) +
+  scale_size_area(max_size = 8) +
+  facet_grid(vars(edge_type), vars(num_vars),
+             labeller = labeller(
+               edge_type = c(all = "Combined",
+                             neg = "Anti-Corr Networks",
+                             pos = "Pos-Corr Networks")
+             ))
+```
+
+::: notes
+-   Reaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.
+-   Here we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks.
+:::
+
+## Estimation Stability {.smaller}
+
+```{r}
+#| label: fig-g-stability
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **The correlation between g scores estimated from each pair of sampling.** For each sampling,
+#|   a pair of equal-number tasks are drawed without replacement. So the maximal
+#|   number of tasks will be 10, and this figure shows that the correlations between
+#|   the paired g scores increase as the number of tasks increase.
+
+targets::tar_load(scores_g_pairs_cor, store = "_store_g_stability")
+scores_g_pairs_cor |>
+  ggplot(aes(num_vars, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubclean() +
+  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
+```
+
+::: notes
+Seemingly the correlation reaches a plateau? But I am doubting here.
+:::
+
+# References
