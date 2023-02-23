@@ -19,6 +19,7 @@ csl: modified-chicago.csl
 library(tidyverse)
 library(ggwordcloud)
 library(brainconn)
+library(lavaan)
 name_pairs <- c("first", "second")
 ```
 
@@ -568,6 +569,183 @@ cpm_pred_pairs |>
   facet_grid(edge_type ~ num_vars, labeller = label_both) +
   labs(x = "First Sample", y = "Second Sample") +
   theme_bw()
+```
+
+# Polish Factor Model
+
+Now we return to use all the indices of the tasks. The first thing we can try is to fit a better factor model.
+
+## The poor fit of one-g model
+
+```{r}
+#| label: fig-loading-one-factor
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   **Factor loadings for one factor only.** Note the largest loadings are 
+#|   mainly from response time tasks. The fit measures are also low.
+
+targets::tar_load(mdl_fitted_full, store = "_store_g_stability")
+df_print <- fitMeasures(mdl_fitted_full, c("cfi", "tli", "rmsea")) |> 
+  as_tibble_row() |> 
+  rename_with(toupper) |> 
+  mutate(across(.fns = ~ round(., 2)))
+standardizedSolution(mdl_fitted_full) |> 
+  filter(lhs == "g", op == "=~") |> 
+  select(variable = rhs, loading = est.std) |> 
+  ggplot(aes(loading, fct_reorder(variable, loading))) +
+  geom_point() +
+  ggpp::geom_table_npc(
+    data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
+    mapping = aes(npcx = x, npcy = y, label = tb)
+  ) +
+  labs(x = "Loading", y = "Task Index") +
+  theme_bw()
+```
+
+## Enhance Model Fitting
+
+Given the previous model does not fit well, item deletion and model re-factor (hierarchical model) are tried. The deleted items are:
+
+-   All the inhibition tasks (anti-saccade, stop signal, stroop), because they do not fit well as an inhibition factor.
+
+-   Penn line orientation task is related to perception, which does not have enough similar tasks.
+
+-   Spatial 2-back task, because its correlation with other WM tasks is relatively low and its loading on WM factor is low.
+
+## Better Model {.smaller}
+
+```{r}
+#| label: fig-better-model
+#| fig-width: 8
+#| fig-height: 5
+#| fig-cap: >
+#|   **Visualization of the new model.** Hierarchical model is more accepted by
+#|   researchers.
+
+targets::tar_load(mdl_fitted, store = "_store_behav")
+semPlot::semPaths(
+  mdl_fitted, 
+  whatLabels = "std", 
+  intercepts = FALSE, 
+  nCharNodes = 0,
+  edge.label.cex = 0.75
+)
+```
+
+```{r}
+#| label: tbl-fitmeasure-better-model
+#| tbl-cap: >
+#|   **Fit measures.**
+
+fitMeasures(mdl_fitted, c("cfi", "tli", "rmsea")) |> 
+  as_tibble_row() |> 
+  rename_with(toupper) |> 
+  mutate(across(.fns = ~ round(., 2))) |> 
+  knitr::kable()
+```
+
+## Correlation between two G factor scores
+
+```{r}
+#| label: fig-cor-between-g
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   **Correlation between g factor scores.** The correlation is very high, which
+#|   is just as what Jensen had found.
+
+tibble(
+  score_g_one = lavPredict(mdl_fitted_full)[, "g"],
+  score_g_better = lavPredict(mdl_fitted)[, "g"]
+) |> 
+  ggplot(aes(score_g_one, score_g_better)) +
+  geom_point() +
+  ggpmisc::stat_correlation(ggpmisc::use_label(c("R", "P")), small.p = TRUE) +
+  theme_bw() +
+  coord_fixed() +
+  labs(x = "Spearman Model", y = "Hierarchical Model")
+```
+
+# More on CPM results for g
+
+Here we do two comparisons:
+
+-   Is the hierarchical model has better CPM prediction result?
+
+-   Is the neural network from a task-state fMRI has better CPM prediction result?
+
+## Model comparison
+
+```{r}
+#| label: fig-model-cmp
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   **Predictability difference between two models.** 
+
+targets::tar_load(cpmcors, store = "_store_task_fmri")
+cpmcors |>
+  filter(modal == "rest", parcel == "nn268", gsr == "without", 
+         thresh_method == "sparsity", latent == "g") |> 
+  select(starts_with("tar"), edge_type, cor = estimate) |> 
+  mutate(model = "Spearman") |> 
+  bind_rows(
+    cpm_pred_g_full |> 
+      filter(thresh_method == "sparsity") |> 
+      mutate(model = "Hierarchical")
+  ) |> 
+  ggplot(aes(model, cor)) +
+  ggdist::stat_dotsinterval() +
+  ggpubr::stat_compare_means(method = "t.test") +
+  facet_grid(
+    cols = vars(edge_type),
+    labeller = labeller(
+      edge_type = c(
+        all = "Combined",
+        neg = "Anti-Corr Networks",
+        pos = "Pos-Corr Networks"
+      )
+    )
+  ) +
+  ggpubr::theme_pubclean() +
+  labs(x = "Model Type",  y = "Neural Correlation")
+```
+
+## Task vs Rest fMRI
+
+```{r}
+#| label: fig-modal-cmp
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   **Predictability difference between two fMRI modality.** 
+
+cpmcors |> 
+  filter(modal %in% c("rest", "nbackfull"), parcel == "nn268", gsr == "without", 
+         thresh_method == "sparsity", latent == "g") |> 
+  ggplot(aes(modal, estimate)) +
+  ggdist::stat_dotsinterval() +
+  ggpubr::stat_compare_means(method = "t.test") +
+  facet_grid(
+    cols = vars(edge_type),
+    labeller = labeller(
+      edge_type = c(
+        all = "Combined",
+        neg = "Anti-Corr Networks",
+        pos = "Pos-Corr Networks"
+      )
+    )
+  ) +
+  scale_x_discrete(
+    "Modality", 
+    labels = c(
+      nbackfull = "Task (N-back)",
+      rest = "Resting"
+    )
+  ) +
+  scale_y_continuous("Neural Correlation") +
+  ggpubr::theme_pubclean()
 ```
 
 # References
