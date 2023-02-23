@@ -28,6 +28,14 @@ list(
     read = qs::qread(!!.x)
   ),
   tar_target(
+    mdl_fitted_full,
+    fit_model(indices_wider_clean)
+  ),
+  tar_target(
+    var_exp_full,
+    semTools::AVE(mdl_fitted_full)[["g"]]
+  ),
+  tar_target(
     scores_g_full,
     estimate_g_scores(indices_wider_clean)
   ),
@@ -42,6 +50,12 @@ list(
     values = hypers_thresh,
     batches = 10,
     reps = 10
+  ),
+  tar_target(
+    cpm_pred_g_full,
+    result_cpm_g_full |>
+      select(edge_type, starts_with("thresh"), starts_with("tar"), cor) |>
+      mutate(cor = map_dbl(cor, "estimate"))
   ),
   tarchetypes::tar_file_read(
     indices_rapm,
@@ -60,10 +74,25 @@ list(
     batches = 10,
     reps = 10
   ),
+  tar_target(
+    cpm_pred_rapm,
+    result_cpm_rapm |>
+      select(edge_type, starts_with("thresh"), starts_with("tar"), cor) |>
+      mutate(cor = map_dbl(cor, "estimate"))
+  ),
   # used for cpm batching (tar_rep cannot used with pattern)
   tar_target(index_batch_cpm, seq_len(10)),
   tar_target(index_rep_cpm, seq_len(10)),
   g_stability_pairs,
+  tarchetypes::tar_combine(
+    data_names_pairs,
+    g_stability_pairs$data_names_pairs,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "data_names_pairs",
+        names(hypers_stability_pairs)
+      )
+  ),
   tarchetypes::tar_combine(
     scores_g_pairs,
     g_stability_pairs$scores_g_pairs,
@@ -112,6 +141,15 @@ list(
       )
   ),
   g_stability_single,
+  tarchetypes::tar_combine(
+    data_names_single,
+    g_stability_single$data_names_single,
+    command = bind_rows(!!!.x, .id = "id") |>
+      clean_combined(
+        "data_names_single",
+        names(hypers_stability_pairs)
+      )
+  ),
   tarchetypes::tar_combine(
     scores_g_single,
     g_stability_single$scores_g_single,

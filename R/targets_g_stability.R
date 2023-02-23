@@ -95,6 +95,15 @@ g_stability_pairs <- tarchetypes::tar_map(
       iteration = "list"
     ),
     tar_target(
+      data_names_pairs,
+      map_df(
+        data_pairs,
+        ~ map_at(., name_pairs, ~ list(names(.)[-1])) |>
+          as_tibble()
+      ),
+      pattern = map(data_pairs)
+    ),
+    tar_target(
       mdl_fitted_pairs,
       map(
         data_pairs,
@@ -107,8 +116,9 @@ g_stability_pairs <- tarchetypes::tar_map(
       map_df(
         mdl_fitted_pairs,
         ~ map_at(., name_pairs, semTools::AVE) |>
-          bind_pairs()
-      )
+          as_tibble()
+      ) |>
+        type.convert(as.is = TRUE)
     ),
     tar_target(
       scores_g_pairs,
@@ -200,6 +210,16 @@ g_stability_single <- tarchetypes::tar_map(
       batches = 10,
       reps = 10,
       iteration = "list"
+    ),
+    tar_target(
+      data_names_single,
+      map_df(
+        data_single,
+        ~ . |>
+          nest(.by = starts_with("tar")) |>
+          mutate(tasks = map(data, ~ names(.)[-1]), .keep = "unused")
+      ),
+      pattern = map(data_single)
     ),
     tar_target(
       mdl_fitted_single,
