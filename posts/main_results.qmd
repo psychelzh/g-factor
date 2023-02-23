@@ -552,7 +552,7 @@ dice_mask_pairs |>
 
 ```{r}
 #| label: fig-pair-flaw
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 6
 #| fig-cap: >
 #|   **Pairs are not really independent.**
@@ -564,7 +564,7 @@ cpm_pred_pairs |>
   ) |>
   ggplot(aes(first, second)) +
   geom_point() +
-  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p")), color = "red") +
+  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p")), color = "red", small.p = TRUE) +
   facet_grid(edge_type ~ num_vars, labeller = label_both) +
   labs(x = "First Sample", y = "Second Sample") +
   theme_bw()
