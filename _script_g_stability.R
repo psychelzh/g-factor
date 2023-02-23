@@ -39,10 +39,7 @@ list(
       thresh_method,
       thresh_level
     ),
-    values = tidyr::expand_grid(
-      hypers_behav,
-      hypers_thresh
-    ),
+    values = hypers_thresh,
     batches = 10,
     reps = 10
   ),
@@ -59,10 +56,7 @@ list(
       thresh_method,
       thresh_level
     ),
-    values = tidyr::expand_grid(
-      hypers_behav,
-      hypers_thresh
-    ),
+    values = hypers_thresh,
     batches = 10,
     reps = 10
   ),
