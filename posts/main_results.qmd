@@ -93,6 +93,7 @@ Savants are those with very high specific abilities but no general intelligence 
 
 ## Factor Modeling
 
+::: incremental
 -   There are several different factor analysis modeling method:
 
     -   Spearman Model
@@ -102,6 +103,7 @@ Savants are those with very high specific abilities but no general intelligence 
     -   Orthogonalized Hierarchical Model
 
 -   Jensen [-@jensen1998] found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000.
+:::
 
 ## Sampling of tasks
 
