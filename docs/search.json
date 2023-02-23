@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "Intelligence and Its Neural Correlates",
     "section": "",
-    "text": "Predict Intelligence by FC Network through CPM\n\n\n\n\n\n\n\n\n\n\n\n\nJan 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\nModeling Behavior\n\n\n\n\n\n\n\n\n\n\n\n\nDec 13, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+    "text": "Intelligence and sampling of cognitive tasks\n\n\n\n\n\n\n\n\n\n\n\n\nFeb 16, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPredict Intelligence by FC Network through CPM\n\n\n\n\n\n\n\n\n\n\n\n\nJan 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nModeling Behavior\n\n\n\n\n\n\n\n\n\n\n\n\nDec 13, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/check_model.html#sample-description",
@@ -110,5 +110,180 @@
     "title": "Predict Intelligence by FC Network through CPM",
     "section": "The Influence of Sex",
     "text": "The Influence of Sex\n\nFigure 6: Investigate the predictability difference of different sex"
+  },
+  {
+    "objectID": "posts/main_results.html#one-g-is-consistent",
+    "href": "posts/main_results.html#one-g-is-consistent",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "One g is consistent",
+    "text": "One g is consistent\n\n\n\n\n\n\n\nConsistency between g estimated from three batteries (Johnson, 2004)\n\n\n\n\n\n\n\nConsistency between g estimated from five batteries (Johnson, 2008)\n\n\n\n\nFigure 1: Consistency between g factors estimated from batteries"
+  },
+  {
+    "objectID": "posts/main_results.html#cognitive-tasks",
+    "href": "posts/main_results.html#cognitive-tasks",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Cognitive Tasks",
+    "text": "Cognitive Tasks\n\n19 Tasks (20 task indices) included\n\nWorking Memory (5): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span\nResponse Inhibition (3): Anti-Saccade (2 indices), Stop-Signal, Stroop\nShifting (3): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment\nLearning and Memory (3): Face Name Association, Symbol Memory, Pattern Separation\nAttention and Speed (5): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time"
+  },
+  {
+    "objectID": "posts/main_results.html#correlation-with-rapm",
+    "href": "posts/main_results.html#correlation-with-rapm",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Correlation with RAPM",
+    "text": "Correlation with RAPM\n\nFigure 4: Correlation with Raven’s Advanced Progressive Matrices (RAPM) scores. The horizontal line is the correlation between gF score estimated from all task indices and RAPM."
+  },
+  {
+    "objectID": "posts/main_results.html#definition",
+    "href": "posts/main_results.html#definition",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Definition",
+    "text": "Definition\n\nThe definition was never and probably won’t be consistent.\n\n\n\nBinet: “judgment, otherwise called good sense, practical sense, initiative, the faculty of adapting one’s self to circumstances”\nGardner: “the ability to solve problems, or to create products, that are valued within one or more cultural settings”\n“Ability to understand complex ideas, to adapt effectively to the environment, to learn from experience, to engage in various forms of reasoning, to overcome obstacles by taking thought.” (Neisser, 1996)\n“[A] very general mental capability that, among other things, involves the ability to reason, plan, solve problems, think abstractly, comprehend complex ideas, learn quickly and learn from experience. It is not merely book learning, a narrow academic skill, or test-taking smarts. Rather, it reflects a broader and deeper capability for comprehending our surroundings catching on, making sense of things, or figuring out what to do.” (Gottfredson, 1997)\n“A general cognitive ability related to solving problems efficiently and effectively” (Barbey, 2021)"
+  },
+  {
+    "objectID": "posts/main_results.html#intelligence-and-g",
+    "href": "posts/main_results.html#intelligence-and-g",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Intelligence and g",
+    "text": "Intelligence and g\n\n\ng-factor was first proposed by Spearman (1904) to account for the “positive manifold” phenomenon of cognitive tests.\nGiven the term “intelligence” is hard to define and easily leads to confusion, many researchers (see Jensen (1998)) focused on the g (i.e., general intelligence) (Barbey, 2021; Haier, 2017)."
+  },
+  {
+    "objectID": "posts/main_results.html#hypothesis",
+    "href": "posts/main_results.html#hypothesis",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Hypothesis",
+    "text": "Hypothesis"
+  },
+  {
+    "objectID": "posts/main_results.html#estimation-stability",
+    "href": "posts/main_results.html#estimation-stability",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Estimation Stability",
+    "text": "Estimation Stability\n\nFigure 9: The correlation between g scores estimated from each pair of sampling. For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.\nSeemingly the correlation reaches a plateau? But I am doubting here."
+  },
+  {
+    "objectID": "posts/main_results.html#predictability",
+    "href": "posts/main_results.html#predictability",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Predictability",
+    "text": "Predictability\n\nFigure 6: Prediction Trending (based on CPM)."
+  },
+  {
+    "objectID": "posts/main_results.html#definition-1",
+    "href": "posts/main_results.html#definition-1",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Definition",
+    "text": "Definition"
+  },
+  {
+    "objectID": "posts/main_results.html#diagram-of-g-and-its-relatives",
+    "href": "posts/main_results.html#diagram-of-g-and-its-relatives",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Diagram of g and its Relatives",
+    "text": "Diagram of g and its Relatives\n\nConceptual relationships among mental abilities, intelligence, IQ, and the g-factor (The intelligent brain, 2013)\nSavants are those with very high specific abilities but no general intelligence (e.g., Kim Peek, AI of current days)."
+  },
+  {
+    "objectID": "posts/main_results.html#measure-of-g",
+    "href": "posts/main_results.html#measure-of-g",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Measure of g",
+    "text": "Measure of g\n\n\nTwo major influences: sampling of participants and sampling of cognitive tasks\nHere we focus on the issue of tasks sampling\n\nTask sampling representativeness\nFactor analysis method"
+  },
+  {
+    "objectID": "posts/main_results.html#invariance-of-g",
+    "href": "posts/main_results.html#invariance-of-g",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Invariance of g",
+    "text": "Invariance of g\n\n\n\n\n\nTest batteries used\n\n\n\n\n\n\nConsistency between g estimated from three batteries (Johnson, 2004)"
+  },
+  {
+    "objectID": "posts/main_results.html#invariance-of-g-1",
+    "href": "posts/main_results.html#invariance-of-g-1",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Invariance of g",
+    "text": "Invariance of g\n\n\n\n\n\nTest Batteries Used\n\n\n\n\n\n\nConsistency between g estimated from five batteries (Johnson, 2008)"
+  },
+  {
+    "objectID": "posts/main_results.html#factor-modeling",
+    "href": "posts/main_results.html#factor-modeling",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Factor Modeling",
+    "text": "Factor Modeling\n\nThere are several different factor analysis modeling method:\n\nSpearman Model\nBifactor Model\nOrthogonalized Hierarchical Model\n\nJensen (1998) found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000."
+  },
+  {
+    "objectID": "posts/main_results.html#sampling-of-tasks",
+    "href": "posts/main_results.html#sampling-of-tasks",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Sampling of tasks",
+    "text": "Sampling of tasks\n\n\nWhat is the clear relationship between the invariance of g and task sampling?\n\nTask number\nTask domain\nNeural predictability\nFactor model selection\nRelationship with the score of Raven’s Advanced Progressive Matrices (RAPM)"
+  },
+  {
+    "objectID": "posts/main_results.html#sample-size",
+    "href": "posts/main_results.html#sample-size",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Sample Size",
+    "text": "Sample Size\n\n\n\n\nBehavior sample: 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)\nFMRI sample: 1524 participants (Mean age = 20.6, SD = 1.9, range: [16, 29]; Sex: 65.4% females, 34.6% males, 0.0% other)"
+  },
+  {
+    "objectID": "posts/main_results.html#missing-pattern",
+    "href": "posts/main_results.html#missing-pattern",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Missing Pattern",
+    "text": "Missing Pattern\n\nFigure 1: Behavior Data Missing Pattern."
+  },
+  {
+    "objectID": "posts/main_results.html#data-distribution",
+    "href": "posts/main_results.html#data-distribution",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Data Distribution",
+    "text": "Data Distribution\n\nFigure 2: Behavior Performance Distribution."
+  },
+  {
+    "objectID": "posts/main_results.html#explained-variance",
+    "href": "posts/main_results.html#explained-variance",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Explained Variance",
+    "text": "Explained Variance\n\nFigure 3: Variance Explained by the g Factor. The horizontal line gives the variance explained by the g factor estimated from all the tasks."
+  },
+  {
+    "objectID": "posts/main_results.html#neural-predictability",
+    "href": "posts/main_results.html#neural-predictability",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Neural Predictability",
+    "text": "Neural Predictability\n\nFigure 6: Prediction Trending (based on CPM)."
+  },
+  {
+    "objectID": "posts/main_results.html#high-predictability-tasks",
+    "href": "posts/main_results.html#high-predictability-tasks",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "High-predictability Tasks",
+    "text": "High-predictability Tasks\n\nFigure 6: Top predictability task names word-cloud plot."
+  },
+  {
+    "objectID": "posts/main_results.html#possible-flaw-to-the-previous-analysis",
+    "href": "posts/main_results.html#possible-flaw-to-the-previous-analysis",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Possible Flaw to the Previous Analysis",
+    "text": "Possible Flaw to the Previous Analysis"
+  },
+  {
+    "objectID": "posts/main_results.html#high-rapm-correlation-tasks",
+    "href": "posts/main_results.html#high-rapm-correlation-tasks",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "High RAPM Correlation tasks",
+    "text": "High RAPM Correlation tasks\n\nFigure 5: Top RAPM correlated tasks. The tasks for each top 10 samples are displayed."
+  },
+  {
+    "objectID": "posts/main_results.html#high-neural-correlation-tasks",
+    "href": "posts/main_results.html#high-neural-correlation-tasks",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "High Neural Correlation Tasks",
+    "text": "High Neural Correlation Tasks\n\nFigure 7: Top predictability tasks. The tasks for each top 10 predictability samples are displayed.\n\nReaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.\nHere we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks."
+  },
+  {
+    "objectID": "posts/main_results.html#brain-network-for-most-predictable-sample",
+    "href": "posts/main_results.html#brain-network-for-most-predictable-sample",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Brain Network for Most Predictable Sample",
+    "text": "Brain Network for Most Predictable Sample\n\nFigure 8: The brain networks of most predictable sample."
   }
 ]
