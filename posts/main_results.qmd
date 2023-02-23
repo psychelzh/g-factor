@@ -349,12 +349,16 @@ preds_sampled |>
     hjust = 1
   ) +
   scale_color_viridis_d(guide = "none") +
-  facet_grid(rows = vars(edge_type),
-             labeller = labeller(
-               edge_type = c(all = "Combined",
-                             neg = "Anti-Corr Networks",
-                             pos = "Pos-Corr Networks")
-             )) +
+  facet_grid(
+    rows = vars(edge_type),
+    labeller = labeller(
+      edge_type = c(
+        all = "Combined",
+        neg = "Anti-Corr Networks",
+        pos = "Pos-Corr Networks"
+      )
+    )
+  ) +
   ggpubr::theme_pubclean() +
   labs(x = "Number of Tasks", y = "Correlation Coefficient")
 ```
@@ -370,7 +374,7 @@ preds_sampled |>
 #| cache: true
 
 tasks_high_pred <- preds_sampled |>
-  slice_max(cor, n = 10, by = c(num_vars, edge_type)) |> 
+  slice_max(cor, n = 10, by = c(num_vars, edge_type)) |>
   inner_join(
     data_names,
     by = c("num_vars", "tar_batch", "tar_rep", "pair"),
@@ -385,12 +389,16 @@ tasks_high_pred |>
   ggplot(aes(label = tasks, size = prop)) +
   geom_text_wordcloud_area(seed = 1) +
   scale_size_area(max_size = 8) +
-  facet_grid(vars(edge_type), vars(num_vars),
-             labeller = labeller(
-               edge_type = c(all = "Combined",
-                             neg = "Anti-Corr Networks",
-                             pos = "Pos-Corr Networks")
-             ))
+  facet_grid(
+    vars(edge_type), vars(num_vars),
+    labeller = labeller(
+      edge_type = c(
+        all = "Combined",
+        neg = "Anti-Corr Networks",
+        pos = "Pos-Corr Networks"
+      )
+    )
+  )
 ```
 
 ::: notes
@@ -434,38 +442,38 @@ vis_mask <- function(mask, thresh_prop = 0.995) {
   shen_268_with_labs <- shen_268 |>
     mutate(network = factor(network, labels = network_labs_shen_268))
   brainconn(
-    atlas = shen_268_with_labs, 
-    conmat = restore_mat(mask) > thresh_prop, 
+    atlas = shen_268_with_labs,
+    conmat = restore_mat(mask) > thresh_prop,
     view = "left", edge.alpha = 0.2
   ) +
     scale_color_manual(values = cols, name = "Network")
 }
-data_masks <- preds_sampled |> 
-  filter(num_vars %in% c(4, 8, 12, 16), edge_type != "all") |> 
-  slice_max(cor, n = 1, by = c(num_vars, edge_type)) |> 
-  nest(.by = num_vars) |> 
+data_masks <- preds_sampled |>
+  filter(num_vars %in% c(4, 8, 12, 16), edge_type != "all") |>
+  slice_max(cor, n = 1, by = c(num_vars, edge_type)) |>
+  nest(.by = num_vars) |>
   mutate(
     data = map2(
       num_vars, data,
       ~ if (.x <= 10) {
-        targets::tar_read_raw(str_c("mask_pairs_", .x), store = "_store_g_stability") |> 
-          rename_with(~ str_remove(., "_last"), starts_with("tar")) |> 
-          pivot_longer(all_of(name_pairs), names_to = "pair", values_to = "mask") |> 
+        targets::tar_read_raw(str_c("mask_pairs_", .x), store = "_store_g_stability") |>
+          rename_with(~ str_remove(., "_last"), starts_with("tar")) |>
+          pivot_longer(all_of(name_pairs), names_to = "pair", values_to = "mask") |>
           semi_join(.y, by = c("edge_type", "tar_batch", "tar_rep", "pair"))
       } else {
-        targets::tar_read_raw(str_c("mask_single_", .x), store = "_store_g_stability") |> 
+        targets::tar_read_raw(str_c("mask_single_", .x), store = "_store_g_stability") |>
           semi_join(.y, by = c("edge_type", "tar_batch", "tar_rep"))
       }
     )
-  ) |> 
+  ) |>
   unnest(data)
 data_plots <- bind_rows(
   sampled = data_masks,
   "All Tasks" = targets::tar_read(mask_g_full, store = "_store_g_stability"),
   "RAPM" = targets::tar_read(mask_rapm, store = "_store_g_stability"),
   .id = "sample_type"
-) |> 
-  arrange(edge_type, num_vars) |> 
+) |>
+  arrange(edge_type, num_vars) |>
   mutate(
     id_task = if_else(is.na(num_vars), sample_type, sprintf("%d tasks", num_vars)),
     edge_type = case_match(
@@ -485,10 +493,10 @@ ggpubr::ggarrange(
 )
 ```
 
-## Estimation Stability {.smaller}
+## Correlation between estimated g in Pairwise Sampling {.smaller}
 
 ```{r}
-#| label: fig-g-stability
+#| label: fig-g-pair-cor
 #| fig-width: 8
 #| fig-height: 6
 #| fig-cap: >
@@ -510,5 +518,56 @@ scores_g_pairs_cor |>
 ::: notes
 Seemingly the correlation reaches a plateau? But I am doubting here.
 :::
+
+## Similarity Between Predictive Network of Pairs
+
+```{r}
+#| label: fig-network-pair-dice
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Dice coefficient between each pair of predictive network in pairwise sampling.**
+
+targets::tar_load(dice_mask_pairs, store = "_store_g_stability")
+dice_mask_pairs |>
+  ggplot(aes(num_vars, dice)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubclean() +
+  facet_grid(
+    rows = vars(edge_type),
+    labeller = labeller(
+      edge_type = c(
+        all = "Combined",
+        neg = "Anti-Corr Networks",
+        pos = "Pos-Corr Networks"
+      )
+    )
+  ) +
+  labs(x = "Number of Tasks", y = "Dice Similarity")
+```
+
+## A Caveat
+
+```{r}
+#| label: fig-pair-flaw
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Pairs are not really independent.**
+
+cpm_pred_pairs |>
+  summarise(
+    across(c(first, second), mean),
+    .by = c(num_vars, edge_type, ends_with("last"))
+  ) |>
+  ggplot(aes(first, second)) +
+  geom_point() +
+  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p")), color = "red") +
+  facet_grid(edge_type ~ num_vars, labeller = label_both) +
+  labs(x = "First Sample", y = "Second Sample") +
+  theme_bw()
+```
 
 # References

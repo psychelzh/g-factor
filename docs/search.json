@@ -285,5 +285,33 @@
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Brain Network for Most Predictable Sample",
     "text": "Brain Network for Most Predictable Sample\n\nFigure 8: The brain networks of most predictable sample."
+  },
+  {
+    "objectID": "posts/main_results.html#brain-networks-for-most-predictable",
+    "href": "posts/main_results.html#brain-networks-for-most-predictable",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Brain Networks for Most Predictable",
+    "text": "Brain Networks for Most Predictable\n\nFigure 8: The brain networks of the most predictable sample. Here we can find the difference between postive correlation networks and negative correlation networks."
+  },
+  {
+    "objectID": "posts/main_results.html#correlation-between-estimated-g-in-pairwise-sampling",
+    "href": "posts/main_results.html#correlation-between-estimated-g-in-pairwise-sampling",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Correlation between estimated g in Pairwise Sampling",
+    "text": "Correlation between estimated g in Pairwise Sampling\n\nFigure 9: The correlation between g scores estimated from each pair of sampling. For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.\nSeemingly the correlation reaches a plateau? But I am doubting here."
+  },
+  {
+    "objectID": "posts/main_results.html#similarity-between-predictive-network-of-pairs",
+    "href": "posts/main_results.html#similarity-between-predictive-network-of-pairs",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Similarity Between Predictive Network of Pairs",
+    "text": "Similarity Between Predictive Network of Pairs\n\nFigure 10: Dice coefficient between each pair of predictive network in pairwise sampling."
+  },
+  {
+    "objectID": "posts/main_results.html#a-caveat",
+    "href": "posts/main_results.html#a-caveat",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "A Caveat",
+    "text": "A Caveat\n\nFigure 11: Pairs are not really independent."
   }
 ]
