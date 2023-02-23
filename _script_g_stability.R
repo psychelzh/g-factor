@@ -57,6 +57,18 @@ list(
       select(edge_type, starts_with("thresh"), starts_with("tar"), cor) |>
       mutate(cor = map_dbl(cor, "estimate"))
   ),
+  tar_target(
+    mask_g_full,
+    result_cpm_g_full |>
+      select(edge_type, mask_prop) |>
+      filter(!map_lgl(mask_prop, is.null)) |>
+      summarise(
+        mask = do.call(cbind, mask_prop) |>
+          rowMeans() |>
+          list(),
+        .by = edge_type
+      )
+  ),
   tarchetypes::tar_file_read(
     indices_rapm,
     fs::path(store_behav, "indices_rapm"),
@@ -79,6 +91,18 @@ list(
     result_cpm_rapm |>
       select(edge_type, starts_with("thresh"), starts_with("tar"), cor) |>
       mutate(cor = map_dbl(cor, "estimate"))
+  ),
+  tar_target(
+    mask_rapm,
+    result_cpm_rapm |>
+      select(edge_type, mask_prop) |>
+      filter(!map_lgl(mask_prop, is.null)) |>
+      summarise(
+        mask = do.call(cbind, mask_prop) |>
+          rowMeans() |>
+          list(),
+        .by = edge_type
+      )
   ),
   # used for cpm batching (tar_rep cannot used with pattern)
   tar_target(index_batch_cpm, seq_len(10)),

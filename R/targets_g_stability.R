@@ -266,6 +266,18 @@ g_stability_single <- tarchetypes::tar_map(
       pattern = cross(scores_g_single, index_batch_cpm)
     ),
     tar_target(
+      mask_single,
+      result_cpm_single |>
+        select(edge_type, starts_with("tar"), mask_prop) |>
+        filter(!map_lgl(mask_prop, is.null)) |>
+        summarise(
+          mask = do.call(cbind, mask_prop) |>
+            rowMeans() |>
+            list(),
+          .by = c(edge_type, starts_with("tar"))
+        )
+    ),
+    tar_target(
       cpm_pred_single,
       result_cpm_single |>
         select(edge_type, contains(c("batch", "rep")), cor) |>
