@@ -1,7 +1,7 @@
 ---
 title: Intelligence and sampling of cognitive tasks
 author: Liang Zhang
-date: 2023-02-16
+date: 2023-02-24
 format:
     revealjs:
         code-fold: false

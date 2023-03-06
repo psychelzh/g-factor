@@ -4,63 +4,7 @@
     "href": "index.html",
     "title": "Intelligence and Its Neural Correlates",
     "section": "",
-    "text": "Intelligence and sampling of cognitive tasks\n\n\n\n\n\n\n\n\n\n\n\n\nFeb 16, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPredict Intelligence by FC Network through CPM\n\n\n\n\n\n\n\n\n\n\n\n\nJan 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nModeling Behavior\n\n\n\n\n\n\n\n\n\n\n\n\nDec 13, 2022\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
-  },
-  {
-    "objectID": "posts/check_model.html#sample-description",
-    "href": "posts/check_model.html#sample-description",
-    "title": "Modeling Behavior",
-    "section": "Sample Description",
-    "text": "Sample Description\n\n\n\nThe full sample contains 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)."
-  },
-  {
-    "objectID": "posts/check_model.html#distribution",
-    "href": "posts/check_model.html#distribution",
-    "title": "Modeling Behavior",
-    "section": "Distribution",
-    "text": "Distribution\n\nFigure 1: Distributions for All Tasks. They are all all fairly distributed as normal."
-  },
-  {
-    "objectID": "posts/check_model.html#missing-pattern",
-    "href": "posts/check_model.html#missing-pattern",
-    "title": "Modeling Behavior",
-    "section": "Missing Pattern",
-    "text": "Missing Pattern\n\nFigure 2: Misssing pattern."
-  },
-  {
-    "objectID": "posts/check_model.html#correlation-matrix",
-    "href": "posts/check_model.html#correlation-matrix",
-    "title": "Modeling Behavior",
-    "section": "Correlation Matrix",
-    "text": "Correlation Matrix\n\nFigure 3: Correlation Between Tasks"
-  },
-  {
-    "objectID": "posts/check_model.html#simple-one-g-cfa",
-    "href": "posts/check_model.html#simple-one-g-cfa",
-    "title": "Modeling Behavior",
-    "section": "Simple One-g CFA",
-    "text": "Simple One-g CFA\n\nFigure 4: Factor loadings for one factor only. Note the largest loadings are mainly from response time tasks. The fit measures are also low."
-  },
-  {
-    "objectID": "posts/check_model.html#enhance-model-fitting",
-    "href": "posts/check_model.html#enhance-model-fitting",
-    "title": "Modeling Behavior",
-    "section": "Enhance Model Fitting",
-    "text": "Enhance Model Fitting\nGiven the previous model does not fit well, item deletion and model re-factor (hierarchical model) are tried. The deleted items are:\n\nAll the inhibition tasks (anti-saccade, stop signal, stroop), because they do not fit well as an inhibition factor.\nPenn line orientation task is related to perception, which does not have enough similar tasks.\nSpatial 2-back task, because its correlation with other WM tasks is relatively low and its loading on WM factor is low."
-  },
-  {
-    "objectID": "posts/check_model.html#better-model",
-    "href": "posts/check_model.html#better-model",
-    "title": "Modeling Behavior",
-    "section": "Better Model",
-    "text": "Better Model\n\nFigure 5: Visualization of the new model.\n\n\n\nTable 1: Fit measures.\n\n\nCFI\nTLI\nRMSEA\n\n\n\n\n0.93\n0.91\n0.04"
-  },
-  {
-    "objectID": "posts/check_model.html#correlation-between-two-g-factor-scores",
-    "href": "posts/check_model.html#correlation-between-two-g-factor-scores",
-    "title": "Modeling Behavior",
-    "section": "Correlation between two G factor scores",
-    "text": "Correlation between two G factor scores\n\n\nFigure 6: Correlation between G factor scores. The correlation is very high, so the results can be similar."
+    "text": "Intelligence and sampling of cognitive tasks\n\n\n\n\n\n\n\n\n\n\n\n\nFeb 24, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPredict Intelligence by FC Network through CPM\n\n\n\n\n\n\n\n\n\n\n\n\nJan 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/cpm.html#configurations",
@@ -112,27 +56,6 @@
     "text": "The Influence of Sex\n\nFigure 6: Investigate the predictability difference of different sex"
   },
   {
-    "objectID": "posts/main_results.html#one-g-is-consistent",
-    "href": "posts/main_results.html#one-g-is-consistent",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "One g is consistent",
-    "text": "One g is consistent\n\n\n\n\n\n\n\nConsistency between g estimated from three batteries (Johnson, 2004)\n\n\n\n\n\n\n\nConsistency between g estimated from five batteries (Johnson, 2008)\n\n\n\n\nFigure 1: Consistency between g factors estimated from batteries"
-  },
-  {
-    "objectID": "posts/main_results.html#cognitive-tasks",
-    "href": "posts/main_results.html#cognitive-tasks",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Cognitive Tasks",
-    "text": "Cognitive Tasks\n\n19 Tasks (20 task indices) included\n\nWorking Memory (5): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span\nResponse Inhibition (3): Anti-Saccade (2 indices), Stop-Signal, Stroop\nShifting (3): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment\nLearning and Memory (3): Face Name Association, Symbol Memory, Pattern Separation\nAttention and Speed (5): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time"
-  },
-  {
-    "objectID": "posts/main_results.html#correlation-with-rapm",
-    "href": "posts/main_results.html#correlation-with-rapm",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Correlation with RAPM",
-    "text": "Correlation with RAPM\n\nFigure 4: Correlation with Raven’s Advanced Progressive Matrices (RAPM) scores. The horizontal line is the correlation between gF score estimated from all task indices and RAPM."
-  },
-  {
     "objectID": "posts/main_results.html#definition",
     "href": "posts/main_results.html#definition",
     "title": "Intelligence and sampling of cognitive tasks",
@@ -145,34 +68,6 @@
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Intelligence and g",
     "text": "Intelligence and g\n\n\ng-factor was first proposed by Spearman (1904) to account for the “positive manifold” phenomenon of cognitive tests.\nGiven the term “intelligence” is hard to define and easily leads to confusion, many researchers (see Jensen (1998)) focused on the g (i.e., general intelligence) (Barbey, 2021; Haier, 2017)."
-  },
-  {
-    "objectID": "posts/main_results.html#hypothesis",
-    "href": "posts/main_results.html#hypothesis",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Hypothesis",
-    "text": "Hypothesis"
-  },
-  {
-    "objectID": "posts/main_results.html#estimation-stability",
-    "href": "posts/main_results.html#estimation-stability",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Estimation Stability",
-    "text": "Estimation Stability\n\nFigure 9: The correlation between g scores estimated from each pair of sampling. For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.\nSeemingly the correlation reaches a plateau? But I am doubting here."
-  },
-  {
-    "objectID": "posts/main_results.html#predictability",
-    "href": "posts/main_results.html#predictability",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Predictability",
-    "text": "Predictability\n\nFigure 6: Prediction Trending (based on CPM)."
-  },
-  {
-    "objectID": "posts/main_results.html#definition-1",
-    "href": "posts/main_results.html#definition-1",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Definition",
-    "text": "Definition"
   },
   {
     "objectID": "posts/main_results.html#diagram-of-g-and-its-relatives",
@@ -217,6 +112,13 @@
     "text": "Sampling of tasks\n\n\nWhat is the clear relationship between the invariance of g and task sampling?\n\nTask number\nTask domain\nNeural predictability\nFactor model selection\nRelationship with the score of Raven’s Advanced Progressive Matrices (RAPM)"
   },
   {
+    "objectID": "posts/main_results.html#cognitive-tasks",
+    "href": "posts/main_results.html#cognitive-tasks",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Cognitive Tasks",
+    "text": "Cognitive Tasks\n\n19 Tasks (20 task indices) included\n\nWorking Memory (5): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span\nResponse Inhibition (3): Anti-Saccade (2 indices), Stop-Signal, Stroop\nShifting (3): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment\nLearning and Memory (3): Face Name Association, Symbol Memory, Pattern Separation\nAttention and Speed (5): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time"
+  },
+  {
     "objectID": "posts/main_results.html#sample-size",
     "href": "posts/main_results.html#sample-size",
     "title": "Intelligence and sampling of cognitive tasks",
@@ -245,25 +147,11 @@
     "text": "Explained Variance\n\nFigure 3: Variance Explained by the g Factor. The horizontal line gives the variance explained by the g factor estimated from all the tasks."
   },
   {
-    "objectID": "posts/main_results.html#neural-predictability",
-    "href": "posts/main_results.html#neural-predictability",
+    "objectID": "posts/main_results.html#correlation-with-rapm",
+    "href": "posts/main_results.html#correlation-with-rapm",
     "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Neural Predictability",
-    "text": "Neural Predictability\n\nFigure 6: Prediction Trending (based on CPM)."
-  },
-  {
-    "objectID": "posts/main_results.html#high-predictability-tasks",
-    "href": "posts/main_results.html#high-predictability-tasks",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "High-predictability Tasks",
-    "text": "High-predictability Tasks\n\nFigure 6: Top predictability task names word-cloud plot."
-  },
-  {
-    "objectID": "posts/main_results.html#possible-flaw-to-the-previous-analysis",
-    "href": "posts/main_results.html#possible-flaw-to-the-previous-analysis",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Possible Flaw to the Previous Analysis",
-    "text": "Possible Flaw to the Previous Analysis"
+    "section": "Correlation with RAPM",
+    "text": "Correlation with RAPM\n\nFigure 4: Correlation with Raven’s Advanced Progressive Matrices (RAPM) scores. The horizontal line is the correlation between gF score estimated from all task indices and RAPM."
   },
   {
     "objectID": "posts/main_results.html#high-rapm-correlation-tasks",
@@ -273,18 +161,18 @@
     "text": "High RAPM Correlation tasks\n\nFigure 5: Top RAPM correlated tasks. The tasks for each top 10 samples are displayed."
   },
   {
+    "objectID": "posts/main_results.html#neural-predictability",
+    "href": "posts/main_results.html#neural-predictability",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Neural Predictability",
+    "text": "Neural Predictability\n\nFigure 6: Prediction Trending (based on CPM)."
+  },
+  {
     "objectID": "posts/main_results.html#high-neural-correlation-tasks",
     "href": "posts/main_results.html#high-neural-correlation-tasks",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "High Neural Correlation Tasks",
     "text": "High Neural Correlation Tasks\n\nFigure 7: Top predictability tasks. The tasks for each top 10 predictability samples are displayed.\n\nReaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.\nHere we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks."
-  },
-  {
-    "objectID": "posts/main_results.html#brain-network-for-most-predictable-sample",
-    "href": "posts/main_results.html#brain-network-for-most-predictable-sample",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Brain Network for Most Predictable Sample",
-    "text": "Brain Network for Most Predictable Sample\n\nFigure 8: The brain networks of most predictable sample."
   },
   {
     "objectID": "posts/main_results.html#brain-networks-for-most-predictable",
