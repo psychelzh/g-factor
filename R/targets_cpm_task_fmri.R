@@ -1,25 +1,3 @@
-do_cpm <- function(fc_data, scores, thresh_method, thresh_level) {
-  data <- fc_data |>
-    tidytable::inner_join(scores, by = "sub_id") |>
-    select(-sub_id) |>
-    as.matrix()
-  result <- cpm(
-    data,
-    kfolds = 10,
-    thresh_method = thresh_method,
-    thresh_level = thresh_level
-  )
-  with(
-    result,
-    tribble(
-      ~edge_type, ~mask_prop, ~behav_pred, ~cor,
-      "pos", mask_prop_pos, behav_pred_pos, cor_pos,
-      "neg", mask_prop_neg, behav_pred_neg, cor_neg,
-      "all", NULL, behav_pred_all, cor_all
-    )
-  )
-}
-
 config_fc_data <- tidyr::expand_grid(
   modal = c("emotion", "facename",
             "Nbackrun1", "Nbackrun2", "nback", "nbackfull",

@@ -1,3 +1,25 @@
+do_cpm <- function(fc_data, scores, thresh_method, thresh_level) {
+  data <- fc_data |>
+    tidytable::inner_join(scores, by = "sub_id") |>
+    select(-sub_id) |>
+    as.matrix()
+  result <- cpm(
+    data,
+    kfolds = 10,
+    thresh_method = thresh_method,
+    thresh_level = thresh_level
+  )
+  with(
+    result,
+    tribble(
+      ~edge_type, ~mask_prop, ~behav_pred, ~cor,
+      "pos", mask_prop_pos, behav_pred_pos, cor_pos,
+      "neg", mask_prop_neg, behav_pred_neg, cor_neg,
+      "all", NULL, behav_pred_all, cor_all
+    )
+  )
+}
+
 #' Perform Connectome-based Predictive Modeling
 #'
 #' This is just a single run of the whole protocol (not including permutation).
@@ -102,10 +124,4 @@ cpm <- function(data, behav = NULL, kfolds = NULL,
     behav_pred_all = behav_pred_all,
     cor_all = cor_all
   )
-}
-
-critical_r <- function(n, alpha) {
-  df <- n - 2
-  ct <- qt( alpha/2, df, lower.tail = FALSE )
-  sqrt( (ct^2) / ( (ct^2) + df ) )
 }
