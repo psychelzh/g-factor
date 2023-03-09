@@ -3,6 +3,7 @@ do_cpm2 <- function(fc_data, scores, thresh_method, thresh_level,
   data <- fc_data |>
     tidytable::inner_join(scores, by = "sub_id") |>
     select(-sub_id) |>
+    drop_na() |> # missing values will cause error
     as.matrix()
   result <- cpm2(
     data,

@@ -1,10 +1,7 @@
 fit_g <- function(data, idx_vars) {
-  vars <- names(data)[idx_vars + 1]
-  mdl <- paste(
-    "g =~",
-    paste0("`", vars, "`", collapse = " + ")
-  )
-  cfa(mdl, data, std.ov = TRUE, missing = "ml")
+  data_sel <- data[, idx_vars + 1] |>
+    rename_with(make.names)
+  efa(data_sel, std.ov = TRUE, missing = "ml")
 }
 
 max_num_vars <- 20 # we have 20 indicators in total (can be more)
@@ -12,7 +9,7 @@ cfg_rsmp_vars <- withr::with_seed(
   1,
   dplyr::bind_rows(
     tidyr::expand_grid(
-      num_vars = 4:floor(max_num_vars / 2),
+      num_vars = 3:floor(max_num_vars / 2),
       idx_rsmp = seq_len(100)
     ) |>
       dplyr::reframe(
@@ -51,14 +48,16 @@ g_invariance <- tarchetypes::tar_map(
   ),
   tar_target(
     mdl_fitted,
-    fit_g(indices_wider_clean, idx_vars)
+    fit_g(indices_wider_clean, idx_vars),
+    deployment = "main"
   ),
   tar_target(
     scores_g,
     bind_cols(
       indices_wider_clean[, 1],
-      g = lavPredict(mdl_fitted)[, "g"]
-    )
+      g = lavPredict(mdl_fitted)[, 1]
+    ),
+    deployment = "main"
   ),
   tarchetypes::tar_map_rep(
     result_cpm,
