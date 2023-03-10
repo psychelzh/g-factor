@@ -84,10 +84,12 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
     leftout <- folds == fold
 
     # train models
-    neural_train <- if (!bias_correct) {
-      neural[!leftout, ]
-    } else {
-      scale(neural[!leftout, ])
+
+    neural_train <- neural[!leftout, , drop = FALSE]
+    if (bias_correct) {
+      train_mns <- fmean(neural_train)
+      train_sds <- fsd(neural_train)
+      neural_train <- (neural_train %r-% train_mns) %r/% train_sds
     }
     behav_train <- behav[!leftout]
     r_mask <- cor(neural_train, behav_train)
@@ -114,14 +116,9 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
     fit_all <- coef(lm(behav_train ~ train_sumpos + train_sumneg))
 
     # test models
-    neural_test <- if (!bias_correct) {
-      neural[leftout, ]
-    } else {
-      scale(
-        neural[leftout, ],
-        center = attr(neural_train, "scaled:center"),
-        scale = attr(neural_train, "scaled:scale")
-      )
+    neural_test <- neural[leftout, , drop = FALSE]
+    if (bias_correct) {
+      neural_test <- (neural_test %r-% train_mns) %r/% train_sds
     }
     behav_test <- behav[leftout]
     test_sumpos <- rowSums(neural_test[, pos_mask, drop = FALSE])
