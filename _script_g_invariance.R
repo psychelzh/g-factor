@@ -42,15 +42,15 @@ list(
   ),
   tarchetypes::tar_map_rep(
     result_cpm_g_full,
-    command = do_cpm(
-      fc_data_rest_nn268_without,
+    command = do_cpm2(
+      fc_data_matched,
       scores_g_full,
       thresh_method,
       thresh_level
     ),
     values = hypers_thresh_g,
-    batches = 2,
-    reps = 10
+    batches = 4,
+    reps = 5
   ),
   tarchetypes::tar_file_read(
     indices_rapm,
@@ -59,15 +59,15 @@ list(
   ),
   tarchetypes::tar_map_rep(
     result_cpm_rapm,
-    command = do_cpm(
-      fc_data_rest_nn268_without,
+    command = do_cpm2(
+      fc_data_matched,
       indices_rapm,
       thresh_method,
       thresh_level
     ),
     values = hypers_thresh_g,
-    batches = 2,
-    reps = 10
+    batches = 4,
+    reps = 5
   ),
   g_invariance
 )
