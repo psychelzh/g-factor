@@ -25,9 +25,10 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
-    fc_data_rest_nn268_without,
+    fc_data_matched,
     fs::path(store_fmri, "fc_data_rest_nn268_without"),
-    read = qs::qread(!!.x)
+    read = qs::qread(!!.x) |>
+      filter(sub_id %in% indices_wider_clean$sub_id)
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),

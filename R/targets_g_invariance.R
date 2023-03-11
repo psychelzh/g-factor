@@ -78,7 +78,7 @@ hypers_thresh_g <- dplyr::bind_rows(
 )
 targets_cpm_rsmpl <- tar_map_cpm2(
   values = hypers_thresh_g,
-  neural = fc_data_rest_nn268_without,
+  neural = fc_data_matched,
   behav = scores_g
 )
 
