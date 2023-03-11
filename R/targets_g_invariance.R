@@ -1,8 +1,23 @@
-fit_g <- function(data, idx_vars) {
-  data_sel <- data[, idx_vars + 1] |>
+fit_g <- function(data, vars) {
+  data_sel <- data |>
+    select({{ vars }}) |>
     rename_with(make.names)
   efa(data_sel, std.ov = TRUE, missing = "ml")
 }
+
+predict_g_score <- function(data, mdl, id_cols = 1) {
+  bind_cols(
+    data[, id_cols],
+    g = lavPredict(mdl)[, 1]
+  )
+}
+
+hypers_thresh_g <- dplyr::bind_rows(
+  tibble::tibble(
+    thresh_method = "alpha",
+    thresh_level = 0.01
+  )
+)
 
 max_num_vars <- 20 # we have 20 indicators in total (can be more)
 cfg_rsmp_vars <- withr::with_seed(
@@ -48,15 +63,12 @@ g_invariance <- tarchetypes::tar_map(
   ),
   tar_target(
     mdl_fitted,
-    fit_g(indices_wider_clean, idx_vars),
+    fit_g(indices_wider_clean, all_of(data_names)),
     deployment = "main"
   ),
   tar_target(
     scores_g,
-    bind_cols(
-      indices_wider_clean[, 1],
-      g = lavPredict(mdl_fitted)[, 1]
-    ),
+    predict_g_score(indices_wider_clean, mdl_fitted),
     deployment = "main"
   ),
   tarchetypes::tar_map_rep(
