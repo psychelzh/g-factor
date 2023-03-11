@@ -12,6 +12,17 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
   )
 }
 
+extract_brain_mask <- function(result_cpm, .by) {
+  result_cpm |>
+    filter(!map_lgl(mask_prop, is.null)) |>
+    summarise(
+      mask = do.call(cbind, mask_prop) |>
+        rowMeans() |>
+        list(),
+      .by = {{ .by }}
+    )
+}
+
 hypers_thresh_g <- dplyr::bind_rows(
   tibble::tibble(
     thresh_method = "alpha",
@@ -50,34 +61,36 @@ cfg_rsmp_vars <- withr::with_seed(
           ~ sample.int(max_num_vars, ., replace = FALSE)
         )
       )
-  )
+  ) |>
+    tidyr::chop(c(idx_rsmp, idx_vars))
 )
 
 g_invariance <- tarchetypes::tar_map(
   values = cfg_rsmp_vars,
-  names = -idx_vars,
+  names = c(num_vars, id_pairs),
   tar_target(
     data_names,
-    data_names_all[idx_vars],
+    map(idx_vars, ~ data_names_all[.]),
     deployment = "main"
   ),
   tar_target(
     mdl_fitted,
-    fit_g(indices_wider_clean, all_of(data_names)),
-    deployment = "main"
+    map(data_names, ~ fit_g(indices_wider_clean, all_of(.)))
   ),
   tar_target(
     scores_g,
-    predict_g_score(indices_wider_clean, mdl_fitted),
-    deployment = "main"
+    map(mdl_fitted, ~ predict_g_score(indices_wider_clean, .))
   ),
   tarchetypes::tar_map_rep(
     result_cpm,
-    command = do_cpm2(
-      fc_data_rest_nn268_without,
+    command = map(
       scores_g,
-      thresh_method,
-      thresh_level
+      ~ do_cpm2(
+        fc_data_rest_nn268_without,
+        .,
+        thresh_method,
+        thresh_level
+      )
     ),
     values = hypers_thresh_g,
     batches = 2,
@@ -85,13 +98,13 @@ g_invariance <- tarchetypes::tar_map(
   ),
   tar_target(
     brain_mask,
-    result_cpm |>
-      filter(!map_lgl(mask_prop, is.null)) |>
-      summarise(
-        mask = do.call(cbind, mask_prop) |>
-          rowMeans() |>
-          list(),
-        .by = c(edge_type, starts_with("tar"), starts_with("thresh"))
+    map(
+      result_cpm,
+      ~ extract_brain_mask(
+        .,
+        .by = c(edge_type, starts_with("thresh"))
       )
+    ),
+    pattern = map(result_cpm)
   )
 )
