@@ -67,9 +67,9 @@ g_invariance <- tarchetypes::tar_map(
       thresh_method,
       thresh_level
     ),
-    values = hypers_thresh,
-    batches = 10,
-    reps = 10
+    values = hypers_thresh_g,
+    batches = 2,
+    reps = 50
   ),
   tar_target(
     brain_mask,
