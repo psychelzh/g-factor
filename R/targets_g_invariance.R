@@ -12,23 +12,21 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
   )
 }
 
-extract_brain_mask <- function(result_cpm, .by) {
-  result_cpm |>
-    filter(!map_lgl(mask_prop, is.null)) |>
-    summarise(
-      mask = do.call(cbind, mask_prop) |>
-        rowMeans() |>
-        list(),
-      .by = {{ .by }}
-    )
+aggregate_masks <- function(cpm, from) {
+  aggr <- function(mask_prop) {
+    rowMeans(do.call(cbind, mask_prop))
+  }
+  list(mns = aggr(map(cpm, from)))
 }
 
-hypers_thresh_g <- dplyr::bind_rows(
-  tibble::tibble(
-    thresh_method = "alpha",
-    thresh_level = 0.01
-  )
-)
+extract_brain_mask <- function(result_cpm) {
+  result_cpm |>
+    summarise(
+      mask_pos = aggregate_masks(cpm, "mask_prop_pos"),
+      mask_neg = aggregate_masks(cpm, "mask_prop_neg"),
+      .by = c(id_behav, starts_with("thresh"))
+    )
+}
 
 max_num_vars <- 20 # we have 20 indicators in total (can be more)
 cfg_rsmp_vars <- withr::with_seed(
@@ -65,6 +63,25 @@ cfg_rsmp_vars <- withr::with_seed(
     tidyr::chop(c(idx_rsmp, idx_vars))
 )
 
+hypers_thresh_g <- dplyr::bind_rows(
+  tidyr::expand_grid(
+    data.frame(
+      thresh_method = "alpha",
+      thresh_level = 0.01
+    ),
+    tidyr::expand_grid(
+      idx_batch = seq_len(2),
+      idx_rep = seq_len(10)
+    )
+  ) |>
+    tidyr::chop(idx_rep)
+)
+targets_cpm_rsmpl <- tar_map_cpm2(
+  values = hypers_thresh_g,
+  neural = fc_data_rest_nn268_without,
+  behav = scores_g
+)
+
 g_invariance <- tarchetypes::tar_map(
   values = cfg_rsmp_vars,
   names = c(num_vars, id_pairs),
@@ -81,30 +98,14 @@ g_invariance <- tarchetypes::tar_map(
     scores_g,
     map(mdl_fitted, ~ predict_g_score(indices_wider_clean, .))
   ),
-  tarchetypes::tar_map_rep(
+  targets_cpm_rsmpl, # this step will produces data.frames
+  tarchetypes::tar_combine(
     result_cpm,
-    command = map(
-      scores_g,
-      ~ do_cpm2(
-        fc_data_rest_nn268_without,
-        .,
-        thresh_method,
-        thresh_level
-      )
-    ),
-    values = hypers_thresh_g,
-    batches = 2,
-    reps = 10
+    targets_cpm_rsmpl$result_cpm,
+    use_names = FALSE
   ),
   tar_target(
     brain_mask,
-    map(
-      result_cpm,
-      ~ extract_brain_mask(
-        .,
-        .by = c(edge_type, starts_with("thresh"))
-      )
-    ),
-    pattern = map(result_cpm)
+    extract_brain_mask(result_cpm)
   )
 )

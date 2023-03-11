@@ -5,21 +5,12 @@ do_cpm2 <- function(fc_data, scores, thresh_method, thresh_level,
     select(-sub_id) |>
     drop_na() |> # missing values will cause error
     as.matrix()
-  result <- cpm2(
+  cpm2(
     data,
     kfolds = 10,
     bias_correct = bias_correct,
     thresh_method = thresh_method,
     thresh_level = thresh_level
-  )
-  with(
-    result,
-    tribble(
-      ~edge_type, ~mask_prop, ~behav_pred, ~cor,
-      "pos", mask_prop_pos, behav_pred_pos, cor_pos,
-      "neg", mask_prop_neg, behav_pred_neg, cor_neg,
-      "all", NULL, behav_pred_all, cor_all
-    )
   )
 }
 
@@ -142,5 +133,44 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
     cor_neg = cor_neg,
     behav_pred_all = behav_pred_all,
     cor_all = cor_all
+  )
+}
+
+tar_map_cpm2 <- function(values, ..., neural, behav) {
+  tarchetypes::tar_map(
+    values = values,
+    names = -idx_rep,
+    list(
+      tar_target_raw(
+        "result_cpm",
+        substitute(
+          expand_grid(
+            if (inherits(behav, "list")) {
+              tibble(
+                id_behav = seq_along(behav),
+                score_behav = behav
+              )
+            } else {
+              tibble(
+                id_behav = 1,
+                score_behav = list(behav)
+              )
+            },
+            idx_rep = idx_rep
+          ) |>
+            mutate(
+              idx_batch = idx_batch,
+              thresh_method = thresh_method,
+              thresh_level = thresh_level,
+              cpm = map(
+                score_behav,
+                ~ do_cpm2(neural, ., thresh_method, thresh_level)
+              ),
+              .keep = "unused"
+            )
+        )
+      )
+    ),
+    ...
   )
 }
