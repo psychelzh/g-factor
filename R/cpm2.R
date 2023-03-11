@@ -1,19 +1,3 @@
-do_cpm2 <- function(fc_data, scores, thresh_method, thresh_level,
-                    bias_correct = TRUE) {
-  data <- fc_data |>
-    tidytable::inner_join(scores, by = "sub_id") |>
-    select(-sub_id) |>
-    drop_na() |> # missing values will cause error
-    as.matrix()
-  cpm2(
-    data,
-    kfolds = 10,
-    bias_correct = bias_correct,
-    thresh_method = thresh_method,
-    thresh_level = thresh_level
-  )
-}
-
 #' Perform Connectome-based Predictive Modeling
 #'
 #' This is just a single run of the whole protocol (not including permutation).
@@ -136,41 +120,36 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
   )
 }
 
-tar_map_cpm2 <- function(values, ..., neural, behav) {
-  tarchetypes::tar_map(
-    values = values,
-    names = -idx_rep,
-    list(
-      tar_target_raw(
-        "result_cpm",
-        substitute(
-          expand_grid(
-            if (inherits(behav, "list")) {
-              tibble(
-                id_behav = seq_along(behav),
-                score_behav = behav
-              )
-            } else {
-              tibble(
-                id_behav = 1,
-                score_behav = list(behav)
-              )
-            },
-            idx_rep = idx_rep
-          ) |>
-            mutate(
-              idx_batch = idx_batch,
-              thresh_method = thresh_method,
-              thresh_level = thresh_level,
-              cpm = map(
-                score_behav,
-                ~ do_cpm2(neural, ., thresh_method, thresh_level)
-              ),
-              .keep = "unused"
-            )
-        )
-      )
-    ),
-    ...
-  )
+#' Perform cpm and return a data.frame
+do_cpm2 <- function(neural, behav, thresh_method, thresh_level,
+                    bias_correct = TRUE, id_cols = "sub_id") {
+  data <- if (inherits(behav, "list")) {
+    tibble(
+      id_behav = seq_along(behav),
+      behav = behav
+    )
+  } else {
+    tibble(
+      id_behav = 1,
+      behav = list(behav)
+    )
+  }
+  data |>
+    mutate(
+      cpm = map(
+        behav,
+        ~ neural |>
+          tidytable::inner_join(., by = id_cols) |>
+          select(-all_of(id_cols)) |>
+          drop_na() |> # missing values will cause error
+          as.matrix() |>
+          cpm2(
+            kfolds = 10,
+            bias_correct = bias_correct,
+            thresh_method = thresh_method,
+            thresh_level = thresh_level
+          )
+      ),
+      .keep = "unused"
+    )
 }

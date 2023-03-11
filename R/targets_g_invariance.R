@@ -64,22 +64,10 @@ cfg_rsmp_vars <- withr::with_seed(
 )
 
 hypers_thresh_g <- dplyr::bind_rows(
-  tidyr::expand_grid(
-    data.frame(
-      thresh_method = "alpha",
-      thresh_level = 0.01
-    ),
-    tidyr::expand_grid(
-      idx_batch = seq_len(2),
-      idx_rep = seq_len(10)
-    )
-  ) |>
-    tidyr::chop(idx_rep)
-)
-targets_cpm_rsmpl <- tar_map_cpm2(
-  values = hypers_thresh_g,
-  neural = fc_data_matched,
-  behav = scores_g
+  data.frame(
+    thresh_method = "alpha",
+    thresh_level = 0.01
+  )
 )
 
 g_invariance <- tarchetypes::tar_map(
@@ -98,11 +86,17 @@ g_invariance <- tarchetypes::tar_map(
     scores_g,
     map(mdl_fitted, ~ predict_g_score(indices_wider_clean, .))
   ),
-  targets_cpm_rsmpl, # this step will produces data.frames
-  tarchetypes::tar_combine(
+  tarchetypes::tar_map_rep(
     result_cpm,
-    targets_cpm_rsmpl$result_cpm,
-    use_names = FALSE
+    do_cpm2(
+      fc_data_matched,
+      scores_g,
+      thresh_method = thresh_method,
+      thresh_level = thresh_level
+    ),
+    values = hypers_thresh_g,
+    batches = 4,
+    reps = 5
   ),
   tar_target(
     brain_mask,
