@@ -5,6 +5,10 @@ fit_g <- function(data, vars) {
   efa(data_sel, std.ov = TRUE, missing = "ml")
 }
 
+calc_var_exp <- function(fit) {
+  mean(loadings(fit) ^ 2)
+}
+
 predict_g_score <- function(data, mdl, id_cols = 1) {
   bind_cols(
     data[, id_cols],
@@ -12,19 +16,32 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
   )
 }
 
-aggregate_masks <- function(cpm, from) {
-  aggr <- function(mask_prop) {
-    rowMeans(do.call(cbind, mask_prop))
+extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
+  extract_cors <- function(cpm, edge_types = c("pos", "neg", "all")) {
+    map_dbl(edge_types, ~ cpm[[str_c("cor_", .)]]$estimate) |>
+      as_tibble_row(.name_repair = ~ edge_types)
   }
-  list(mns = aggr(map(cpm, from)))
+  result_cpm |>
+    mutate(
+      map({{ col_cpm }}, extract_cors) |>
+        bind_rows(),
+      .keep = "unused"
+    )
 }
 
-extract_brain_mask <- function(result_cpm) {
+extract_brain_mask <- function(result_cpm, col_cpm = cpm) {
+  aggregate_masks <- function(cpm, edge_types = c("pos", "neg")) {
+    map(
+      edge_types,
+      ~ list(rowMeans(do.call(cbind, map(cpm, str_c("mask_prop_", .)))))
+    ) |>
+      set_names(edge_types) |>
+      as_tibble_row()
+  }
   result_cpm |>
     summarise(
-      mask_pos = aggregate_masks(cpm, "mask_prop_pos"),
-      mask_neg = aggregate_masks(cpm, "mask_prop_neg"),
-      .by = c(id_behav, starts_with("thresh"))
+      aggregate_masks({{ col_cpm }}),
+      .by = c(any_of("idx_rsmp"), starts_with("thresh"))
     )
 }
 
@@ -75,31 +92,61 @@ g_invariance <- tarchetypes::tar_map(
   names = c(num_vars, id_pairs),
   tar_target(
     data_names,
-    map(idx_vars, ~ data_names_all[.]),
+    tibble(
+      idx_rsmp = idx_rsmp, # use this to track samples
+      tasks = map(idx_vars, ~ data_names_all[.])
+    ),
     deployment = "main"
   ),
   tar_target(
     mdl_fitted,
-    map(data_names, ~ fit_g(indices_wider_clean, all_of(.)))
+    data_names |>
+      mutate(
+        mdl = map(
+          tasks,
+          ~ fit_g(indices_wider_clean, all_of(.))
+        ),
+        .keep = "unused"
+      )
+  ),
+  tar_target(
+    var_exp,
+    mdl_fitted |>
+      mutate(
+        prop = map_dbl(mdl, calc_var_exp),
+        .keep = "unused"
+      )
   ),
   tar_target(
     scores_g,
-    map(mdl_fitted, ~ predict_g_score(indices_wider_clean, .))
+    mdl_fitted |>
+      mutate(
+        scores = map(
+          mdl,
+          ~ predict_g_score(indices_wider_clean, .)
+        ),
+        .keep = "unused"
+      )
   ),
   tarchetypes::tar_map_rep(
     result_cpm,
-    do_cpm2(
-      fc_data_matched,
-      scores_g,
-      thresh_method = thresh_method,
-      thresh_level = thresh_level
-    ),
+    scores_g |>
+      mutate(
+        cpm = map(
+          scores,
+          ~ do_cpm2(
+            fc_data_matched,
+            .,
+            thresh_method = thresh_method,
+            thresh_level = thresh_level
+          )
+        ),
+        .keep = "unused"
+      ),
     values = hypers_thresh_g,
     batches = 4,
     reps = 5
   ),
-  tar_target(
-    brain_mask,
-    extract_brain_mask(result_cpm)
-  )
+  tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
+  tar_target(brain_mask, extract_brain_mask(result_cpm))
 )
