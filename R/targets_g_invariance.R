@@ -24,7 +24,7 @@ extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
   result_cpm |>
     mutate(
       map({{ col_cpm }}, extract_cors) |>
-        bind_rows(),
+        list_rbind(),
       .keep = "unused"
     )
 }
