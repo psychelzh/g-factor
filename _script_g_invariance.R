@@ -44,43 +44,36 @@ list(
     scores_g_full,
     predict_g_score(indices_wider_clean, mdl_fitted_full)
   ),
-  tarchetypes::tar_map_rep(
-    result_cpm_g_full,
-    command = tibble(
-      cpm = do_cpm2(
-        fc_data_matched,
-        scores_g_full,
-        thresh_method,
-        thresh_level
-      ) |> list()
-    ),
-    values = hypers_thresh_g,
-    batches = 4,
-    reps = 5
-  ),
-  tar_target(cpm_pred_g_full, extract_cpm_pred(result_cpm_g_full)),
-  tar_target(brain_mask_g_full, extract_brain_mask(result_cpm_g_full)),
   tarchetypes::tar_file_read(
     indices_rapm,
     fs::path(store_behav, "indices_rapm"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_map_rep(
-    result_cpm_rapm,
-    command = tibble(
-      cpm = do_cpm2(
-        fc_data_matched,
-        indices_rapm,
-        thresh_method,
-        thresh_level
-      ) |> list()
-    ),
+    result_cpm_main,
+    command = tribble(
+      ~idx, ~scores,
+      "g_full", scores_g_full,
+      "rapm", indices_rapm
+    ) |>
+      mutate(
+        cpm = map(
+          scores,
+          ~ do_cpm2(
+            fc_data_matched,
+            .,
+            thresh_method = thresh_method,
+            thresh_level = thresh_level
+          )
+        ),
+        .keep = "unused"
+      ),
     values = hypers_thresh_g,
     batches = 4,
     reps = 5
   ),
-  tar_target(cpm_pred_rapm, extract_cpm_pred(result_cpm_rapm)),
-  tar_target(brain_mask_rapm, extract_brain_mask(result_cpm_rapm)),
+  tar_target(cpm_pred_main, extract_cpm_pred(result_cpm_main)),
+  tar_target(brain_mask_main, extract_brain_mask(result_cpm_main)),
   g_invariance,
   tarchetypes::tar_combine(
     data_names,

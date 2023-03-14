@@ -41,7 +41,7 @@ extract_brain_mask <- function(result_cpm, col_cpm = cpm) {
   result_cpm |>
     summarise(
       aggregate_masks({{ col_cpm }}),
-      .by = c(any_of("idx_rsmp"), starts_with("thresh"))
+      .by = starts_with(c("idx", "thresh"))
     )
 }
 
