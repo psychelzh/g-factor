@@ -119,5 +119,30 @@ list(
         "brain_mask",
         c("num_vars", "id_pairs")
       )
+  ),
+  tar_target(
+    dice_mask_pairs,
+    brain_mask |>
+      filter(n() == 2, .by = c(num_vars, idx_rsmp, starts_with("thresh"))) |>
+      pivot_longer(
+        c(pos, neg),
+        names_to = "edge_type",
+        values_to = "mask"
+      ) |>
+      mutate(mask_bin = map(mask, ~ . > 0.995), .keep = "unused") |>
+      pivot_wider(
+        id_cols = c(num_vars, idx_rsmp, starts_with("thresh"), edge_type),
+        names_from = id_pairs,
+        values_from = mask_bin
+      ) |>
+      mutate(
+        dice = map2_dbl(
+          `1`, `2`,
+          ~ rbind(.x, .y) |>
+            proxy::simil(method = "dice") |>
+            unclass()
+        ),
+        .keep = "unused"
+      )
   )
 )
