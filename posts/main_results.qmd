@@ -20,7 +20,8 @@ library(tidyverse)
 library(ggwordcloud)
 library(brainconn)
 library(lavaan)
-name_pairs <- c("first", "second")
+Sys.setenv("TAR_PROJECT" = "project_g_invariance")
+edge_types <- c("pos", "neg", "all")
 ```
 
 # Issues on Intelligence
@@ -139,10 +140,7 @@ targets::tar_load(
   c(subjs_info_clean, indices_wider_clean),
   store = "_store_behav"
 )
-subjs_fmri <- targets::tar_read(
-  fc_data_rest_nn268_without,
-  store = "_store_g_stability"
-) |>
+subjs_fmri <- targets::tar_read(fc_data_matched) |>
   select(sub_id) |>
   inner_join(subjs_info_clean, by = "sub_id")
 subjs_info_full <- subjs_info_clean |>
@@ -209,13 +207,8 @@ Here we used 4 tasks at minimal, because g factor modeling from 3 tasks is a sat
 #|   **Variance Explained by the g Factor.** The horizontal line gives the variance explained
 #|   by the g factor estimated from all the tasks.
 
-targets::tar_load(
-  c(var_exp_pairs, var_exp_single, var_exp_full),
-  store = "_store_g_stability"
-)
-var_exp_pairs |>
-  pivot_longer(all_of(name_pairs), names_to = "pair", values_to = "prop") |>
-  bind_rows(var_exp_single) |>
+targets::tar_load(c(var_exp, var_exp_full))
+var_exp |>
   ggplot(aes(num_vars, prop)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
@@ -241,19 +234,17 @@ var_exp_pairs |>
 #|   horizontal line is the correlation between gF score estimated from all task
 #|   indices and RAPM.
 
-targets::tar_load(
-  c(scores_g_pairs, scores_g_single, scores_g_full),
-  store = "_store_g_stability"
-)
+targets::tar_load(c(scores_g, scores_g_full))
 targets::tar_load(indices_rapm, store = "_store_behav")
 cor_rapm_full <- scores_g_full |>
   inner_join(indices_rapm, by = "sub_id") |>
   summarise(cor = cor(g, RAPM, use = "pairwise"))
-cor_rapm_sampled <- bind_rows(scores_g_pairs, scores_g_single) |>
+cor_rapm_sampled <- scores_g |>
+  unnest(scores) |> 
   inner_join(indices_rapm, by = "sub_id") |>
   summarise(
     cor = cor(g, RAPM, use = "pairwise"),
-    .by = c(num_vars, pair, starts_with("tar"))
+    .by = c(num_vars, id_pairs, idx_rsmp)
   )
 cor_rapm_sampled |>
   ggplot(aes(num_vars, cor)) +
@@ -279,15 +270,12 @@ cor_rapm_sampled |>
 #|   **Top RAPM correlated tasks.** The tasks for each top 10 samples are displayed.
 #| cache: true
 
-data_names <- targets::tar_read(data_names_pairs, store = "_store_g_stability") |>
-  pivot_longer(all_of(name_pairs), names_to = "pair", values_to = "tasks") |>
-  bind_rows(targets::tar_read(data_names_single, store = "_store_g_stability"))
-targets::tar_load(c(data_names_pairs, data_names_single), store = "_store_g_stability")
+targets::tar_load(data_names)
 tasks_high_cor_rapm <- cor_rapm_sampled |>
   slice_max(cor, n = 10, by = num_vars) |>
   inner_join(
     data_names,
-    by = c("num_vars", "tar_batch", "tar_rep", "tar_seed", "pair")
+    by = c("num_vars", "id_pairs", "idx_rsmp")
   ) |>
   unnest(tasks)
 tasks_high_cor_rapm |>
@@ -310,45 +298,33 @@ tasks_high_cor_rapm |>
 #| fig-cap: >
 #|   **Prediction Trending (based on CPM)**.
 
-targets::tar_load(
-  c(cpm_pred_g_full, cpm_pred_rapm, cpm_pred_pairs, cpm_pred_single),
-  store = "_store_g_stability"
-)
-pred_g_full <- cpm_pred_g_full |>
-  filter(thresh_method == "sparsity") |>
-  summarise(cor = mean(cor), .by = edge_type)
-pred_rapm <- cpm_pred_rapm |>
-  filter(thresh_method == "sparsity") |>
-  summarise(cor = mean(cor), .by = edge_type)
-preds <- bind_rows(
-  `All Tasks` = pred_g_full,
-  RAPM = pred_rapm,
-  .id = "name"
-)
-pred_pairs <- cpm_pred_pairs |>
-  summarise(
-    across(all_of(name_pairs), mean),
-    .by = c(num_vars, edge_type, starts_with("tar"))
-  ) |>
+targets::tar_load(c(cpm_pred, cpm_pred_main))
+idx_name <- c(g_full = "All Tasks", rapm = "RAPM")
+preds_main <- cpm_pred_main |> 
+  summarise(across(all_of(edge_types), mean), .by = idx) |> 
   pivot_longer(
-    all_of(name_pairs),
-    names_to = "pair",
+    all_of(edge_types),
+    names_to = "edge_type",
     values_to = "cor"
-  ) |>
-  rename_with(~ str_remove(., "_last"), starts_with("tar"))
-pred_single <- cpm_pred_single |>
+  ) |> 
+  mutate(idx_name = idx_name[idx])
+preds_sampled <- cpm_pred |> 
   summarise(
-    cor = mean(cor),
-    .by = c(num_vars, edge_type, starts_with("tar"))
+    across(all_of(edge_types), mean),
+    .by = c(num_vars, id_pairs, idx_rsmp, starts_with("thresh"))
+  ) |> 
+  pivot_longer(
+    all_of(edge_types),
+    names_to = "edge_type",
+    values_to = "cor"
   )
-preds_sampled <- bind_rows(pred_pairs, pred_single)
 preds_sampled |>
   ggplot(aes(num_vars, cor)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
   geomtextpath::geom_texthline(
-    aes(label = name, yintercept = cor, color = name),
-    preds,
+    aes(label = idx_name, yintercept = cor, color = idx_name),
+    preds_main,
     hjust = 1
   ) +
   scale_color_viridis_d(guide = "none") +
@@ -368,6 +344,8 @@ preds_sampled |>
 
 ## High Neural Correlation Tasks {.smaller}
 
+<!-- TODO: this is not the best method for domain checking -->
+
 ```{r}
 #| label: fig-neural-pred-tasks
 #| fig-width: 15
@@ -380,7 +358,7 @@ tasks_high_pred <- preds_sampled |>
   slice_max(cor, n = 10, by = c(num_vars, edge_type)) |>
   inner_join(
     data_names,
-    by = c("num_vars", "tar_batch", "tar_rep", "pair"),
+    by = c("num_vars", "id_pairs", "idx_rsmp"),
     multiple = "all"
   ) |>
   unnest(tasks)
@@ -446,6 +424,7 @@ vis_mask <- function(mask, thresh_prop = 0.995) {
     mutate(network = factor(network, labels = network_labs_shen_268))
   brainconn(
     atlas = shen_268_with_labs,
+    node.size = 1,
     conmat = restore_mat(mask) > thresh_prop,
     view = "left", edge.alpha = 0.2
   ) +
@@ -454,18 +433,20 @@ vis_mask <- function(mask, thresh_prop = 0.995) {
 data_masks <- preds_sampled |>
   filter(num_vars %in% c(4, 8, 12, 16), edge_type != "all") |>
   slice_max(cor, n = 1, by = c(num_vars, edge_type)) |>
-  nest(.by = num_vars) |>
+  nest(.by = c(num_vars, id_pairs)) |>
   mutate(
-    data = map2(
-      num_vars, data,
-      ~ if (.x <= 10) {
-        targets::tar_read_raw(str_c("mask_pairs_", .x), store = "_store_g_stability") |>
-          rename_with(~ str_remove(., "_last"), starts_with("tar")) |>
-          pivot_longer(all_of(name_pairs), names_to = "pair", values_to = "mask") |>
-          semi_join(.y, by = c("edge_type", "tar_batch", "tar_rep", "pair"))
-      } else {
-        targets::tar_read_raw(str_c("mask_single_", .x), store = "_store_g_stability") |>
-          semi_join(.y, by = c("edge_type", "tar_batch", "tar_rep"))
+    data = pmap(
+      list(num_vars, id_pairs, data),
+      \(num_vars, id_pairs, data, ...) {
+        targets::tar_read_raw(
+          str_c("brain_mask", num_vars, id_pairs, sep = "_")
+        ) |> 
+          pivot_longer(
+            any_of(edge_types),
+            names_to = "edge_type",
+            values_to = "mask"
+          ) |> 
+          semi_join(data)
       }
     )
   ) |>
@@ -508,9 +489,21 @@ ggpubr::ggarrange(
 #|   number of tasks will be 10, and this figure shows that the correlations between
 #|   the paired g scores increase as the number of tasks increase.
 
-targets::tar_load(scores_g_pairs_cor, store = "_store_g_stability")
-scores_g_pairs_cor |>
-  ggplot(aes(num_vars, estimate)) +
+scores_g |>
+  filter(n() == 2, .by = c(num_vars, idx_rsmp)) |> 
+  pivot_wider(
+    id_cols = c(num_vars, idx_rsmp),
+    names_from = id_pairs,
+    values_from = scores
+  ) |> 
+  mutate(
+    cor = map2_dbl(
+      `1`, `2`,
+      ~ cor(.x$g, .y$g, use = "pairwise")
+    ),
+    .keep = "unused"
+  ) |> 
+  ggplot(aes(num_vars, cor)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
@@ -531,7 +524,7 @@ Seemingly the correlation reaches a plateau? But I am doubting here.
 #| fig-cap: >
 #|   **Dice coefficient between each pair of predictive network in pairwise sampling.**
 
-targets::tar_load(dice_mask_pairs, store = "_store_g_stability")
+targets::tar_load(dice_mask_pairs)
 dice_mask_pairs |>
   ggplot(aes(num_vars, dice)) +
   ggdist::stat_slabinterval() +
@@ -560,12 +553,22 @@ dice_mask_pairs |>
 #| fig-cap: >
 #|   **Pairs are not really independent.**
 
-cpm_pred_pairs |>
+cpm_pred |>
+  filter(n_distinct(id_pairs) == 2, .by = num_vars) |> 
   summarise(
-    across(c(first, second), mean),
-    .by = c(num_vars, edge_type, ends_with("last"))
+    across(all_of(edge_types), mean),
+    .by = c(num_vars, id_pairs, idx_rsmp, starts_with("thresh"))
   ) |>
-  ggplot(aes(first, second)) +
+  pivot_longer(
+    all_of(edge_types),
+    names_to = "edge_type",
+    values_to = "pred"
+  ) |> 
+  pivot_wider(
+    names_from = id_pairs,
+    values_from = pred
+  ) |> 
+  ggplot(aes(`1`, `2`)) +
   geom_point() +
   ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p")), color = "red", small.p = TRUE) +
   facet_grid(edge_type ~ num_vars, labeller = label_both) +
@@ -689,12 +692,17 @@ Here we do two comparisons:
 targets::tar_load(cpmcors, store = "_store_task_fmri")
 cpmcors |>
   filter(modal == "rest", parcel == "nn268", gsr == "without", 
-         thresh_method == "sparsity", latent == "g") |> 
+         thresh_method == "alpha", latent == "g") |> 
   select(starts_with("tar"), edge_type, cor = estimate) |> 
   mutate(model = "Spearman") |> 
   bind_rows(
-    cpm_pred_g_full |> 
-      filter(thresh_method == "sparsity") |> 
+    cpm_pred_main |> 
+      filter(thresh_method == "alpha") |> 
+      pivot_longer(
+        all_of(edge_types),
+        names_to = "edge_type",
+        values_to = "cor"
+      ) |> 
       mutate(model = "Hierarchical")
   ) |> 
   ggplot(aes(model, cor)) +
@@ -725,7 +733,7 @@ cpmcors |>
 
 cpmcors |> 
   filter(modal %in% c("rest", "nbackfull"), parcel == "nn268", gsr == "without", 
-         thresh_method == "sparsity", latent == "g") |> 
+         thresh_method == "alpha", latent == "g") |> 
   ggplot(aes(modal, estimate)) +
   ggdist::stat_dotsinterval() +
   ggpubr::stat_compare_means(method = "t.test") +
