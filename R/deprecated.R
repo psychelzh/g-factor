@@ -1,3 +1,6 @@
+#' These functions are all deprecated for certain reasons. Please do not use
+#' them now.
+
 do_cpm <- function(fc_data, scores, thresh_method, thresh_level) {
   data <- fc_data |>
     tidytable::inner_join(scores, by = "sub_id") |>
@@ -124,4 +127,87 @@ cpm <- function(data, behav = NULL, kfolds = NULL,
     behav_pred_all = behav_pred_all,
     cor_all = cor_all
   )
+}
+
+fit_model <- function(data, id_cols = NULL) {
+  if (is.null(id_cols)) {
+    id_cols <- names(data)[[1]]
+  }
+  vars <- setdiff(names(data), id_cols)
+  mdl <- paste(
+    "g =~",
+    paste0("`", vars, "`", collapse = " + ")
+  )
+  cfa(mdl, data, std.ov = TRUE, missing = "ml")
+}
+
+# TODO: this is deprecated because model object is not returned
+estimate_g_scores <- function(data, id_cols = NULL) {
+  if (is.null(id_cols)) {
+    id_cols <- names(data)[[1]]
+  }
+  vars <- setdiff(names(data), id_cols)
+  mdl <- paste(
+    "g =~",
+    paste0("`", vars, "`", collapse = " + ")
+  )
+  fitted <- cfa(mdl, data, std.ov = TRUE, missing = "ml")
+  data[id_cols] |>
+    mutate(g = lavPredict(fitted)[, "g"])
+}
+
+resample_vars <- function(data, num_vars, id_cols = NULL, paired = FALSE) {
+  if (is.null(id_cols)) {
+    id_cols <- names(data)[[1]]
+  }
+  vars <- setdiff(names(data), id_cols)
+  if (!paired) {
+    vars_sel <- sample(vars, num_vars)
+    select(data, all_of(c(id_cols, vars_sel)))
+  } else {
+    if (2 * num_vars > length(vars)) {
+      stop("Too many variables for each pair.")
+    }
+    vars_sel <- sample(vars, 2 * num_vars)
+    list(
+      vars_sel[1:num_vars],
+      vars_sel[num_vars + (1:num_vars)]
+    ) |>
+      set_names(name_pairs) |>
+      map(~ select(data, all_of(c(id_cols, .))))
+  }
+}
+
+correlate_scores_pairs <- function(scores_pairs) {
+  data <- scores_pairs[name_pairs]
+  meta <- scores_pairs[setdiff(names(scores_pairs), name_pairs)]
+  bind_rows(data, .id = "pair") |>
+    pivot_wider(
+      id_cols = sub_id,
+      names_from = pair,
+      values_from = g
+    ) |>
+    summarise(
+      cor.test(.data[[name_pairs[[1]]]], .data[[name_pairs[[2]]]]) |>
+        broom::tidy()
+    ) |>
+    mutate(!!!meta)
+}
+
+bind_pairs <- function(pairs) {
+  data <- pairs[name_pairs]
+  meta <- pairs[setdiff(names(pairs), name_pairs)]
+  data |>
+    bind_rows(.id = "pair") |>
+    mutate(!!!meta)
+}
+
+do_cpm_pairs <- function(scores_pairs, ...) {
+  data <- scores_pairs[name_pairs]
+  meta <- scores_pairs[setdiff(names(scores_pairs), name_pairs)]
+  do_cpm_partial <- partial(do_cpm, ...)
+  map(data, do_cpm_partial) |>
+    bind_rows(.id = "pair") |>
+    mutate(!!!meta) |>
+    rename_with(~ str_c(., "_last"), starts_with("tar"))
 }

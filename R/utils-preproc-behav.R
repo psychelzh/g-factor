@@ -80,19 +80,3 @@ summarise_ssd <- function(ssd) {
   keep_length <- min(length(peaks), length(valleys))
   mean(c(tail(peaks, keep_length), tail(valleys, keep_length)))
 }
-
-id_cols <- function() {
-  c("file", "sub_id", "task_datetime")
-}
-
-clean_combined <- function(df, name, to) {
-  df |>
-    mutate(id = str_remove(id, name)) |>
-    separate(id, c(NA, to), convert = TRUE)
-}
-
-critical_r <- function(n, alpha) {
-  df <- n - 2
-  ct <- qt( alpha/2, df, lower.tail = FALSE )
-  sqrt( (ct^2) / ( (ct^2) + df ) )
-}

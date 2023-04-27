@@ -120,18 +120,8 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
   )
 }
 
-#' Perform CPM by correctly join neural and behavioral data
-do_cpm2 <- function(neural, behav, thresh_method, thresh_level,
-                    bias_correct = TRUE, id_cols = "sub_id") {
-  neural |>
-    tidytable::inner_join(behav, by = id_cols) |>
-    select(-all_of(id_cols)) |>
-    drop_na() |> # missing values will cause error
-    as.matrix() |>
-    cpm2(
-      kfolds = 10,
-      bias_correct = bias_correct,
-      thresh_method = thresh_method,
-      thresh_level = thresh_level
-    )
+critical_r <- function(n, alpha) {
+  df <- n - 2
+  ct <- qt( alpha/2, df, lower.tail = FALSE )
+  sqrt( (ct^2) / ( (ct^2) + df ) )
 }
