@@ -9,3 +9,7 @@ The project is pipelined with the help of R package {targets}. But a multiple-pr
 * The targets project is named with prefix of `project_`.
 * The targets data store is named with prefix of `_store_`.
 * The targets pipeline script is named with prefix of `_script_`.
+
+## Deprecation
+
+The deprecated projects now live in the `deprecated` folder. And functions that are no longer used are moved to files starting with `deprecated-`.
