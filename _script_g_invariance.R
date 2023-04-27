@@ -49,13 +49,17 @@ list(
     fs::path(store_behav, "indices_rapm"),
     read = qs::qread(!!.x)
   ),
-  tarchetypes::tar_map_rep(
-    result_cpm_main,
-    command = tribble(
+  tar_target(
+    behav_main,
+    tribble(
       ~idx, ~scores,
       "g_full", scores_g_full,
       "rapm", indices_rapm
-    ) |>
+    )
+  ),
+  tarchetypes::tar_map_rep(
+    result_cpm_main,
+    command = behav_main |>
       mutate(
         cpm = map(
           scores,
