@@ -1,4 +1,4 @@
-# Modeling Cognitive Measure Results
+# Estimate general intelligence (G-factor) from many tasks
 
 The goal of this project is to check the idea of measuring general intelligence with cognitive paradigms. Modeling is done with latent variable models, such as factor analysis and structural equation modeling, with the aid of the R package {lavaan}.
 
