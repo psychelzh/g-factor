@@ -33,13 +33,9 @@ list(
     read = qs::qread(!!.x)
   ),
   modality_comparison,
-  tarchetypes::tar_combine(
+  combine_targets(
     cpm_pred,
-    modality_comparison$cpm_pred,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "cpm_pred",
-        c("num_vars", "id_pairs")
-      )
+    modality_comparison,
+    names(config_fc_data)
   )
 )

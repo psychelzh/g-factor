@@ -79,50 +79,30 @@ list(
   tar_target(cpm_pred_main, extract_cpm_pred(result_cpm_main)),
   tar_target(brain_mask_main, extract_brain_mask(result_cpm_main)),
   g_invariance,
-  tarchetypes::tar_combine(
+  combine_targets(
     data_names,
-    g_invariance$data_names,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "data_names",
-        c("num_vars", "id_pairs")
-      )
+    g_invariance,
+    c("num_vars", "id_pairs")
   ),
-  tarchetypes::tar_combine(
+  combine_targets(
     var_exp,
-    g_invariance$var_exp,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "var_exp",
-        c("num_vars", "id_pairs")
-      )
+    g_invariance,
+    c("num_vars", "id_pairs")
   ),
-  tarchetypes::tar_combine(
+  combine_targets(
     scores_g,
-    g_invariance$scores_g,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "scores_g",
-        c("num_vars", "id_pairs")
-      )
+    g_invariance,
+    c("num_vars", "id_pairs")
   ),
-  tarchetypes::tar_combine(
+  combine_targets(
     cpm_pred,
-    g_invariance$cpm_pred,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "cpm_pred",
-        c("num_vars", "id_pairs")
-      )
+    g_invariance,
+    c("num_vars", "id_pairs")
   ),
-  tarchetypes::tar_combine(
+  combine_targets(
     brain_mask,
-    g_invariance$brain_mask,
-    command = bind_rows(!!!.x, .id = "id") |>
-      clean_combined(
-        "brain_mask",
-        c("num_vars", "id_pairs")
-      )
+    g_invariance,
+    c("num_vars", "id_pairs")
   ),
   tar_target(
     dice_mask_pairs,
