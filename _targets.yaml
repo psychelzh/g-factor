@@ -10,3 +10,6 @@ project_g_stability:
 project_g_invariance:
   script: _script_g_invariance.R
   store: _store_g_invariance
+project_modality_comparison:
+  script: _script_modality_comparison.R
+  store: _store_modality_comparison
