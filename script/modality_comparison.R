@@ -37,5 +37,17 @@ list(
     cpm_pred,
     modality_comparison,
     names(config_fc_data)
-  )
+  ),
+  tar_target(
+    subjs_pattern,
+    list(
+      append = fc_data_origin_run1rest_nn268_with$sub_id,
+      task = fc_data_origin_nbackfull_nn268_with$sub_id,
+      rest = fc_data_origin_rest_nn268_with$sub_id,
+      behav = behav_main |>
+        filter(idx == "g_full") |>
+        pluck("scores", 1, "sub_id")
+    )
+  ),
+  tar_target(subjs_combined, subjs_pattern |> reduce(intersect))
 )

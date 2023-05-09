@@ -1,5 +1,5 @@
 config_fc_data <- tidyr::expand_grid(
-  modal = c("Nbackrun1", "rest", "run1rest"),
+  modal = c("nbackfull", "rest", "run1rest"),
   parcel = c("nn268", "Power264"),
   gsr = c("with", "without")
 )
@@ -19,13 +19,14 @@ modality_comparison <- tarchetypes::tar_map(
   config_fc_data,
   list(
     tarchetypes::tar_file_read(
-      fc_data,
+      fc_data_origin,
       sprintf(
         "data/neural/FC_modal-%s_parcel-%s_gsr-%s.arrow",
         modal, parcel, gsr
       ),
       read = arrow::read_feather(!!.x)
     ),
+    tar_target(fc_data, filter(fc_data_origin, sub_id %in% subjs_combined)),
     tarchetypes::tar_map_rep(
       result_cpm,
       command = behav_main |>
