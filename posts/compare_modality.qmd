@@ -1,5 +1,5 @@
 ---
-title: Predict Intelligence by FC Network through CPM
+title: Compare G-Score Predictability among Modalities using CPM
 author: Liang Zhang
 date: 2023-05-10
 draft: false
@@ -30,9 +30,10 @@ Sys.setenv(TAR_PROJECT = "project_modality_comparison")
 
 tar_load_here(subjs_info_clean)
 tar_load_here(subjs_combined)
-report::report_participants(
-  subjs_info_clean |> filter(sub_id %in% subjs_combined)
-)
+subjs_info_clean |> 
+  filter(sub_id %in% subjs_combined) |> 
+  report::report_participants() |> 
+  cat()
 ```
 
 # CPM results
