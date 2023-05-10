@@ -1,5 +1,8 @@
 # for indices pre-processing
-task_preproc <- readr::read_csv("config/task_preproc.csv", show_col_types = FALSE) |>
+task_preproc <- readr::read_csv(
+  "config/task_preproc.csv",
+  show_col_types = FALSE
+) |>
   tidyr::drop_na() |>
   dplyr::mutate(preproc = rlang::syms(paste0("preproc_", preproc)))
 preproc_behav <- tarchetypes::tar_map(

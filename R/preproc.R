@@ -356,3 +356,7 @@ reshape_data_wider <- function(indices, name_score = "score") {
       values_from = all_of(name_score)
     )
 }
+
+id_cols <- function() {
+  c("file", "sub_id", "task_datetime")
+}
