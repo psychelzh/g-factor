@@ -7,6 +7,7 @@ tar_option_set(
   format = "qs"
 )
 tar_source()
+source("tar_mate/targets_preproc_behav.R")
 future::plan(future.callr::callr)
 list(
   tarchetypes::tar_file_read(

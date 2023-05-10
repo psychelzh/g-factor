@@ -7,8 +7,10 @@ The goal of this project is to check the idea of measuring general intelligence 
 The project is pipelined with the help of R package {targets}. But a multiple-project setup is used, and these projects are interdependent. The naming convention is as follows:
 
 * The targets project is named with prefix of `project_`.
-* The targets data store is named with prefix of `_store_`.
-* The targets pipeline script is named with prefix of `_script_`.
+* The targets data store is stored in different subdirectory of `_targets`.
+* The targets pipeline script is stored in `script` subdirectory.
+
+Note there is also a `tar_mate` subdirectory, which is used to store the targets preparation scripts.
 
 ## Deprecation
 

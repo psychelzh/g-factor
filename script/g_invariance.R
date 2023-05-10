@@ -9,6 +9,7 @@ tar_option_set(
   format = "qs"
 )
 tar_source()
+source("tar_mate/targets_g_invariance.R")
 future::plan(future.callr::callr)
 store_behav <- fs::path(
   tar_config_get("store", project = "project_behav"),

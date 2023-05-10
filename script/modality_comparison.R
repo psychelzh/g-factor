@@ -10,6 +10,7 @@ tar_option_set(
   controller = crew::crew_controller_local(workers = 10)
 )
 tar_source()
+source("tar_mate/targets_modality_comparison.R")
 future::plan(future.callr::callr)
 
 store_behav <- fs::path(

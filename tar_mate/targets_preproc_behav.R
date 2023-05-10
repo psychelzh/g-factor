@@ -1,6 +1,6 @@
 # for indices pre-processing
 task_preproc <- readr::read_csv(
-  "config/task_preproc.csv",
+  here::here("config/task_preproc.csv"),
   show_col_types = FALSE
 ) |>
   tidyr::drop_na() |>
