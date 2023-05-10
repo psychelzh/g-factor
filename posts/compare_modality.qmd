@@ -1,0 +1,70 @@
+---
+title: Predict Intelligence by FC Network through CPM
+author: Liang Zhang
+date: 2023-05-10
+draft: false
+format:
+  revealjs:
+    code-fold: false
+execute:
+  warning: false
+  message: false
+bibliography: references.bib
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(targets)
+purrr::walk(fs::dir_ls(here::here("R"), glob = "*.R"), source)
+Sys.setenv(TAR_PROJECT = "project_modality_comparison")
+```
+
+# FMRI Sample Description
+
+```{r}
+#| label: describe-sample
+#| results: asis
+
+tar_load_here(subjs_info_clean)
+tar_load_here(subjs_combined)
+report::report_participants(
+  subjs_info_clean |> filter(sub_id %in% subjs_combined)
+)
+```
+
+# CPM results
+
+## Configurations {.smaller}
+
+Parameters are as follows (mainly inspired by @greene2018):
+
+-   FMRI data pre-processing: `with` or `without` global signal regression (GSR)
+-   Node parcellation: Power's *264* nodes (`Power264`) or Shen's *268* nodes (`nn268`)
+-   Modality:
+    -   `task`: N-back task
+    -   `rest`: resting-state
+    -   `combined`: combines N-back and rest-stating by appending these two data
+-   Edge selection threshold method: correlation p.value based (`alpha`) or network sparsity based (`sparsity`)
+
+```{r}
+#| label: render-results
+#| results: asis
+
+tar_load_here(cpm_pred)
+config <- distinct(cpm_pred, parcel, gsr)
+for (row in seq_len(nrow(config))) {
+  knitr::knit_expand(
+    here::here("template/modality_comparison_tmpl.qmd"),
+    parcel = config$parcel[[row]],
+    gsr = config$gsr[[row]]
+  ) |>
+    knitr::knit(text = _, quiet = TRUE) |>
+    cat()
+  cat("\n\n")
+}
+```
+
+# References

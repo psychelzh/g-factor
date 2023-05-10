@@ -1,0 +1,45 @@
+## Parcel `r parcels["{{parcel}}"]` {{ gsr }} GSR
+
+```{r}
+#| label: fig-modality-{{ parcel }}-{{ gsr }}
+#| fig-width: 12
+#| fig-height: 8
+#| fig-cap: CPM prediction among different modality.
+
+cpm_pred |> 
+  filter(
+    parcel == "{{ parcel }}",
+    gsr == "{{ gsr }}"
+  ) |>
+  pivot_longer(
+    cols = all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |> 
+  mutate(
+    thresh_method = factor(thresh_method, names(thresh_methods)),
+    idx = factor(idx, names(meas_behav)),
+    modal = factor(modal, names(modalities))
+  ) |>
+  ggplot(aes(idx, estimate, fill = modal)) +
+  ggdist::stat_slabinterval(position = position_dodge(width = 0.5)) +
+  ggdist::stat_dots(position = position_dodge(width = 0.6), side = "left") +
+  facet_grid(
+    rows = vars(thresh_method),
+    cols = vars(edge_type),
+    labeller = labeller(
+      edge_type = edge_types,
+      thresh_method = thresh_methods
+    )
+  ) +
+  rlang::exec(scale_x_discrete, !!!scale_meas_behv) +
+  rlang::exec(
+    scale_fill_brewer, 
+    !!!scale_modalities, 
+    palette = "Dark2", 
+    aesthetics = "fill"
+  ) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(y = "Prediction (Pearson's Correlation)")
+```

@@ -1,7 +1,10 @@
 project:
   type: website
   output-dir: docs
-  execute-dir: project
+  execute-dir: file
+  render:
+    - "*.qmd"
+    - "!template"
 
 comments:
   hypothesis: true
