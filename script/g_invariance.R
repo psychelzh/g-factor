@@ -6,7 +6,8 @@ tar_option_set(
   storage = "worker",
   retrieval = "worker",
   error = "null",
-  format = "qs"
+  format = "qs",
+  controller = crew::crew_controller_local(workers = 8, auto_scale = "one")
 )
 tar_source()
 source("tar_mate/targets_g_invariance.R")
@@ -15,8 +16,8 @@ store_behav <- fs::path(
   tar_config_get("store", project = "project_behav"),
   "objects"
 )
-store_fmri <- fs::path(
-  tar_config_get("store", project = "project_task_fmri"),
+store_modality_comparison <- fs::path(
+  tar_config_get("store", project = "project_modality_comparison"),
   "objects"
 )
 list(
@@ -26,10 +27,19 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
-    fc_data_matched,
-    fs::path(store_fmri, "fc_data_rest_nn268_without"),
-    read = qs::qread(!!.x) |>
-      filter(sub_id %in% indices_wider_clean$sub_id)
+    fc_data_nbackfull_Power264_without,
+    fs::path(store_modality_comparison, "fc_data_nbackfull_Power264_without"),
+    read = qs::qread(!!.x)
+  ),
+  tarchetypes::tar_file_read(
+    fc_data_rest_Power264_without,
+    fs::path(store_modality_comparison, "fc_data_rest_Power264_without"),
+    read = qs::qread(!!.x)
+  ),
+  tarchetypes::tar_file_read(
+    fc_data_run1rest_Power264_without,
+    fs::path(store_modality_comparison, "fc_data_run1rest_Power264_without"),
+    read = qs::qread(!!.x)
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
@@ -60,12 +70,12 @@ list(
   ),
   tarchetypes::tar_map_rep(
     result_cpm_main,
-    command = behav_main |>
+    behav_main |>
       mutate(
         cpm = map(
           scores,
           ~ do_cpm2(
-            fc_data_matched,
+            fc_data,
             .,
             thresh_method = thresh_method,
             thresh_level = thresh_level
@@ -73,7 +83,8 @@ list(
         ),
         .keep = "unused"
       ),
-    values = hypers_thresh_g,
+    values = hypers_cpm,
+    names = -fc_data,
     batches = 4,
     reps = 5
   ),
@@ -108,7 +119,7 @@ list(
   tar_target(
     dice_mask_pairs,
     brain_mask |>
-      filter(n() == 2, .by = c(num_vars, idx_rsmp, starts_with("thresh"))) |>
+      filter(n() == 2, .by = c(num_vars, idx_rsmp, modal)) |>
       pivot_longer(
         c(pos, neg),
         names_to = "edge_type",
@@ -116,7 +127,7 @@ list(
       ) |>
       mutate(mask_bin = map(mask, ~ . > 0.995), .keep = "unused") |>
       pivot_wider(
-        id_cols = c(num_vars, idx_rsmp, starts_with("thresh"), edge_type),
+        id_cols = c(num_vars, idx_rsmp, modal, edge_type),
         names_from = id_pairs,
         values_from = mask_bin
       ) |>

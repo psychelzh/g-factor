@@ -47,6 +47,12 @@ modality_comparison <- tarchetypes::tar_map(
       reps = 5
     ),
     tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
-    tar_target(brain_mask, extract_brain_mask(result_cpm))
+    tar_target(
+      brain_mask,
+      extract_brain_mask(
+        result_cpm,
+        by = starts_with(c("idx", "thresh"))
+      )
+    )
   )
 )

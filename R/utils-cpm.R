@@ -27,7 +27,7 @@ extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
     )
 }
 
-extract_brain_mask <- function(result_cpm, col_cpm = cpm) {
+extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
   aggregate_masks <- function(cpm, edge_types = c("pos", "neg")) {
     map(
       edge_types,
@@ -39,6 +39,6 @@ extract_brain_mask <- function(result_cpm, col_cpm = cpm) {
   result_cpm |>
     summarise(
       aggregate_masks({{ col_cpm }}),
-      .by = starts_with(c("idx", "thresh"))
+      .by = by
     )
 }

@@ -3,7 +3,7 @@ cfg_rsmp_vars <- withr::with_seed(
   1,
   dplyr::bind_rows(
     tidyr::expand_grid(
-      num_vars = 3:floor(max_num_vars / 2),
+      num_vars = round(seq(3, floor(max_num_vars / 2), length.out = 5)),
       idx_rsmp = seq_len(100)
     ) |>
       dplyr::reframe(
@@ -19,7 +19,9 @@ cfg_rsmp_vars <- withr::with_seed(
       ) |>
       tidyr::chop(idx_vars),
     tidyr::expand_grid(
-      num_vars = (floor(max_num_vars / 2) + 1):(max_num_vars - 2),
+      num_vars = round(
+        seq(floor(max_num_vars / 2) + 1, max_num_vars - 2, length.out = 5)
+      ),
       idx_rsmp = seq_len(100)
     ) |>
       dplyr::mutate(
@@ -39,6 +41,15 @@ hypers_thresh_g <- dplyr::bind_rows(
     thresh_level = 0.01
   )
 )
+hypers_fc_data <- tidyr::expand_grid(
+  modal = c("nbackfull", "rest", "run1rest"),
+  parcel = c("Power264"),
+  gsr = c("without")
+) |>
+  dplyr::mutate(
+    fc_data = rlang::syms(paste("fc_data", modal, parcel, gsr, sep = "_"))
+  )
+hypers_cpm <- tidyr::expand_grid(hypers_thresh_g, hypers_fc_data)
 
 g_invariance <- tarchetypes::tar_map(
   values = cfg_rsmp_vars,
@@ -88,7 +99,7 @@ g_invariance <- tarchetypes::tar_map(
         cpm = map(
           scores,
           ~ do_cpm2(
-            fc_data_matched,
+            fc_data,
             .,
             thresh_method = thresh_method,
             thresh_level = thresh_level
@@ -96,10 +107,17 @@ g_invariance <- tarchetypes::tar_map(
         ),
         .keep = "unused"
       ),
-    values = hypers_thresh_g,
+    values = hypers_cpm,
+    names = -fc_data,
     batches = 4,
     reps = 5
   ),
   tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
-  tar_target(brain_mask, extract_brain_mask(result_cpm))
+  tar_target(
+    brain_mask,
+    extract_brain_mask(
+      result_cpm,
+      by = any_of(c(names(cfg_rsmp_vars), names(hypers_cpm)))
+    )
+  )
 )
