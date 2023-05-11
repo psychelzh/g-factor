@@ -45,10 +45,7 @@ hypers_fc_data <- tidyr::expand_grid(
   modal = c("nbackfull", "rest", "run1rest"),
   parcel = c("Power264"),
   gsr = c("without")
-) |>
-  dplyr::mutate(
-    fc_data = rlang::syms(paste("fc_data", modal, parcel, gsr, sep = "_"))
-  )
+)
 hypers_cpm <- tidyr::expand_grid(hypers_thresh_g, hypers_fc_data)
 
 g_invariance <- tarchetypes::tar_map(
@@ -92,25 +89,9 @@ g_invariance <- tarchetypes::tar_map(
         .keep = "unused"
       )
   ),
-  tarchetypes::tar_map_rep(
-    result_cpm,
-    scores_g |>
-      mutate(
-        cpm = map(
-          scores,
-          ~ do_cpm2(
-            fc_data,
-            .,
-            thresh_method = thresh_method,
-            thresh_level = thresh_level
-          )
-        ),
-        .keep = "unused"
-      ),
-    values = hypers_cpm,
-    names = -fc_data,
-    batches = 4,
-    reps = 5
+  tar_fact_perm_cpm(
+    result_cpm, scores_g, hypers_cpm,
+    store_fc_data = store_modality_comparison
   ),
   tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
   tar_target(

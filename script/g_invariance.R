@@ -26,21 +26,6 @@ list(
     fs::path(store_behav, "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
-  tarchetypes::tar_eval(
-    tarchetypes::tar_file_read(
-      fc_data,
-      fs::path(
-        store_modality_comparison,
-        sprintf(
-          "fc_data_%s_%s_%s",
-          modal, parcel, gsr
-        )
-      ),
-      read = qs::qread(!!.x),
-      deployment = "main"
-    ),
-    values = hypers_fc_data
-  ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
   tar_target(
@@ -68,25 +53,9 @@ list(
       "rapm", indices_rapm
     )
   ),
-  tarchetypes::tar_map_rep(
-    result_cpm_main,
-    behav_main |>
-      mutate(
-        cpm = map(
-          scores,
-          ~ do_cpm2(
-            fc_data,
-            .,
-            thresh_method = thresh_method,
-            thresh_level = thresh_level
-          )
-        ),
-        .keep = "unused"
-      ),
-    values = hypers_cpm,
-    names = -fc_data,
-    batches = 4,
-    reps = 5
+  tar_fact_perm_cpm(
+    result_cpm_main, behav_main, hypers_cpm,
+    store_fc_data = store_modality_comparison
   ),
   tar_target(cpm_pred_main, extract_cpm_pred(result_cpm_main)),
   tar_target(brain_mask_main, extract_brain_mask(result_cpm_main)),
