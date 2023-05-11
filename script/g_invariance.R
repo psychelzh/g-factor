@@ -26,20 +26,20 @@ list(
     fs::path(store_behav, "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
-  tarchetypes::tar_file_read(
-    fc_data_nbackfull_Power264_without,
-    fs::path(store_modality_comparison, "fc_data_nbackfull_Power264_without"),
-    read = qs::qread(!!.x)
-  ),
-  tarchetypes::tar_file_read(
-    fc_data_rest_Power264_without,
-    fs::path(store_modality_comparison, "fc_data_rest_Power264_without"),
-    read = qs::qread(!!.x)
-  ),
-  tarchetypes::tar_file_read(
-    fc_data_run1rest_Power264_without,
-    fs::path(store_modality_comparison, "fc_data_run1rest_Power264_without"),
-    read = qs::qread(!!.x)
+  tarchetypes::tar_eval(
+    tarchetypes::tar_file_read(
+      fc_data,
+      fs::path(
+        store_modality_comparison,
+        sprintf(
+          "fc_data_%s_%s_%s",
+          modal, parcel, gsr
+        )
+      ),
+      read = qs::qread(!!.x),
+      deployment = "main"
+    ),
+    values = hypers_fc_data
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
