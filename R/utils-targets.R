@@ -18,17 +18,10 @@ tar_fact_perm_cpm <- function(name, behav, hypers_cpm,
   name <- deparse1(substitute(name))
   if (is.null(fc_data)) {
     stopifnot(all(rlang::has_name(hypers_cpm, c("modal", "parcel", "gsr"))))
-    fc_data <- substitute(
-      qs::qread(
-        fs::path(
-          store_fc_data,
-          sprintf(
-            "fc_data_%s_%s_%s",
-            modal, parcel, gsr
-          )
-        )
-      )
-    )
+    fc_data <- store_fc_data |>
+      fs::path(sprintf("fc_data_%s_%s_%s", modal, parcel, gsr)) |>
+      qs::qread() |>
+      substitute()
   }
   tarchetypes::tar_map_rep_raw(
     name,
