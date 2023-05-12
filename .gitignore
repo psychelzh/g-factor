@@ -6,5 +6,4 @@
 _targets
 
 /.quarto/
-_freeze/
-_store*
+_site

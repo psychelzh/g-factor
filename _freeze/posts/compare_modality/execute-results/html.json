@@ -1,0 +1,20 @@
+{
+  "hash": "7bcb21acf027cbebe61932d31a737a49",
+  "result": {
+    "markdown": "---\ntitle: Compare G-Score Predictability among Modalities using CPM\nauthor: Liang Zhang\ndate: 2023-05-10\ndraft: false\nformat:\n  revealjs:\n    code-fold: false\nexecute:\n  warning: false\n  message: false\nbibliography: references.bib\n---\n\n\n\n\n# FMRI Sample Description\n\n\n745 participants (Mean age = 20.9, SD = 2.2, range: [17, 29]; Sex: 63.0% females, 37.0% males, 0.0% other)\n\n\n# CPM results\n\n## Configurations {.smaller}\n\nParameters are as follows (mainly inspired by @greene2018):\n\n-   FMRI data pre-processing: `with` or `without` global signal regression (GSR)\n-   Node parcellation: Power's *264* nodes (`Power264`) or Shen's *268* nodes (`nn268`)\n-   Modality:\n    -   `task`: N-back task\n    -   `rest`: resting-state\n    -   `combined`: combines N-back and rest-stating by appending these two data\n-   Edge selection threshold method: correlation p.value based (`alpha`) or network sparsity based (`sparsity`)\n\n\n## Parcel Shen268 with GSR\n\n::: {.cell}\n::: {.cell-output-display}\n![CPM prediction among different modality.](compare_modality_files/figure-revealjs/fig-modality-nn268-with-1.png){#fig-modality-nn268-with width=1152}\n:::\n:::\n\n## Parcel Shen268 without GSR\n\n::: {.cell}\n::: {.cell-output-display}\n![CPM prediction among different modality.](compare_modality_files/figure-revealjs/fig-modality-nn268-without-1.png){#fig-modality-nn268-without width=1152}\n:::\n:::\n\n## Parcel Power264 with GSR\n\n::: {.cell}\n::: {.cell-output-display}\n![CPM prediction among different modality.](compare_modality_files/figure-revealjs/fig-modality-Power264-with-1.png){#fig-modality-Power264-with width=1152}\n:::\n:::\n\n## Parcel Power264 without GSR\n\n::: {.cell}\n::: {.cell-output-display}\n![CPM prediction among different modality.](compare_modality_files/figure-revealjs/fig-modality-Power264-without-1.png){#fig-modality-Power264-without width=1152}\n:::\n:::\n\n\n# References\n",
+    "supporting": [
+      "compare_modality_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {
+      "include-after-body": [
+        "\r\n<script>\r\n  // htmlwidgets need to know to resize themselves when slides are shown/hidden.\r\n  // Fire the \"slideenter\" event (handled by htmlwidgets.js) when the current\r\n  // slide changes (different for each slide format).\r\n  (function () {\r\n    // dispatch for htmlwidgets\r\n    function fireSlideEnter() {\r\n      const event = window.document.createEvent(\"Event\");\r\n      event.initEvent(\"slideenter\", true, true);\r\n      window.document.dispatchEvent(event);\r\n    }\r\n\r\n    function fireSlideChanged(previousSlide, currentSlide) {\r\n      fireSlideEnter();\r\n\r\n      // dispatch for shiny\r\n      if (window.jQuery) {\r\n        if (previousSlide) {\r\n          window.jQuery(previousSlide).trigger(\"hidden\");\r\n        }\r\n        if (currentSlide) {\r\n          window.jQuery(currentSlide).trigger(\"shown\");\r\n        }\r\n      }\r\n    }\r\n\r\n    // hookup for slidy\r\n    if (window.w3c_slidy) {\r\n      window.w3c_slidy.add_observer(function (slide_num) {\r\n        // slide_num starts at position 1\r\n        fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);\r\n      });\r\n    }\r\n\r\n  })();\r\n</script>\r\n\r\n"
+      ]
+    },
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
