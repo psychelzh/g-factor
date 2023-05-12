@@ -10,11 +10,11 @@ OSpan,OSPAN,ospan
 Reinf,,
 ShiftingColor,COLSHP,shifting
 ShiftNumber,NUMLET,shifting
-spatial_2back,2BACK,twoback
+spatial_2back,TWOBACK,twoback
 SPST,MST,spst
 SRT,SRT,srt
 SSpan,SSPAN,sspan
 StopSignal,STOPSIG,stopsignal
 Stroop,STROOP,stroop
 Ultimate,,
-WM3,3BACK,threeback
+WM3,THREEBACK,threeback

@@ -347,7 +347,7 @@ reshape_data_wider <- function(indices, name_score = "score") {
       task_index = if_else(
         n_indices == 1,
         disp_name,
-        str_c(disp_name, index, sep = "-")
+        str_c(disp_name, index, sep = ".")
       )
     ) |>
     pivot_wider(
