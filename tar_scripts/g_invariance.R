@@ -16,7 +16,7 @@ tar_option_set(
 tar_source()
 future::plan(future.callr::callr)
 store_behav <- fs::path(
-  tar_config_get("store", project = "project_behav"),
+  tar_config_get("store", project = "project_preproc_behav"),
   "objects"
 )
 store_modality_comparison <- fs::path(

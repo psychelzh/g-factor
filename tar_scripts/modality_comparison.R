@@ -14,10 +14,9 @@ tar_option_set(
 
 # targets globals ----
 tar_source()
-source("tar_mate/targets_modality_comparison.R")
 future::plan(future.callr::callr)
-store_behav <- fs::path(
-  tar_config_get("store", project = "project_behav"),
+store_preproc_behav <- fs::path(
+  tar_config_get("store", project = "project_preproc_behav"),
   "objects"
 )
 store_g_invariance <- fs::path(
@@ -92,7 +91,7 @@ list(
   ),
   tarchetypes::tar_file_read(
     subjs_info_clean,
-    fs::path(store_behav, "subjs_info_clean"),
+    fs::path(store_preproc_behav, "subjs_info_clean"),
     read = qs::qread(!!.x)
   ),
   modality_comparison,
@@ -112,5 +111,5 @@ list(
         pluck("scores", 1, "sub_id")
     )
   ),
-  tar_target(subjs_combined, subjs_pattern |> reduce(intersect))
+  tar_target(subjs_combined, reduce(subjs_pattern, intersect))
 )
