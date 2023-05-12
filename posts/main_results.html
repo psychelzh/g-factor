@@ -938,10 +938,10 @@ The intelligent brain. (2013). Chantilly, Virginia: Teaching Company.
           event.initEvent("slideenter", true, true);
           window.document.dispatchEvent(event);
         }
-
+    
         function fireSlideChanged(previousSlide, currentSlide) {
           fireSlideEnter();
-
+    
           // dispatch for shiny
           if (window.jQuery) {
             if (previousSlide) {
@@ -952,7 +952,7 @@ The intelligent brain. (2013). Chantilly, Virginia: Teaching Company.
             }
           }
         }
-
+    
         // hookup for slidy
         if (window.w3c_slidy) {
           window.w3c_slidy.add_observer(function (slide_num) {
@@ -960,10 +960,10 @@ The intelligent brain. (2013). Chantilly, Virginia: Teaching Company.
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
           });
         }
-
+    
       })();
     </script>
-
+    
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {

@@ -634,10 +634,10 @@ Greene, Abigail S., Siyuan Gao, Dustin Scheinost, and R. Todd Constable. 2018. <
           event.initEvent("slideenter", true, true);
           window.document.dispatchEvent(event);
         }
-
+    
         function fireSlideChanged(previousSlide, currentSlide) {
           fireSlideEnter();
-
+    
           // dispatch for shiny
           if (window.jQuery) {
             if (previousSlide) {
@@ -648,7 +648,7 @@ Greene, Abigail S., Siyuan Gao, Dustin Scheinost, and R. Todd Constable. 2018. <
             }
           }
         }
-
+    
         // hookup for slidy
         if (window.w3c_slidy) {
           window.w3c_slidy.add_observer(function (slide_num) {
@@ -656,10 +656,10 @@ Greene, Abigail S., Siyuan Gao, Dustin Scheinost, and R. Todd Constable. 2018. <
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
           });
         }
-
+    
       })();
     </script>
-
+    
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {
