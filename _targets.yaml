@@ -1,6 +1,6 @@
-project_behav:
-  script: script/behav.R
-  store: _targets/behav
+project_preproc_behav:
+  script: tar_scripts/preproc_behav.R
+  store: _targets/preproc_behav
 project_task_fmri:
   script: deprecated/_script_task_fmri.R
   store: deprecated/_store_task_fmri
@@ -8,8 +8,8 @@ project_g_stability:
   script: deprecated/_script_g_stability.R
   store: deprecated/_store_g_stability
 project_g_invariance:
-  script: script/g_invariance.R
+  script: tar_scripts/g_invariance.R
   store: _targets/g_invariance
 project_modality_comparison:
-  script: script/modality_comparison.R
+  script: tar_scripts/modality_comparison.R
   store: _targets/modality_comparison

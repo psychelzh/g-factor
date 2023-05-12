@@ -39,6 +39,6 @@ extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
   result_cpm |>
     summarise(
       aggregate_masks({{ col_cpm }}),
-      .by = by
+      .by = {{ by }}
     )
 }

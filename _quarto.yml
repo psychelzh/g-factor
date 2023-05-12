@@ -1,6 +1,5 @@
 project:
   type: website
-  output-dir: docs
   execute-dir: file
   render:
     - "*.qmd"
@@ -10,7 +9,7 @@ comments:
   hypothesis: true
 
 execute:
-  freeze: auto
+  freeze: true
 
 website:
   title: "Intelligence and Its Neural Correlates"
