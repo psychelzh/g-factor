@@ -9,7 +9,7 @@ comments:
   hypothesis: true
 
 execute:
-  freeze: auto
+  freeze: true
 
 website:
   title: "Intelligence and Its Neural Correlates"
