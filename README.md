@@ -10,8 +10,6 @@ The project is pipelined with the help of R package {targets}. But a multiple-pr
 * The targets data store is stored in different subdirectory of `_targets`.
 * The targets pipeline script is stored in `tar_scripts` subdirectory.
 
-Note there is also a `tar_mate` subdirectory, which is used to store the targets preparation scripts.
-
 ## Deprecation
 
 The deprecated projects now live in the `deprecated` folder. And functions that are no longer used are moved to files starting with `deprecated-`.

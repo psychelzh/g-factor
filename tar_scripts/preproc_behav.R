@@ -1,14 +1,49 @@
 library(targets)
+
+# targets options -----
 tar_option_set(
   packages = c("tidyverse", "lavaan"),
   memory = "transient",
   garbage_collection = TRUE,
   error = "null",
-  format = "qs"
+  format = "qs",
 )
+
+# targets globals ----
 tar_source()
-source("tar_mate/targets_preproc_behav.R")
 future::plan(future.callr::callr)
+
+# prepare static branches targets ----
+task_preproc <- readr::read_csv(
+  here::here("config/task_preproc.csv"),
+  show_col_types = FALSE
+) |>
+  tidyr::drop_na() |>
+  dplyr::mutate(preproc = rlang::syms(paste0("preproc_", preproc)))
+preproc_behav <- tarchetypes::tar_map(
+  task_preproc,
+  names = task,
+  list(
+    tar_target(
+      indices,
+      preproc(data_clean) |>
+        pivot_longer(
+          -any_of(id_cols()),
+          names_to = "index",
+          values_to = "score"
+        ) |>
+        select(-task_datetime)
+    ),
+    tarchetypes::tar_file_read(
+      data,
+      fs::path("data/behav", sprintf("%s.arrow", task)),
+      read = arrow::read_feather(!!.x)
+    ),
+    tar_target(data_clean, screen_data(data))
+  )
+)
+
+# targets pipeline ----
 list(
   tarchetypes::tar_file_read(
     subjs_info,

@@ -1,6 +1,6 @@
-project_behav:
-  script: tar_scripts/behav.R
-  store: _targets/behav
+project_preproc_behav:
+  script: tar_scripts/preproc_behav.R
+  store: _targets/preproc_behav
 project_task_fmri:
   script: deprecated/_script_task_fmri.R
   store: deprecated/_store_task_fmri

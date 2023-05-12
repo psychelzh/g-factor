@@ -7,7 +7,7 @@ tar_option_set(
   format = "qs"
 )
 tar_source()
-source("tar_mate/deprecated-targets.R")
+source("deprecated/deprecated-targets.R")
 future::plan(future.callr::callr)
 
 store_behav <- fs::path(
