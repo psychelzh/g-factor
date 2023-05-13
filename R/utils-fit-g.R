@@ -1,7 +1,5 @@
 fit_g <- function(data, vars) {
-  data |>
-    select({{ vars }}) |>
-    efa(std.ov = TRUE, missing = "ml")
+  efa(data, ov.names = vars, std.ov = TRUE, missing = "ml")
 }
 
 calc_var_exp <- function(fit) {

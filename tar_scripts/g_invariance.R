@@ -92,7 +92,7 @@ g_invariance <- tarchetypes::tar_map(
       mutate(
         mdl = map(
           tasks,
-          ~ fit_g(indices_wider_clean, all_of(.))
+          ~ fit_g(indices_wider_clean, .)
         ),
         .keep = "unused"
       )
@@ -141,7 +141,7 @@ list(
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
   tar_target(
     mdl_fitted_full,
-    fit_g(indices_wider_clean, all_of(data_names_all))
+    fit_g(indices_wider_clean, data_names_all)
   ),
   tar_target(
     var_exp_full,
