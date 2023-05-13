@@ -24,18 +24,18 @@ combine_targets <- function(name, targets, cols_targets) {
 #'
 #' @param name The name for the target. Should be a symbol.
 #' @param behav The name for the behavioral data. Should be a symbol.
-#' @param hypers A [data.frame()] storing the hyper parameters passed to the
-#'   `values` argument of [tarchetypes::tar_map_rep()]. Currently
-#'   `"thresh_method"` and `"thresh_level"` are required.
-#' @param neural,store_neural One and only one of the first two should be
+#' @param neural,store_neural One and only one of these two parameters should be
 #'   specified. `neural` must be a symbol referring to the brain data, whereas
 #'   `store_neural` must be a character scalar referring to the storage path of
 #'   the brain data, in this way, the `"modal"`, `"parcel"` and `"gsr"` fields
 #'   must be present in `hypers` to specify which neural data to use.
-#' @param split_hyper,subjs_info These two must be specied simultaneously.
-#'   `split_hyper` specifies the field used to split neural data to perform
-#'   different CPM calculations, e.g., different gender. Note this field must be
-#'   present in both `hypers` and `subjs_info`.
+#' @param hypers A [data.frame()] storing the hyper parameters passed to the
+#'   `values` argument of [tarchetypes::tar_map_rep()]. Currently
+#'   `"thresh_method"` and `"thresh_level"` are required.
+#' @param split_hyper,subjs_info If one of these two parameters is specified,
+#'   the other must be specified, too. `split_hyper` specifies the field used to
+#'   split neural data to perform different CPM calculations, e.g., different
+#'   gender. Note this field must be present in both `hypers` and `subjs_info`.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A new target object to calculate the permutation results.
