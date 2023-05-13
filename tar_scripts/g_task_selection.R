@@ -1,0 +1,112 @@
+library(targets)
+
+# targets options ----
+tar_option_set(
+  packages = c("tidyverse", "lavaan", "collapse"),
+  memory = "transient",
+  garbage_collection = TRUE,
+  storage = "worker",
+  retrieval = "worker",
+  error = "null",
+  format = "qs",
+  controller = crew::crew_controller_local(workers = 8, auto_scale = "one")
+)
+
+# targets globals ----
+tar_source()
+future::plan(future.callr::callr)
+store_behav <- fs::path(
+  tar_config_get("store", project = "project_preproc_behav"),
+  "objects"
+)
+store_modality_comparison <- fs::path(
+  tar_config_get("store", project = "project_modality_comparison"),
+  "objects"
+)
+store_g_invariance <- fs::path(
+  tar_config_get("store", project = "project_g_invariance"),
+  "objects"
+)
+
+# prepare static branches targets ----
+hypers_strip_n <- data.frame(n_rm = 1:5)
+hypers_thresh <- dplyr::bind_rows(
+  data.frame(
+    thresh_method = "alpha",
+    thresh_level = 0.01
+  )
+)
+hypers_fc_data <- tidyr::expand_grid(
+  modal = c("nbackfull", "rest", "run1rest"),
+  parcel = c("Power264"),
+  gsr = c("without")
+)
+hypers_cpm <- tidyr::expand_grid(hypers_thresh, hypers_fc_data)
+g_task_selection <- tarchetypes::tar_map(
+  values = hypers_strip_n,
+  list(
+    tar_target(
+      data_names,
+      tibble(
+        tasks = data_names_ordered |>
+          .subset(1:(length(data_names_ordered) - n_rm)) |>
+          list()
+      )
+    ),
+    tar_target(
+      mdl_fitted,
+      data_names |>
+        mutate(
+          mdl = map(
+            tasks,
+            ~ fit_g(indices_wider_clean, .)
+          ),
+          .keep = "unused"
+        )
+    ),
+    tar_target(
+      scores_g,
+      mdl_fitted |>
+        mutate(
+          scores = map(
+            mdl,
+            ~ predict_g_score(indices_wider_clean, .)
+          ),
+          .keep = "unused"
+        )
+    ),
+    tar_fact_perm_cpm(
+      result_cpm, scores_g, hypers_cpm,
+      store_fc_data = store_modality_comparison
+    ),
+    tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
+    tar_target(
+      brain_mask,
+      extract_brain_mask(
+        result_cpm,
+        by = any_of(names(hypers_cpm))
+      )
+    )
+  )
+)
+
+# targets pipeline ----
+list(
+  tar_target(
+    file_mdl_full,
+    fs::path(store_g_invariance, "mdl_fitted_full"),
+    format = "file"
+  ),
+  tar_target(
+    data_names_ordered, {
+      loadings_mdl <- loadings(qs::qread(file_mdl_full))
+      rownames(loadings_mdl)[order(loadings_mdl, decreasing = TRUE)]
+    }
+  ),
+  tarchetypes::tar_file_read(
+    indices_wider_clean,
+    fs::path(store_behav, "indices_wider_clean"),
+    read = qs::qread(!!.x)
+  ),
+  g_task_selection
+)

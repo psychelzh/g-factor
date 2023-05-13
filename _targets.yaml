@@ -13,3 +13,6 @@ project_g_invariance:
 project_modality_comparison:
   script: tar_scripts/modality_comparison.R
   store: _targets/modality_comparison
+project_g_task_selection:
+  script: tar_scripts/g_task_selection.R
+  store: _targets/g_task_selection
