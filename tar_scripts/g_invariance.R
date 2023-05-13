@@ -15,7 +15,7 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-store_behav <- fs::path(
+store_preproc_behav <- fs::path(
   tar_config_get("store", project = "project_preproc_behav"),
   "objects"
 )
@@ -134,7 +134,7 @@ g_invariance <- tarchetypes::tar_map(
 list(
   tarchetypes::tar_file_read(
     indices_wider_clean,
-    fs::path(store_behav, "indices_wider_clean"),
+    fs::path(store_preproc_behav, "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
   # first column is identifier
@@ -153,7 +153,7 @@ list(
   ),
   tarchetypes::tar_file_read(
     indices_rapm,
-    fs::path(store_behav, "indices_rapm"),
+    fs::path(store_preproc_behav, "indices_rapm"),
     read = qs::qread(!!.x)
   ),
   tar_target(
