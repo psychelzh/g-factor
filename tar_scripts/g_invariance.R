@@ -117,9 +117,9 @@ g_invariance <- tarchetypes::tar_map(
         .keep = "unused"
       )
   ),
-  tar_fact_perm_cpm(
+  permute_cpm(
     result_cpm, scores_g, hypers_cpm,
-    store_fc_data = store_modality_comparison
+    store_neural = store_modality_comparison
   ),
   tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
   tar_target(
@@ -165,9 +165,9 @@ list(
       "rapm", indices_rapm
     )
   ),
-  tar_fact_perm_cpm(
+  permute_cpm(
     result_cpm_main, behav_main, hypers_cpm,
-    store_fc_data = store_modality_comparison
+    store_neural = store_modality_comparison
   ),
   tar_target(cpm_pred_main, extract_cpm_pred(result_cpm_main)),
   tar_target(brain_mask_main, extract_brain_mask(result_cpm_main)),

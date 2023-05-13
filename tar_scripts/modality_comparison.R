@@ -40,6 +40,7 @@ hypers_thresh <- dplyr::bind_rows(
     thresh_level = 0.01
   )
 )
+hypers_sex <- data.frame(sex = c("M", "F"))
 modality_comparison <- tarchetypes::tar_map(
   config_fc_data,
   list(
@@ -52,30 +53,27 @@ modality_comparison <- tarchetypes::tar_map(
       read = arrow::read_feather(!!.x)
     ),
     tar_target(fc_data, filter(fc_data_origin, sub_id %in% subjs_combined)),
-    tarchetypes::tar_map_rep(
-      result_cpm,
-      command = behav_main |>
-        mutate(
-          cpm = map(
-            scores,
-            ~ do_cpm2(
-              fc_data,
-              .,
-              thresh_method = thresh_method,
-              thresh_level = thresh_level
-            )
-          ),
-          .keep = "unused"
-        ),
-      values = hypers_thresh,
-      batches = 4,
-      reps = 5
-    ),
+    permute_cpm(result_cpm, behav_main, hypers_thresh, fc_data),
     tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
     tar_target(
       brain_mask,
       extract_brain_mask(
         result_cpm,
+        by = starts_with(c("idx", "thresh"))
+      )
+    ),
+    permute_cpm(
+      result_cpm_sex,
+      behav_main,
+      tidyr::expand_grid(hypers_thresh, hypers_sex),
+      fc_data,
+      split_hyper = "sex"
+    ),
+    tar_target(cpm_pred_sex, extract_cpm_pred(result_cpm_sex)),
+    tar_target(
+      brain_mask_sex,
+      extract_brain_mask(
+        result_cpm_sex,
         by = starts_with(c("idx", "thresh"))
       )
     )
@@ -94,16 +92,10 @@ list(
     fs::path(store_preproc_behav, "subjs_info_clean"),
     read = qs::qread(!!.x)
   ),
-  modality_comparison,
-  combine_targets(
-    cpm_pred,
-    modality_comparison,
-    names(config_fc_data)
-  ),
   tar_target(
     subjs_pattern,
     list(
-      append = fc_data_origin_run1rest_nn268_with$sub_id,
+      combined = fc_data_origin_run1rest_nn268_with$sub_id,
       task = fc_data_origin_nbackfull_nn268_with$sub_id,
       rest = fc_data_origin_rest_nn268_with$sub_id,
       behav = behav_main |>
@@ -111,5 +103,16 @@ list(
         pluck("scores", 1, "sub_id")
     )
   ),
-  tar_target(subjs_combined, reduce(subjs_pattern, intersect))
+  tar_target(subjs_combined, reduce(subjs_pattern, intersect)),
+  modality_comparison,
+  combine_targets(
+    cpm_pred,
+    modality_comparison,
+    names(config_fc_data)
+  ),
+  combine_targets(
+    cpm_pred_sex,
+    modality_comparison,
+    names(config_fc_data)
+  )
 )
