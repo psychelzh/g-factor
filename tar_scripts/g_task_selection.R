@@ -76,7 +76,8 @@ g_task_selection <- tarchetypes::tar_map(
         )
     ),
     permute_cpm(
-      result_cpm, scores_g, hypers_cpm,
+      result_cpm, scores_g,
+      hypers = hypers_cpm,
       store_neural = store_modality_comparison
     ),
     tar_target(cpm_pred, extract_cpm_pred(result_cpm)),

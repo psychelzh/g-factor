@@ -4,6 +4,7 @@
 #' @param targets A list from which targets to extract.
 #' @param cols_targets A character vector specifying the columns in the names of
 #'   targets.
+#' @returns A new target object to do the given targets combination.
 combine_targets <- function(name, targets, cols_targets) {
   name <- deparse1(substitute(name))
   tarchetypes::tar_combine_raw(
@@ -31,13 +32,17 @@ combine_targets <- function(name, targets, cols_targets) {
 #'   `store_neural` must be a character scalar referring to the storage path of
 #'   the brain data, in this way, the `"modal"`, `"parcel"` and `"gsr"` fields
 #'   must be present in `hypers` to specify which neural data to use.
-#' @param split_hyper The field used to split neural data to perform different
-#'   CPM calculations, e.g., different gender.
+#' @param split_hyper,subjs_info These two must be specied simultaneously.
+#'   `split_hyper` specifies the field used to split neural data to perform
+#'   different CPM calculations, e.g., different gender. Note this field must be
+#'   present in both `hypers` and `subjs_info`.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
-permute_cpm <- function(name, behav, hypers,
-                        neural = NULL, store_neural = NULL,
+#' @returns A new target object to calculate the permutation results.
+permute_cpm <- function(name, behav, neural, hypers,
+                        store_neural = NULL,
                         split_hyper = NULL,
+                        subjs_info = NULL,
                         batches = 4, reps = 5) {
   rlang::check_exclusive(neural, store_neural, .require = TRUE)
   name <- deparse1(substitute(name))
@@ -49,15 +54,16 @@ permute_cpm <- function(name, behav, hypers,
       substitute()
   }
   if (!missing(split_hyper)) {
-    neural <- neural |>
+    stopifnot(!missing(subjs_info))
+    neural <- .(substitute(neural)) |>
       semi_join(
         filter(
-          subjs_info_clean,
-          .data[[split_hyper]] == .env[[split_hyper]]
+          .(substitute(subjs_info)),
+          .data[[.(split_hyper)]] == .(as.name(split_hyper))
         ),
         by = "sub_id"
       ) |>
-      substitute()
+      bquote()
   }
   tarchetypes::tar_map_rep_raw(
     name,

@@ -118,7 +118,8 @@ g_invariance <- tarchetypes::tar_map(
       )
   ),
   permute_cpm(
-    result_cpm, scores_g, hypers_cpm,
+    result_cpm, scores_g,
+    hypers = hypers_cpm,
     store_neural = store_modality_comparison
   ),
   tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
@@ -166,7 +167,8 @@ list(
     )
   ),
   permute_cpm(
-    result_cpm_main, behav_main, hypers_cpm,
+    result_cpm_main, behav_main,
+    hypers = hypers_cpm,
     store_neural = store_modality_comparison
   ),
   tar_target(cpm_pred_main, extract_cpm_pred(result_cpm_main)),

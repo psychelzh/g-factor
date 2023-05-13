@@ -53,7 +53,7 @@ modality_comparison <- tarchetypes::tar_map(
       read = arrow::read_feather(!!.x)
     ),
     tar_target(fc_data, filter(fc_data_origin, sub_id %in% subjs_combined)),
-    permute_cpm(result_cpm, behav_main, hypers_thresh, fc_data),
+    permute_cpm(result_cpm, behav_main, fc_data, hypers = hypers_thresh),
     tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
     tar_target(
       brain_mask,
@@ -65,9 +65,10 @@ modality_comparison <- tarchetypes::tar_map(
     permute_cpm(
       result_cpm_sex,
       behav_main,
-      tidyr::expand_grid(hypers_thresh, hypers_sex),
       fc_data,
-      split_hyper = "sex"
+      hypers = tidyr::expand_grid(hypers_thresh, hypers_sex),
+      split_hyper = "sex",
+      subjs_info = subjs_info_clean
     ),
     tar_target(cpm_pred_sex, extract_cpm_pred(result_cpm_sex)),
     tar_target(
