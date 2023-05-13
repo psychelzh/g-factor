@@ -26,41 +26,42 @@ store_modality_comparison <- fs::path(
 
 # prepare static branches targets ----
 max_num_vars <- 20 # we have 20 indicators in total (can be more)
-cfg_rsmp_vars <- withr::with_seed(
-  1,
-  dplyr::bind_rows(
-    tidyr::expand_grid(
-      num_vars = round(seq(3, floor(max_num_vars / 2), length.out = 5)),
-      idx_rsmp = seq_len(100)
-    ) |>
-      dplyr::reframe(
-        purrr::map(
-          num_vars,
-          ~ data.frame(
-            id_pairs = rep(c(1, 2), .),
+cfg_rsmp_vars <- dplyr::bind_rows(
+  tidyr::expand_grid(
+    num_vars = 3:floor(max_num_vars / 2),
+    idx_rsmp = seq_len(100)
+  ) |>
+    dplyr::reframe(
+      purrr::map2(
+        num_vars, idx_rsmp,
+        ~ withr::with_seed(
+          as.integer(sprintf("%03d%03d", .x, .y)),
+          data.frame(
+            id_pairs = rep(c(1, 2), .x),
             idx_vars = sample.int(max_num_vars, . * 2, replace = FALSE)
           )
-        ) |>
-          purrr::list_rbind(),
-        .by = c(num_vars, idx_rsmp)
+        )
       ) |>
-      tidyr::chop(idx_vars),
-    tidyr::expand_grid(
-      num_vars = round(
-        seq(floor(max_num_vars / 2) + 1, max_num_vars - 2, length.out = 5)
-      ),
-      idx_rsmp = seq_len(100)
+        purrr::list_rbind(),
+      .by = c(num_vars, idx_rsmp)
     ) |>
-      dplyr::mutate(
-        id_pairs = 1,
-        idx_vars = purrr::map(
-          num_vars,
-          ~ sample.int(max_num_vars, ., replace = FALSE)
+    tidyr::chop(idx_vars),
+  tidyr::expand_grid(
+    num_vars = (floor(max_num_vars / 2) + 1):(max_num_vars - 2),
+    idx_rsmp = seq_len(100)
+  ) |>
+    dplyr::mutate(
+      id_pairs = 1,
+      idx_vars = purrr::map2(
+        num_vars, idx_rsmp,
+        ~ withr::with_seed(
+          as.integer(sprintf("%03d%03d", .x, .y)),
+          sample.int(max_num_vars, .x, replace = FALSE)
         )
       )
-  ) |>
-    tidyr::chop(c(idx_rsmp, idx_vars))
-)
+    )
+) |>
+  tidyr::chop(c(idx_rsmp, idx_vars))
 
 hypers_thresh_g <- dplyr::bind_rows(
   data.frame(
