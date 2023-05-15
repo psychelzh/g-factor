@@ -3,4 +3,3 @@
 export(cpm)
 export(cpm2)
 export(permute_cpm2)
-export(prepare_neural_files)

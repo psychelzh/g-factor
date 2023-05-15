@@ -7,6 +7,7 @@
 do_cpm2(
   neural,
   behav,
+  kfolds,
   thresh_method,
   thresh_level,
   bias_correct = TRUE,

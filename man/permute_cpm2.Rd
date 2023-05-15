@@ -6,10 +6,11 @@
 \usage{
 permute_cpm2(
   behav,
-  hypers,
-  file_neural_prefix = NULL,
-  name_suffix = "",
+  config_neural,
+  hypers_cpm,
   subjs_subset = NULL,
+  name_suffix = "",
+  include_file_targets = TRUE,
   by_brain_mask = NULL,
   split_hyper = NULL,
   subjs_info = NULL,
@@ -20,21 +21,21 @@ permute_cpm2(
 \arguments{
 \item{behav}{The name for the behavioral data. Should be a symbol.}
 
-\item{hypers}{A \code{\link[=data.frame]{data.frame()}} storing the hyper parameters passed to the
-\code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. The \code{"modal"},
-\code{"parcel"} and \code{"gsr"} fields must be present in \code{hypers} to specify which
-neural data to use, and \code{"thresh_method"} and \code{"thresh_level"} are required
-to specify threshold method parameters.}
+\item{config_neural}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of neural
+data used. The \code{tar_neural} and \code{file} fields must be present to specify
+which neural data to use.}
 
-\item{file_neural_prefix}{The name prefix for neural file targets. Must be
-the same as that you specified in \code{name_prefix} argument of
-\code{\link[=prepare_neural_files]{prepare_neural_files()}}.}
+\item{hypers_cpm}{A \code{\link[=data.frame]{data.frame()}} storing the CPM hyper parameters passed to
+the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. The \code{kfolds},
+\code{thresh_method} and \code{thresh_level} are required.}
 
-\item{name_suffix}{The name suffix for the target.}
+\item{subjs_subset}{The subject list to include in CPM analysis.}
+
+\item{name_suffix}{The name suffix for the CPM targets.}
 
 \item{by_brain_mask}{The \code{by} specification for \code{\link[=extract_brain_mask]{extract_brain_mask()}}.
-Default is the names matching those of \code{behav} and \code{hypers}, i.e.,
-\code{any_of(c(names(behav), names(hypers)))}.}
+Default is the names matching those from the three required arguments,
+i.e., \code{behav}, \code{config_neural} and \code{hypers_cpm}.}
 
 \item{split_hyper, subjs_info}{If one of these two parameters is specified,
 the other must be specified, too. \code{split_hyper} specifies the field used to
