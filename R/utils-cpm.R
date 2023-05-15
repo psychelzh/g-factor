@@ -1,13 +1,15 @@
 #' Perform CPM by correctly join neural and behavioral data
 do_cpm2 <- function(neural, behav, thresh_method, thresh_level,
-                    bias_correct = TRUE, id_cols = "sub_id") {
+                    kfolds = 10,
+                    bias_correct = TRUE,
+                    id_cols = "sub_id") {
   neural |>
-    tidytable::inner_join(behav, by = id_cols) |>
+    inner_join(behav, by = id_cols) |>
     select(-all_of(id_cols)) |>
     drop_na() |> # missing values will cause error
     as.matrix() |>
     cpm2(
-      kfolds = 10,
+      kfolds = kfolds,
       bias_correct = bias_correct,
       thresh_method = thresh_method,
       thresh_level = thresh_level

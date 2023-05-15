@@ -11,7 +11,7 @@
 #'   be equal to the number of observations, i.e., leave-one-subject-out.
 #' @param bias_correct Logical value indicating if z-score should be performed
 #'   separated in training and test group. This is forced to be `FALSE` for
-#'   leave one out case.
+#'   leave one out case. Otherwise, it is `TRUE` by default.
 #' @param thresh_method,thresh_level The threshold method and level used in edge
 #'   selection. Choices are correlation p value (`"alpha"`) and network sparsity
 #'   (`"sparsity"`) methods.
@@ -25,7 +25,7 @@
 #' @author Liang Zhang <psychelzh@outlook.com>
 #' @export
 cpm2 <- function(data, behav = NULL, kfolds = NULL,
-                 bias_correct = TRUE,
+                 bias_correct = NULL,
                  thresh_method = c("alpha", "sparsity"),
                  thresh_level = 0.01) {
   thresh_method <- match.arg(thresh_method)
@@ -41,8 +41,14 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
   # random split into folds
   no_sub <- length(behav)
   if (is.null(kfolds)) {
-    if (bias_correct) bias_correct <- FALSE # cannot correct in this case
     kfolds <- no_sub
+  }
+  if (kfolds == no_sub) {
+    bias_correct <- FALSE
+  } else {
+    if (is.null(bias_correct)) {
+      bias_correct <- TRUE
+    }
   }
   folds <- seq_len(no_sub) |>
     cut(breaks = kfolds, labels = FALSE) |>
