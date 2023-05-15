@@ -117,17 +117,9 @@ g_invariance <- tarchetypes::tar_map(
       )
   ),
   permute_cpm(
-    result_cpm, scores_g,
+    scores_g,
     hypers = hypers_cpm,
     store_neural = store_modality_comparison
-  ),
-  tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
-  tar_target(
-    brain_mask,
-    extract_brain_mask(
-      result_cpm,
-      by = any_of(c(names(cfg_rsmp_vars), names(hypers_cpm)))
-    )
   )
 )
 
@@ -166,12 +158,11 @@ list(
     )
   ),
   permute_cpm(
-    result_cpm_main, behav_main,
+    behav_main,
     hypers = hypers_cpm,
+    name_suffix = "_main",
     store_neural = store_modality_comparison
   ),
-  tar_target(cpm_pred_main, extract_cpm_pred(result_cpm_main)),
-  tar_target(brain_mask_main, extract_brain_mask(result_cpm_main)),
   g_invariance,
   combine_targets(
     data_names,

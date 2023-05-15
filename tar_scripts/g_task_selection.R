@@ -72,17 +72,9 @@ g_task_selection <- tarchetypes::tar_map(
         )
     ),
     permute_cpm(
-      result_cpm, scores_g,
+      scores_g,
       hypers = hypers_cpm,
       store_neural = store_modality_comparison
-    ),
-    tar_target(cpm_pred, extract_cpm_pred(result_cpm)),
-    tar_target(
-      brain_mask,
-      extract_brain_mask(
-        result_cpm,
-        by = any_of(names(hypers_cpm))
-      )
     )
   )
 )
@@ -106,5 +98,24 @@ list(
     read = qs::qread(!!.x)
   ),
   g_task_selection,
-  combine_targets(cpm_pred, g_task_selection, names(hypers_strip_n))
+  combine_targets(cpm_pred, g_task_selection, names(hypers_strip_n)),
+  tar_target(
+    scores_single,
+    tibble(
+      task = data_names_ordered
+    ) |>
+      mutate(
+        scores = map(
+          task,
+          ~ indices_wider_clean |>
+            select(all_of(c("sub_id", .)))
+        )
+      )
+  ),
+  permute_cpm(
+    scores_single,
+    hypers = hypers_cpm,
+    name_suffix = "_single",
+    store_neural = store_modality_comparison
+  )
 )

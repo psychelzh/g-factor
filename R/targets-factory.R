@@ -22,7 +22,6 @@ combine_targets <- function(name, targets, cols_targets) {
 #'
 #' This will generate batches of CPM permutation for targets to use.
 #'
-#' @param name The name for the target. Should be a symbol.
 #' @param behav The name for the behavioral data. Should be a symbol.
 #' @param neural,store_neural One and only one of these two parameters should be
 #'   specified. `neural` must be a symbol referring to the brain data, whereas
@@ -32,6 +31,10 @@ combine_targets <- function(name, targets, cols_targets) {
 #' @param hypers A [data.frame()] storing the hyper parameters passed to the
 #'   `values` argument of [tarchetypes::tar_map_rep()]. Currently
 #'   `"thresh_method"` and `"thresh_level"` are required.
+#' @param name_suffix The name suffix for the target.
+#' @param by_brain_mask The `by` specification for [extract_brain_mask()].
+#'   Default is the names matching those of `behav` and `hypers`, i.e.,
+#'   `any_of(c(names(behav), names(hypers)))`.
 #' @param split_hyper,subjs_info If one of these two parameters is specified,
 #'   the other must be specified, too. `split_hyper` specifies the field used to
 #'   split neural data to perform different CPM calculations, e.g., different
@@ -39,19 +42,23 @@ combine_targets <- function(name, targets, cols_targets) {
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A new target object to calculate the permutation results.
-permute_cpm <- function(name, behav, neural, hypers,
+permute_cpm <- function(behav, neural, hypers,
+                        name_suffix = "",
                         store_neural = NULL,
+                        by_brain_mask = NULL,
                         split_hyper = NULL,
                         subjs_info = NULL,
                         batches = 4, reps = 5) {
   rlang::check_exclusive(neural, store_neural, .require = TRUE)
-  name <- deparse1(substitute(name))
   if (missing(neural)) {
     stopifnot(all(rlang::has_name(hypers, c("modal", "parcel", "gsr"))))
     neural <- store_neural |>
       fs::path(sprintf("fc_data_%s_%s_%s", modal, parcel, gsr)) |>
       qs::qread() |>
       substitute()
+  }
+  if (missing(by_brain_mask)) {
+    by_brain_mask <- substitute(any_of(c(names(behav), names(hypers))))
   }
   if (!missing(split_hyper)) {
     stopifnot(!missing(subjs_info))
@@ -65,24 +72,44 @@ permute_cpm <- function(name, behav, neural, hypers,
       ) |>
       bquote()
   }
-  tarchetypes::tar_map_rep_raw(
-    name,
-    behav |>
-      mutate(
-        cpm = map(
-          scores,
-          ~ do_cpm2(
-            neural,
-            .,
-            thresh_method = thresh_method,
-            thresh_level = thresh_level
-          )
-        ),
-        .keep = "unused"
+  name_result_cpm <- paste0("result_cpm", name_suffix)
+  name_cpm_pred <- paste0("cpm_pred", name_suffix)
+  name_brain_mask <- paste0("brain_mask", name_suffix)
+  list(
+    tarchetypes::tar_map_rep_raw(
+      name_result_cpm,
+      behav |>
+        mutate(
+          cpm = map(
+            scores,
+            ~ do_cpm2(
+              neural,
+              .,
+              thresh_method = thresh_method,
+              thresh_level = thresh_level
+            )
+          ),
+          .keep = "unused"
+        ) |>
+        substitute(),
+      values = hypers,
+      batches = batches,
+      reps = reps
+    ),
+    tar_target_raw(
+      name_cpm_pred,
+      extract_cpm_pred(
+        .(as.name(name_result_cpm))
       ) |>
-      substitute(),
-    values = hypers,
-    batches = batches,
-    reps = reps
+        bquote()
+    ),
+    tar_target_raw(
+      name_brain_mask,
+      extract_brain_mask(
+        .(as.name(name_result_cpm)),
+        by = .(substitute(by_brain_mask))
+      ) |>
+        bquote()
+    )
   )
 }
