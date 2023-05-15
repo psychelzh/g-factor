@@ -25,7 +25,6 @@ store_modality_comparison <- fs::path(
 )
 
 # prepare static branches targets ----
-max_num_vars <- 20 # we have 20 indicators in total (can be more)
 cfg_rsmp_vars <- dplyr::bind_rows(
   tidyr::expand_grid(
     num_vars = 3:floor(max_num_vars / 2),

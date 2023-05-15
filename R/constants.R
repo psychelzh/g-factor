@@ -1,3 +1,4 @@
+max_num_vars <- 20 # we have 20 indicators in total
 sexes <- c(M = "Male", F = "Female")
 scale_sexes <- list(
   name = "Sex",
