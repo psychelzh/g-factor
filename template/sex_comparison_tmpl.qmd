@@ -1,0 +1,46 @@
+## Parcel `r parcels["{{parcel}}"]` {{ gsr }} GSR
+
+```{r}
+#| label: fig-sex-{{ parcel }}-{{ gsr }}
+#| fig-width: 12
+#| fig-height: 8
+#| fig-cap: CPM prediction between different sex.
+
+cpm_pred_sex |> 
+  filter(
+    thresh_method == "alpha",
+    parcel == "{{ parcel }}",
+    gsr == "{{ gsr }}"
+  ) |>
+  pivot_longer(
+    cols = all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |> 
+  mutate(
+    idx = factor(idx, names(meas_behav)),
+    sex = factor(sex, names(sexes)),
+    modal = factor(modal, names(modalities))
+  ) |>
+  ggplot(aes(idx, estimate, fill = sex)) +
+  ggdist::stat_slabinterval(position = position_dodge(width = 0.5)) +
+  ggdist::stat_dots(position = position_dodge(width = 0.6), side = "left") +
+  facet_grid(
+    rows = vars(edge_type),
+    cols = vars(modal),
+    labeller = labeller(
+      edge_type = edge_types,
+      modal = modalities
+    )
+  ) +
+  rlang::exec(scale_x_discrete, !!!scale_meas_behv) +
+  rlang::exec(
+    scale_fill_brewer, 
+    !!!scale_sexes, 
+    palette = "Paired", 
+    aesthetics = "fill"
+  ) +
+  theme_bw() +
+  theme(legend.position = "top") +
+  labs(y = "Prediction (Pearson's Correlation)")
+```

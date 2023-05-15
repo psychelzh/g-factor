@@ -1,3 +1,10 @@
+sexes <- c(M = "Male", F = "Female")
+scale_sexes <- list(
+  name = "Sex",
+  limits = names(sexes),
+  labels = sexes
+)
+
 parcels <- c(
   nn268 = "Shen268",
   Power264 = "Power264"

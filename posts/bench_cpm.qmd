@@ -1,5 +1,5 @@
 ---
-title: Compare G-Score Predictability among Modalities using CPM
+title: Benchmark Neural Predictability of G-factor
 author: Liang Zhang
 date: 2023-05-10
 draft: false
@@ -17,9 +17,12 @@ bibliography: references.bib
 #| include: false
 
 library(tidyverse)
-library(targets)
-purrr::walk(fs::dir_ls(here::here("R"), glob = "*.R"), source)
-Sys.setenv(TAR_PROJECT = "project_modality_comparison")
+source(here::here("R/constants.R"))
+store_modality_comparison <- targets::tar_config_get(
+  "store", 
+  config = here::here("_targets.yaml"),
+  project = "project_modality_comparison"
+)
 ```
 
 # FMRI Sample Description
@@ -28,15 +31,17 @@ Sys.setenv(TAR_PROJECT = "project_modality_comparison")
 #| label: describe-sample
 #| results: asis
 
-tar_load_here(subjs_info_clean)
-tar_load_here(subjs_combined)
+targets::tar_load(
+  c(subjs_info_clean, subjs_combined),
+  store = here::here(store_modality_comparison)
+)
 subjs_info_clean |> 
   filter(sub_id %in% subjs_combined) |> 
   report::report_participants() |> 
   cat()
 ```
 
-# CPM results
+# Compare CPM among different modalities
 
 ## Configurations {.smaller}
 
@@ -51,14 +56,34 @@ Parameters are as follows (mainly inspired by @greene2018):
 -   Edge selection threshold method: correlation p.value based (`alpha`) or network sparsity based (`sparsity`)
 
 ```{r}
-#| label: render-results
+#| label: render-results-modality
 #| results: asis
 
-tar_load_here(cpm_pred)
+targets::tar_load(cpm_pred, store = here::here(store_modality_comparison))
 config <- distinct(cpm_pred, parcel, gsr)
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
     here::here("template/modality_comparison_tmpl.qmd"),
+    parcel = config$parcel[[row]],
+    gsr = config$gsr[[row]]
+  ) |>
+    knitr::knit(text = _, quiet = TRUE) |>
+    cat()
+  cat("\n\n")
+}
+```
+
+# Compare between gender/sex
+
+```{r}
+#| label: render-results-sex
+#| results: asis
+
+targets::tar_load(cpm_pred_sex, store = here::here(store_modality_comparison))
+config <- distinct(cpm_pred_sex, parcel, gsr)
+for (row in seq_len(nrow(config))) {
+  knitr::knit_expand(
+    here::here("template/sex_comparison_tmpl.qmd"),
     parcel = config$parcel[[row]],
     gsr = config$gsr[[row]]
   ) |>
