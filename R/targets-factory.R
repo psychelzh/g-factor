@@ -34,8 +34,8 @@ combine_targets <- function(name, targets, cols_targets) {
 #' @param subjs_subset The subject list to include in CPM analysis.
 #' @param name_suffix The name suffix for the CPM targets.
 #' @param by_brain_mask The `by` specification for [extract_brain_mask()].
-#'   Default is the names matching those of `behav` and `hypers`, i.e.,
-#'   `any_of(c(names(behav), names(hypers)))`.
+#'   Default is the names matching those from the three required arguments,
+#'   i.e., `behav`, `config_neural` and `hypers_cpm`.
 #' @param split_hyper,subjs_info If one of these two parameters is specified,
 #'   the other must be specified, too. `split_hyper` specifies the field used to
 #'   split neural data to perform different CPM calculations, e.g., different
@@ -59,7 +59,9 @@ permute_cpm2 <- function(behav,
     neural <- substitute(filter(neural, sub_id %in% subjs_subset))
   }
   if (missing(by_brain_mask)) {
-    by_brain_mask <- substitute(any_of(c(names(behav), names(hypers))))
+    by_brain_mask <- substitute(
+      any_of(c(names(behav), names(config_neural), names(hypers_cpm)))
+    )
   }
   if (!missing(split_hyper)) {
     stopifnot(!missing(subjs_info))
@@ -101,8 +103,8 @@ permute_cpm2 <- function(behav,
         ) |>
         substitute(),
       values = tidyr::expand_grid(config_neural, hypers_cpm),
-      # `file` and `tar_name` are constructed from other core elements
-      columns = quote(-c(file, tar_name)),
+      # `tar_neural` and `file` are constructed from other core elements
+      columns = quote(-c(tar_neural, file)),
       batches = batches,
       reps = reps
     ),
