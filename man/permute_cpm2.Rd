@@ -49,7 +49,5 @@ gender. Note this field must be present in both \code{hypers} and \code{subjs_in
 A new target object to calculate the permutation results.
 }
 \description{
-This will generate batches of CPM permutation for targets to use. Note these
-targets depends on those created by \code{\link[=prepare_neural_files]{prepare_neural_files()}}, you should
-create those targets first.
+This will generate batches of CPM permutation for targets to use.
 }

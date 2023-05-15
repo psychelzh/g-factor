@@ -20,9 +20,7 @@ combine_targets <- function(name, targets, cols_targets) {
 
 #' Target factory for CPM permutation
 #'
-#' This will generate batches of CPM permutation for targets to use. Note these
-#' targets depends on those created by [prepare_neural_files()], you should
-#' create those targets first.
+#' This will generate batches of CPM permutation for targets to use.
 #'
 #' @param behav The name for the behavioral data. Should be a symbol.
 #' @param config_neural A [data.frame()] storing the specifications of neural
