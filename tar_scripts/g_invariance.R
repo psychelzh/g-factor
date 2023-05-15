@@ -19,10 +19,6 @@ store_preproc_behav <- fs::path(
   tar_config_get("store", project = "project_preproc_behav"),
   "objects"
 )
-store_modality_comparison <- fs::path(
-  tar_config_get("store", project = "project_modality_comparison"),
-  "objects"
-)
 
 # prepare static branches targets ----
 cfg_rsmp_vars <- dplyr::bind_rows(
@@ -62,18 +58,10 @@ cfg_rsmp_vars <- dplyr::bind_rows(
 ) |>
   tidyr::chop(c(idx_rsmp, idx_vars))
 
-hypers_thresh_g <- dplyr::bind_rows(
-  data.frame(
-    thresh_method = "alpha",
-    thresh_level = 0.01
-  )
-)
-hypers_fc_data <- tidyr::expand_grid(
-  modal = c("nbackfull", "rest", "run1rest"),
-  parcel = c("Power264"),
-  gsr = c("without")
-)
-hypers_cpm <- tidyr::expand_grid(hypers_thresh_g, hypers_fc_data)
+config_neural <- config_neural |>
+  dplyr::filter(parcel == "Power264", gsr == "without")
+hypers_cpm <- hypers_cpm |>
+  dplyr::filter(thresh_method == "alpha")
 
 g_invariance <- tarchetypes::tar_map(
   values = cfg_rsmp_vars,
@@ -116,10 +104,12 @@ g_invariance <- tarchetypes::tar_map(
         .keep = "unused"
       )
   ),
-  permute_cpm(
+  permute_cpm2(
     scores_g,
-    hypers = hypers_cpm,
-    store_neural = store_modality_comparison
+    config_neural,
+    hypers_cpm,
+    subjs_subset = subjs_combined,
+    include_file_targets = FALSE
   )
 )
 
@@ -130,38 +120,24 @@ list(
     fs::path(store_preproc_behav, "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
-  # first column is identifier
-  tar_target(data_names_all, names(indices_wider_clean)[-1]),
-  tar_target(
-    mdl_fitted_full,
-    fit_g(indices_wider_clean, data_names_all)
-  ),
-  tar_target(
-    var_exp_full,
-    calc_var_exp(mdl_fitted_full)
-  ),
-  tar_target(
-    scores_g_full,
-    predict_g_score(indices_wider_clean, mdl_fitted_full)
-  ),
   tarchetypes::tar_file_read(
-    indices_rapm,
-    fs::path(store_preproc_behav, "indices_rapm"),
+    behav_main,
+    fs::path(store_preproc_behav, "behav_main"),
     read = qs::qread(!!.x)
   ),
-  tar_target(
-    behav_main,
-    tribble(
-      ~idx, ~scores,
-      "g_full", scores_g_full,
-      "rapm", indices_rapm
-    )
+  tarchetypes::tar_file_read(
+    subjs_combined,
+    file_subjs_combined,
+    read = as.numeric(read_lines(!!.x))
   ),
-  permute_cpm(
+  # first column is identifier
+  tar_target(data_names_all, names(indices_wider_clean)[-1]),
+  permute_cpm2(
     behav_main,
-    hypers = hypers_cpm,
-    name_suffix = "_main",
-    store_neural = store_modality_comparison
+    config_neural,
+    hypers_cpm,
+    subjs_subset = subjs_combined,
+    name_suffix = "_main"
   ),
   g_invariance,
   combine_targets(

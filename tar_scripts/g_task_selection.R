@@ -15,35 +15,20 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-store_behav <- fs::path(
+store_preproc_behav <- fs::path(
   tar_config_get("store", project = "project_preproc_behav"),
-  "objects"
-)
-store_modality_comparison <- fs::path(
-  tar_config_get("store", project = "project_modality_comparison"),
-  "objects"
-)
-store_g_invariance <- fs::path(
-  tar_config_get("store", project = "project_g_invariance"),
   "objects"
 )
 
 # prepare static branches targets ----
-hypers_strip_n <- data.frame(n_rm = 1:(max_num_vars - 3))
-hypers_thresh <- dplyr::bind_rows(
-  data.frame(
-    thresh_method = "alpha",
-    thresh_level = 0.01
-  )
-)
-hypers_fc_data <- tidyr::expand_grid(
-  modal = c("nbackfull", "rest", "run1rest"),
-  parcel = c("Power264"),
-  gsr = c("without")
-)
-hypers_cpm <- tidyr::expand_grid(hypers_thresh, hypers_fc_data)
+config_neural <- config_neural |>
+  dplyr::filter(parcel == "Power264", gsr == "without")
+hypers_cpm <- hypers_cpm |>
+  dplyr::filter(thresh_method == "alpha")
+
+hypers_behav <- data.frame(n_rm = 1:(max_num_vars - 3))
 g_task_selection <- tarchetypes::tar_map(
-  values = hypers_strip_n,
+  values = hypers_behav,
   list(
     tar_target(
       data_names,
@@ -71,10 +56,12 @@ g_task_selection <- tarchetypes::tar_map(
           .keep = "unused"
         )
     ),
-    permute_cpm(
+    permute_cpm2(
       scores_g,
-      hypers = hypers_cpm,
-      store_neural = store_modality_comparison
+      config_neural,
+      hypers_cpm,
+      subjs_subset = subjs_combined,
+      include_file_targets = FALSE
     )
   )
 )
@@ -83,7 +70,7 @@ g_task_selection <- tarchetypes::tar_map(
 list(
   tar_target(
     file_mdl_full,
-    fs::path(store_g_invariance, "mdl_fitted_full"),
+    fs::path(store_preproc_behav, "mdl_fitted_full"),
     format = "file"
   ),
   tar_target(
@@ -93,17 +80,18 @@ list(
     }
   ),
   tarchetypes::tar_file_read(
+    subjs_combined,
+    file_subjs_combined,
+    read = as.numeric(read_lines(!!.x))
+  ),
+  tarchetypes::tar_file_read(
     indices_wider_clean,
-    fs::path(store_behav, "indices_wider_clean"),
+    fs::path(store_preproc_behav, "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
-  g_task_selection,
-  combine_targets(cpm_pred, g_task_selection, names(hypers_strip_n)),
   tar_target(
     scores_single,
-    tibble(
-      task = data_names_ordered
-    ) |>
+    tibble(task = data_names_ordered) |>
       mutate(
         scores = map(
           task,
@@ -112,10 +100,13 @@ list(
         )
       )
   ),
-  permute_cpm(
+  permute_cpm2(
     scores_single,
-    hypers = hypers_cpm,
-    name_suffix = "_single",
-    store_neural = store_modality_comparison
-  )
+    config_neural,
+    hypers_cpm,
+    subjs_subset = subjs_combined,
+    name_suffix = "_single"
+  ),
+  g_task_selection,
+  combine_targets(cpm_pred, g_task_selection, names(hypers_behav))
 )

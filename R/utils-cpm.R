@@ -1,8 +1,6 @@
 #' Perform CPM by correctly join neural and behavioral data
-do_cpm2 <- function(neural, behav, thresh_method, thresh_level,
-                    kfolds = 10,
-                    bias_correct = TRUE,
-                    id_cols = "sub_id") {
+do_cpm2 <- function(neural, behav, kfolds, thresh_method, thresh_level,
+                    bias_correct = TRUE, id_cols = "sub_id") {
   neural |>
     inner_join(behav, by = id_cols) |>
     select(-all_of(id_cols)) |>

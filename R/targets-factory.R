@@ -20,18 +20,19 @@ combine_targets <- function(name, targets, cols_targets) {
 
 #' Target factory for CPM permutation
 #'
-#' This will generate batches of CPM permutation for targets to use.
+#' This will generate batches of CPM permutation for targets to use. Note these
+#' targets depends on those created by [prepare_neural_files()], you should
+#' create those targets first.
 #'
 #' @param behav The name for the behavioral data. Should be a symbol.
-#' @param neural,store_neural One and only one of these two parameters should be
-#'   specified. `neural` must be a symbol referring to the brain data, whereas
-#'   `store_neural` must be a character scalar referring to the storage path of
-#'   the brain data, in this way, the `"modal"`, `"parcel"` and `"gsr"` fields
-#'   must be present in `hypers` to specify which neural data to use.
-#' @param hypers A [data.frame()] storing the hyper parameters passed to the
-#'   `values` argument of [tarchetypes::tar_map_rep()]. Currently
-#'   `"thresh_method"` and `"thresh_level"` are required.
-#' @param name_suffix The name suffix for the target.
+#' @param config_neural A [data.frame()] storing the specifications of neural
+#'   data used. The `tar_neural` and `file` fields must be present to specify
+#'   which neural data to use.
+#' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
+#'   the `values` argument of [tarchetypes::tar_map_rep()]. The `kfolds`,
+#'   `thresh_method` and `thresh_level` are required.
+#' @param subjs_subset The subject list to include in CPM analysis.
+#' @param name_suffix The name suffix for the CPM targets.
 #' @param by_brain_mask The `by` specification for [extract_brain_mask()].
 #'   Default is the names matching those of `behav` and `hypers`, i.e.,
 #'   `any_of(c(names(behav), names(hypers)))`.
@@ -42,20 +43,20 @@ combine_targets <- function(name, targets, cols_targets) {
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A new target object to calculate the permutation results.
-permute_cpm <- function(behav, neural, hypers,
-                        name_suffix = "",
-                        store_neural = NULL,
-                        by_brain_mask = NULL,
-                        split_hyper = NULL,
-                        subjs_info = NULL,
-                        batches = 4, reps = 5) {
-  rlang::check_exclusive(neural, store_neural, .require = TRUE)
-  if (missing(neural)) {
-    stopifnot(all(rlang::has_name(hypers, c("modal", "parcel", "gsr"))))
-    neural <- store_neural |>
-      fs::path(sprintf("fc_data_%s_%s_%s", modal, parcel, gsr)) |>
-      qs::qread() |>
-      substitute()
+#' @export
+permute_cpm2 <- function(behav,
+                         config_neural,
+                         hypers_cpm,
+                         subjs_subset = NULL,
+                         name_suffix = "",
+                         include_file_targets = TRUE,
+                         by_brain_mask = NULL,
+                         split_hyper = NULL,
+                         subjs_info = NULL,
+                         batches = 4, reps = 5) {
+  neural <- quote(arrow::read_feather(tar_neural))
+  if (!missing(subjs_subset)) {
+    neural <- substitute(filter(neural, sub_id %in% subjs_subset))
   }
   if (missing(by_brain_mask)) {
     by_brain_mask <- substitute(any_of(c(names(behav), names(hypers))))
@@ -76,6 +77,12 @@ permute_cpm <- function(behav, neural, hypers,
   name_cpm_pred <- paste0("cpm_pred", name_suffix)
   name_brain_mask <- paste0("brain_mask", name_suffix)
   list(
+    if (include_file_targets) {
+      tarchetypes::tar_eval(
+        tar_target(tar_neural, file, format = "file"),
+        values = config_neural
+      )
+    },
     tarchetypes::tar_map_rep_raw(
       name_result_cpm,
       behav |>
@@ -85,6 +92,7 @@ permute_cpm <- function(behav, neural, hypers,
             ~ do_cpm2(
               neural,
               .,
+              kfolds = kfolds,
               thresh_method = thresh_method,
               thresh_level = thresh_level
             )
@@ -92,7 +100,9 @@ permute_cpm <- function(behav, neural, hypers,
           .keep = "unused"
         ) |>
         substitute(),
-      values = hypers,
+      values = tidyr::expand_grid(config_neural, hypers_cpm),
+      # `file` and `tar_name` are constructed from other core elements
+      columns = quote(-c(file, tar_name)),
       batches = batches,
       reps = reps
     ),

@@ -167,5 +167,25 @@ list(
       select(indices_wider_clean, sub_id),
       as_tibble(unclass(lavPredict(mdl_fitted)))
     )
+  ),
+  tar_target(
+    var_exp_full,
+    calc_var_exp(mdl_fitted_full)
+  ),
+  tar_target(
+    mdl_fitted_full,
+    fit_g(indices_wider_clean, names(indices_wider_clean)[-1])
+  ),
+  tar_target(
+    scores_g_full,
+    predict_g_score(indices_wider_clean, mdl_fitted_full)
+  ),
+  tar_target(
+    behav_main,
+    tribble(
+      ~idx, ~scores,
+      "g_full", scores_g_full,
+      "rapm", indices_rapm
+    )
   )
 )
