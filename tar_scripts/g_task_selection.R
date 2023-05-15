@@ -29,7 +29,7 @@ store_g_invariance <- fs::path(
 )
 
 # prepare static branches targets ----
-hypers_strip_n <- data.frame(n_rm = 1:5)
+hypers_strip_n <- data.frame(n_rm = 1:(max_num_vars - 3))
 hypers_thresh <- dplyr::bind_rows(
   data.frame(
     thresh_method = "alpha",
@@ -47,11 +47,7 @@ g_task_selection <- tarchetypes::tar_map(
   list(
     tar_target(
       data_names,
-      tibble(
-        tasks = data_names_ordered |>
-          .subset(1:(length(data_names_ordered) - n_rm)) |>
-          list()
-      )
+      tibble(tasks = list(data_names_ordered[1:(max_num_vars - n_rm)]))
     ),
     tar_target(
       mdl_fitted,
@@ -109,5 +105,6 @@ list(
     fs::path(store_behav, "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
-  g_task_selection
+  g_task_selection,
+  combine_targets(cpm_pred, g_task_selection, names(hypers_strip_n))
 )
