@@ -51,14 +51,14 @@ task_selection <- tarchetypes::tar_map(
 
 # targets pipeline ----
 list(
-  tar_target(
-    file_mdl_full,
+  tarchetypes::tar_file_read(
+    mdl_fitted_full,
     fs::path(store_preproc_behav, "mdl_fitted_full"),
-    format = "file"
+    read = qs::qread(!!.x)
   ),
   tar_target(
     data_names_ordered, {
-      loadings_mdl <- loadings(qs::qread(file_mdl_full))
+      loadings_mdl <- loadings(mdl_fitted_full)
       rownames(loadings_mdl)[order(loadings_mdl, decreasing = TRUE)]
     }
   ),
