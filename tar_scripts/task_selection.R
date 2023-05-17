@@ -27,7 +27,7 @@ hypers_cpm <- hypers_cpm |>
   dplyr::filter(thresh_method == "alpha")
 
 hypers_behav <- data.frame(n_rm = 1:(max_num_vars - 3))
-g_task_selection <- tarchetypes::tar_map(
+task_selection <- tarchetypes::tar_map(
   values = hypers_behav,
   list(
     tar_target(
@@ -107,6 +107,6 @@ list(
     subjs_subset = subjs_combined,
     name_suffix = "_single"
   ),
-  g_task_selection,
-  combine_targets(cpm_pred, g_task_selection, names(hypers_behav))
+  task_selection,
+  combine_targets(cpm_pred, task_selection, names(hypers_behav))
 )

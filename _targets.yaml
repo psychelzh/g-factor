@@ -13,6 +13,6 @@ project_bench_cpm:
 project_g_invariance:
   script: tar_scripts/g_invariance.R
   store: _targets/g_invariance
-project_g_task_selection:
-  script: tar_scripts/g_task_selection.R
-  store: _targets/g_task_selection
+project_task_selection:
+  script: tar_scripts/task_selection.R
+  store: _targets/task_selection
