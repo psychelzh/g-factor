@@ -34,27 +34,10 @@ task_selection <- tarchetypes::tar_map(
       data_names,
       tibble(tasks = list(data_names_ordered[1:(max_num_vars - n_rm)]))
     ),
-    tar_target(
-      mdl_fitted,
-      data_names |>
-        mutate(
-          mdl = map(
-            tasks,
-            ~ fit_g(indices_wider_clean, .)
-          ),
-          .keep = "unused"
-        )
-    ),
-    tar_target(
-      scores_g,
-      mdl_fitted |>
-        mutate(
-          scores = map(
-            mdl,
-            ~ predict_g_score(indices_wider_clean, .)
-          ),
-          .keep = "unused"
-        )
+    include_g_fitting(
+      indices_wider_clean,
+      data_names,
+      include_var_exp = FALSE
     ),
     permute_cpm2(
       scores_g,

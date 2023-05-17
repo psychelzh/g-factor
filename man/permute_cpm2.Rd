@@ -46,7 +46,7 @@ gender. Note this field must be present in both \code{hypers} and \code{subjs_in
 \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}.}
 }
 \value{
-A new target object to calculate the permutation results.
+A list of new target objects to calculate the permutation results.
 }
 \description{
 This will generate batches of CPM permutation for targets to use.

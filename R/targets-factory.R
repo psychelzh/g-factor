@@ -18,6 +18,59 @@ combine_targets <- function(name, targets, cols_targets) {
   )
 }
 
+#' Fit and extract g factor scores
+#'
+#' This will generate targets used to fit a one-g factor model and predict
+#' factor scores from it.
+#'
+#' @param indices Raw behavior data.
+#' @param df_ov A [data.frame()] specifying observed variables in the field
+#'   `tasks`.
+#' @param include_var_exp A logical value indicating if `var_exp` should be
+#'   included. `var_exp` means the variance explained targets calculating the
+#'   variance explained by g factor.
+#' @returns A list of new target objects to fit and extract g factor scores.
+#' @export
+include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
+  list(
+    tar_target_raw(
+      "mdl_fitted",
+      df_ov |>
+        mutate(
+          mdl = map(
+            tasks,
+            ~ fit_g(indices, .)
+          ),
+          .keep = "unused"
+        ) |>
+        substitute()
+    ),
+    if (include_var_exp) {
+      tar_target_raw(
+        "var_exp",
+        mdl_fitted |>
+          mutate(
+            prop = map_dbl(mdl, calc_var_exp),
+            .keep = "unused"
+          ) |>
+          substitute()
+      )
+    },
+    tar_target_raw(
+      "scores_g",
+      mdl_fitted |>
+        mutate(
+          scores = map(
+            mdl,
+            ~ predict_g_score(indices, .)
+          ),
+          .keep = "unused"
+        ) |>
+        substitute()
+    )
+  )
+}
+
 #' Target factory for CPM permutation
 #'
 #' This will generate batches of CPM permutation for targets to use.
@@ -40,7 +93,7 @@ combine_targets <- function(name, targets, cols_targets) {
 #'   gender. Note this field must be present in both `hypers` and `subjs_info`.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
-#' @returns A new target object to calculate the permutation results.
+#' @returns A list of new target objects to calculate the permutation results.
 #' @export
 permute_cpm2 <- function(behav,
                          config_neural,

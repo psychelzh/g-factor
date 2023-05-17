@@ -74,35 +74,9 @@ g_invariance <- tarchetypes::tar_map(
     ),
     deployment = "main"
   ),
-  tar_target(
-    mdl_fitted,
-    data_names |>
-      mutate(
-        mdl = map(
-          tasks,
-          ~ fit_g(indices_wider_clean, .)
-        ),
-        .keep = "unused"
-      )
-  ),
-  tar_target(
-    var_exp,
-    mdl_fitted |>
-      mutate(
-        prop = map_dbl(mdl, calc_var_exp),
-        .keep = "unused"
-      )
-  ),
-  tar_target(
-    scores_g,
-    mdl_fitted |>
-      mutate(
-        scores = map(
-          mdl,
-          ~ predict_g_score(indices_wider_clean, .)
-        ),
-        .keep = "unused"
-      )
+  include_g_fitting(
+    indices_wider_clean,
+    data_names
   ),
   permute_cpm2(
     scores_g,

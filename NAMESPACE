@@ -2,4 +2,5 @@
 
 export(cpm)
 export(cpm2)
+export(include_g_fitting)
 export(permute_cpm2)
