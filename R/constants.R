@@ -38,7 +38,7 @@ hypers_cpm <- tidyr::expand_grid(
   )
 )
 
-# scales for common features
+# scales for demographic variables
 sexes <- c(M = "Male", F = "Female")
 scale_sexes <- list(
   name = "Sex",
@@ -46,6 +46,17 @@ scale_sexes <- list(
   labels = sexes
 )
 
+# scales for neural parameters
+modalities <- c(
+  run1rest = "Combined",
+  nbackfull = "Task",
+  rest = "Resting"
+)
+scale_modalities <- list(
+  name = "Modality",
+  limits = names(modalities),
+  labels = modalities
+)
 parcels <- c(
   nn268 = "Shen268",
   Power264 = "Power264"
@@ -55,7 +66,17 @@ scale_parcels <- list(
   limits = names(parcels),
   labels = parcels
 )
+gsrs <- c(
+  with = "With GSR",
+  without = "Without GSR"
+)
+scale_gsrs <- list(
+  name = "Global Signal Regression",
+  limits = names(gsrs),
+  labels = gsrs
+)
 
+# scales for CPM parameters
 thresh_methods <- c(
   alpha = "Alpha",
   sparsity = "Sparsity"
@@ -65,7 +86,6 @@ scale_thresh_methods <- list(
   limits = names(thresh_methods),
   labels = thresh_methods
 )
-
 edge_types <- c(
   all = "Combined",
   neg = "Anti-Corr Networks",
@@ -77,17 +97,7 @@ scale_edge_types <- list(
   labels = edge_types
 )
 
-modalities <- c(
-  run1rest = "Combined",
-  nbackfull = "Task",
-  rest = "Resting"
-)
-scale_modalities <- list(
-  name = "Modality",
-  limits = names(modalities),
-  labels = modalities
-)
-
+# scales for behavioral parameters
 meas_behav <- c(
   g_full = "G-Factor",
   rapm = "RAPM"
