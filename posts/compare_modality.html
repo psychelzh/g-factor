@@ -12,7 +12,7 @@
 
   <meta name="author" content="Liang Zhang">
   <meta name="dcterms.date" content="2023-05-10">
-  <title>Intelligence and Its Neural Correlates - Benchmark Neural Predictability of G-factor</title>
+  <title>Intelligence and Its Neural Correlates - Compare G-Score Predictability among Modalities using CPM</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -346,7 +346,7 @@
     <div class="slides">
 
 <section id="title-slide" class="quarto-title-block center">
-  <h1 class="title">Benchmark Neural Predictability of G-factor</h1>
+  <h1 class="title">Compare G-Score Predictability among Modalities using CPM</h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -364,8 +364,8 @@ Liang Zhang
 </section>
 
 <section>
-<section id="compare-cpm-among-different-modalities" class="title-slide slide level1 center">
-<h1>Compare CPM among different modalities</h1>
+<section id="cpm-results" class="title-slide slide level1 center">
+<h1>CPM results</h1>
 
 </section>
 <section id="configurations" class="slide level2 smaller">
@@ -386,56 +386,19 @@ Liang Zhang
 <section id="parcel-shen268-with-gsr" class="slide level2">
 <h2>Parcel Shen268 with GSR</h2>
 
-<img data-src="bench_cpm_files/figure-revealjs/fig-modality-nn268-with-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;1: CPM prediction among different modality.</p></section>
+<img data-src="compare_modality_files/figure-revealjs/fig-modality-nn268-with-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;1: CPM prediction among different modality.</p></section>
 <section id="parcel-shen268-without-gsr" class="slide level2">
 <h2>Parcel Shen268 without GSR</h2>
 
-<img data-src="bench_cpm_files/figure-revealjs/fig-modality-nn268-without-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;2: CPM prediction among different modality.</p></section>
+<img data-src="compare_modality_files/figure-revealjs/fig-modality-nn268-without-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;2: CPM prediction among different modality.</p></section>
 <section id="parcel-power264-with-gsr" class="slide level2">
 <h2>Parcel Power264 with GSR</h2>
 
-<img data-src="bench_cpm_files/figure-revealjs/fig-modality-Power264-with-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;3: CPM prediction among different modality.</p></section>
+<img data-src="compare_modality_files/figure-revealjs/fig-modality-Power264-with-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;3: CPM prediction among different modality.</p></section>
 <section id="parcel-power264-without-gsr" class="slide level2">
 <h2>Parcel Power264 without GSR</h2>
 
-<img data-src="bench_cpm_files/figure-revealjs/fig-modality-Power264-without-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;4: CPM prediction among different modality.</p></section></section>
-<section>
-<section id="compare-between-gendersex" class="title-slide slide level1 center">
-<h1>Compare between gender/sex</h1>
-
-</section>
-<section id="parcel-shen268-with-gsr-1" class="slide level2">
-<h2>Parcel Shen268 with GSR</h2>
-
-<img data-src="bench_cpm_files/figure-revealjs/fig-sex-nn268-with-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;5: CPM prediction between different sex.</p></section>
-<section id="parcel-shen268-without-gsr-1" class="slide level2">
-<h2>Parcel Shen268 without GSR</h2>
-
-<img data-src="bench_cpm_files/figure-revealjs/fig-sex-nn268-without-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: CPM prediction between different sex.</p></section>
-<section id="parcel-power264-with-gsr-1" class="slide level2">
-<h2>Parcel Power264 with GSR</h2>
-
-<img data-src="bench_cpm_files/figure-revealjs/fig-sex-Power264-with-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;7: CPM prediction between different sex.</p></section>
-<section id="parcel-power264-without-gsr-1" class="slide level2">
-<h2>Parcel Power264 without GSR</h2>
-
-<img data-src="bench_cpm_files/figure-revealjs/fig-sex-Power264-without-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;8: CPM prediction between different sex.</p></section></section>
-<section>
-<section id="model-g-with-the-highest-loading-tasks" class="title-slide slide level1 center">
-<h1>Model g with the Highest Loading Tasks</h1>
-<p>The following is to test whether the correlation between the estimated g-factor scores and the brain functional connectivity can be improved by eliminating certain observed variables, e.g., those with the least factor loading.</p>
-<blockquote>
-<p>Note: all following calculations are based on <strong>Power’s 264-node parcellation</strong> and <strong>p-value based</strong> threshold method, which appears to have a better prediction accuracy.</p>
-</blockquote>
-</section>
-<section id="trends-by-number-of-kept-tasks" class="slide level2 smaller">
-<h2>Trends by Number of Kept tasks</h2>
-
-<img data-src="bench_cpm_files/figure-revealjs/fig-tasksel-neural-correlation-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;9: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp.&nbsp;when adding low g loading tasks.</p></section>
-<section id="single-task-benchmark" class="slide level2">
-<h2>Single Task Benchmark</h2>
-
-<img data-src="bench_cpm_files/figure-revealjs/fig-single-tasks-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;10: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model.</p></section></section>
+<img data-src="compare_modality_files/figure-revealjs/fig-modality-Power264-without-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;4: CPM prediction among different modality.</p></section></section>
 <section id="references" class="title-slide slide level1 smaller scrollable">
 <h1>References</h1>
 
