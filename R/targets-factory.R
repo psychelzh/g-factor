@@ -84,9 +84,6 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   `thresh_method` and `thresh_level` are required.
 #' @param subjs_subset The subject list to include in CPM analysis.
 #' @param name_suffix The name suffix for the CPM targets.
-#' @param by_brain_mask The `by` specification for [extract_brain_mask()].
-#'   Default is the names matching those from the three required arguments,
-#'   i.e., `behav`, `config_neural` and `hypers_cpm`.
 #' @param split_hyper,subjs_info If one of these two parameters is specified,
 #'   the other must be specified, too. `split_hyper` specifies the field used to
 #'   split neural data to perform different CPM calculations, e.g., different
@@ -101,18 +98,12 @@ permute_cpm2 <- function(behav,
                          subjs_subset = NULL,
                          name_suffix = "",
                          include_file_targets = TRUE,
-                         by_brain_mask = NULL,
                          split_hyper = NULL,
                          subjs_info = NULL,
                          batches = 4, reps = 5) {
   neural <- quote(arrow::read_feather(tar_neural))
   if (!missing(subjs_subset)) {
     neural <- substitute(filter(neural, sub_id %in% subjs_subset))
-  }
-  if (missing(by_brain_mask)) {
-    by_brain_mask <- substitute(
-      any_of(c(names(behav), names(config_neural), names(hypers_cpm)))
-    )
   }
   if (!missing(split_hyper)) {
     stopifnot(!missing(subjs_info))
@@ -170,7 +161,9 @@ permute_cpm2 <- function(behav,
       name_brain_mask,
       extract_brain_mask(
         .(as.name(name_result_cpm)),
-        by = .(substitute(by_brain_mask))
+        by = .(substitute(
+          any_of(c(names(behav), names(config_neural), names(hypers_cpm)))
+        ))
       ) |>
         bquote()
     )

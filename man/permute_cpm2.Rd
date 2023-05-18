@@ -11,7 +11,6 @@ permute_cpm2(
   subjs_subset = NULL,
   name_suffix = "",
   include_file_targets = TRUE,
-  by_brain_mask = NULL,
   split_hyper = NULL,
   subjs_info = NULL,
   batches = 4,
@@ -32,10 +31,6 @@ the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::
 \item{subjs_subset}{The subject list to include in CPM analysis.}
 
 \item{name_suffix}{The name suffix for the CPM targets.}
-
-\item{by_brain_mask}{The \code{by} specification for \code{\link[=extract_brain_mask]{extract_brain_mask()}}.
-Default is the names matching those from the three required arguments,
-i.e., \code{behav}, \code{config_neural} and \code{hypers_cpm}.}
 
 \item{split_hyper, subjs_info}{If one of these two parameters is specified,
 the other must be specified, too. \code{split_hyper} specifies the field used to
