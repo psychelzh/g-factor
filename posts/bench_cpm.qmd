@@ -16,13 +16,18 @@ bibliography: references.bib
 #| label: setup
 #| include: false
 
+conflicted::conflicts_prefer(dplyr::filter(), dplyr::lag())
 library(tidyverse)
 source(here::here("R/constants.R"))
-store_modality_comparison <- targets::tar_config_get(
-  "store", 
-  config = here::here("_targets.yaml"),
-  project = "project_modality_comparison"
-)
+get_store_path <- function(project) {
+  here::here() |>
+    withr::with_dir(
+      targets::tar_config_get("store", project = project)
+    ) |>
+    here::here()
+}
+store_bench_cpm <- get_store_path("project_bench_cpm")
+store_task_selection <- get_store_path("project_task_selection")
 ```
 
 # FMRI Sample Description
@@ -33,11 +38,11 @@ store_modality_comparison <- targets::tar_config_get(
 
 targets::tar_load(
   c(subjs_info_clean, subjs_combined),
-  store = here::here(store_modality_comparison)
+  store = store_bench_cpm
 )
-subjs_info_clean |> 
-  filter(sub_id %in% subjs_combined) |> 
-  report::report_participants() |> 
+subjs_info_clean |>
+  filter(sub_id %in% subjs_combined) |>
+  report::report_participants() |>
   cat()
 ```
 
@@ -59,11 +64,11 @@ Parameters are as follows (mainly inspired by @greene2018):
 #| label: render-results-modality
 #| results: asis
 
-targets::tar_load(cpm_pred, store = here::here(store_modality_comparison))
+targets::tar_load(cpm_pred, store = store_bench_cpm)
 config <- distinct(cpm_pred, parcel, gsr)
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
-    here::here("template/modality_comparison_tmpl.qmd"),
+    "template/modality_comparison_tmpl.qmd",
     parcel = config$parcel[[row]],
     gsr = config$gsr[[row]]
   ) |>
@@ -79,11 +84,11 @@ for (row in seq_len(nrow(config))) {
 #| label: render-results-sex
 #| results: asis
 
-targets::tar_load(cpm_pred_sex, store = here::here(store_modality_comparison))
+targets::tar_load(cpm_pred_sex, store = here::here(store_bench_cpm))
 config <- distinct(cpm_pred_sex, parcel, gsr)
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
-    here::here("template/sex_comparison_tmpl.qmd"),
+    "template/sex_comparison_tmpl.qmd",
     parcel = config$parcel[[row]],
     gsr = config$gsr[[row]]
   ) |>
@@ -91,6 +96,129 @@ for (row in seq_len(nrow(config))) {
     cat()
   cat("\n\n")
 }
+```
+
+# Model g with the Highest Loading Tasks
+
+The following is to test whether the correlation between the estimated g-factor scores and the brain functional connectivity can be improved by eliminating certain observed variables, e.g., those with the least factor loading.
+
+> Note: all following calculations are based on **Power's 264-node parcellation** and **p-value based** threshold method, which appears to have a better prediction accuracy.
+
+## Trends by Number of Kept tasks  {.smaller}
+
+```{r}
+#| label: fig-tasksel-neural-correlation
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   The correlation between g factor scores and brain functional connectivity
+#|   reaches plateau after 6 variables of largest factor loading were included,
+#|   whereas that of RAPM scores reaches plateau after 13 variables. This might
+#|   indicate that more variables might not necesssarily be beneficial to
+#|   the measure of g-factor estimation, esp. when adding low g loading tasks.
+
+targets::tar_load(cpm_pred, store = store_task_selection)
+targets::tar_load(scores_g, store = store_task_selection)
+targets::tar_load(behav_main, store = store_bench_cpm)
+behav_cor <- expand_grid(
+  rename(scores_g, tasksel = scores),
+  rename(behav_main, baseline = scores)
+) |>
+  mutate(
+    map2(
+      tasksel, baseline,
+      ~ {
+        colnames(.x)[[2]] <- "x1"
+        colnames(.y)[[2]] <- "x2"
+        .x |>
+          inner_join(.y, by = "sub_id") |>
+          summarise(estimate = cor(x1, x2, use = "pairwise"))
+      }
+    ) |>
+      list_rbind(),
+    .keep = "unused"
+  )
+cpm_pred |>
+  pivot_longer(
+    all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |>
+  mutate(
+    modal = factor(modal, names(modalities)),
+    gsr = factor(gsr, names(gsrs))
+  ) |>
+  ggplot(aes(max_num_vars - n_rm, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(aes(color = parcel), side = "left") +
+  geom_point(
+    aes(max_num_vars - n_rm, estimate, color = idx),
+    behav_cor |> filter(idx == "rapm")
+  ) +
+  facet_grid(
+    cols = vars(modal),
+    rows = vars(gsr),
+    labeller = labeller(
+      modal = modalities,
+      gsr = gsrs
+    )
+  ) +
+  scale_x_continuous(
+    breaks = scales::breaks_width(4),
+    name = "Number of Kept Variables"
+  ) +
+  scale_color_manual(
+    name = "",
+    values = c(rapm = "blue4", Power264 = "grey"),
+    labels = c(
+      rapm = "Correlation with RAPM scores",
+      Power264 = "Correlation with FC (by CPM)"
+    )
+  ) +
+  scale_y_continuous(name = "Prediction (Pearson's Correlation)") +
+  theme_bw() +
+  theme(legend.position = "top")
+```
+
+## Single Task Benchmark
+
+```{r}
+#| label: fig-single-tasks
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   Correlation with brain FC for single tasks. The tasks are ordered by the
+#|   factor loading in one g factor model.
+
+targets::tar_load(
+  c(cpm_pred_single, data_names_ordered),
+  store = store_task_selection
+)
+cpm_pred_single |>
+  mutate(task = factor(task, data_names_ordered)) |>
+  pivot_longer(
+    all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |>
+  mutate(
+    modal = factor(modal, names(modalities)),
+    gsr = factor(gsr, names(gsrs))
+  ) |>
+  ggplot(aes(task, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  facet_grid(
+    cols = vars(modal),
+    rows = vars(gsr),
+    labeller = labeller(
+      modal = modalities,
+      gsr = gsrs
+    )
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Task Name (Descending Loading)", y = "Correlation with FC")
 ```
 
 # References
