@@ -1,0 +1,4 @@
+- source: project
+  netlify:
+    - id: a4f3e869-74dd-475e-be19-e43b6129c16e
+      url: 'https://g-factors-dev.netlify.app'
