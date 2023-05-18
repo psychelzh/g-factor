@@ -91,5 +91,6 @@ list(
     name_suffix = "_single"
   ),
   task_selection,
+  combine_targets(scores_g, task_selection, names(hypers_behav)),
   combine_targets(cpm_pred, task_selection, names(hypers_behav))
 )
