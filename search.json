@@ -4,42 +4,84 @@
     "href": "index.html",
     "title": "Intelligence and Its Neural Correlates",
     "section": "",
-    "text": "Compare G-Score Predictability among Modalities using CPM\n\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n  \n\n\n\n\nIntelligence and sampling of cognitive tasks\n\n\n\n\n\n\n\n\n\n\n\n\nFeb 24, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+    "text": "Benchmark Neural Predictability of G-factor\n\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n  \n\n\n\n\nIntelligence and sampling of cognitive tasks\n\n\n\n\n\n\n\n\n\n\n\n\nFeb 24, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
   },
   {
-    "objectID": "posts/compare_modality.html#configurations",
-    "href": "posts/compare_modality.html#configurations",
-    "title": "Compare G-Score Predictability among Modalities using CPM",
+    "objectID": "posts/bench_cpm.html#configurations",
+    "href": "posts/bench_cpm.html#configurations",
+    "title": "Benchmark Neural Predictability of G-factor",
     "section": "Configurations",
     "text": "Configurations\nParameters are as follows (mainly inspired by Greene et al. (2018)):\n\nFMRI data pre-processing: with or without global signal regression (GSR)\nNode parcellation: Power’s 264 nodes (Power264) or Shen’s 268 nodes (nn268)\nModality:\n\ntask: N-back task\nrest: resting-state\ncombined: combines N-back and rest-stating by appending these two data\n\nEdge selection threshold method: correlation p.value based (alpha) or network sparsity based (sparsity)"
   },
   {
-    "objectID": "posts/compare_modality.html#parcel-shen268-with-gsr",
-    "href": "posts/compare_modality.html#parcel-shen268-with-gsr",
-    "title": "Compare G-Score Predictability among Modalities using CPM",
+    "objectID": "posts/bench_cpm.html#parcel-shen268-with-gsr",
+    "href": "posts/bench_cpm.html#parcel-shen268-with-gsr",
+    "title": "Benchmark Neural Predictability of G-factor",
     "section": "Parcel Shen268 with GSR",
     "text": "Parcel Shen268 with GSR\n\nFigure 1: CPM prediction among different modality."
   },
   {
-    "objectID": "posts/compare_modality.html#parcel-shen268-without-gsr",
-    "href": "posts/compare_modality.html#parcel-shen268-without-gsr",
-    "title": "Compare G-Score Predictability among Modalities using CPM",
+    "objectID": "posts/bench_cpm.html#parcel-shen268-without-gsr",
+    "href": "posts/bench_cpm.html#parcel-shen268-without-gsr",
+    "title": "Benchmark Neural Predictability of G-factor",
     "section": "Parcel Shen268 without GSR",
     "text": "Parcel Shen268 without GSR\n\nFigure 2: CPM prediction among different modality."
   },
   {
-    "objectID": "posts/compare_modality.html#parcel-power264-with-gsr",
-    "href": "posts/compare_modality.html#parcel-power264-with-gsr",
-    "title": "Compare G-Score Predictability among Modalities using CPM",
+    "objectID": "posts/bench_cpm.html#parcel-power264-with-gsr",
+    "href": "posts/bench_cpm.html#parcel-power264-with-gsr",
+    "title": "Benchmark Neural Predictability of G-factor",
     "section": "Parcel Power264 with GSR",
     "text": "Parcel Power264 with GSR\n\nFigure 3: CPM prediction among different modality."
   },
   {
-    "objectID": "posts/compare_modality.html#parcel-power264-without-gsr",
-    "href": "posts/compare_modality.html#parcel-power264-without-gsr",
-    "title": "Compare G-Score Predictability among Modalities using CPM",
+    "objectID": "posts/bench_cpm.html#parcel-power264-without-gsr",
+    "href": "posts/bench_cpm.html#parcel-power264-without-gsr",
+    "title": "Benchmark Neural Predictability of G-factor",
     "section": "Parcel Power264 without GSR",
     "text": "Parcel Power264 without GSR\n\nFigure 4: CPM prediction among different modality."
+  },
+  {
+    "objectID": "posts/bench_cpm.html#parcel-shen268-with-gsr-1",
+    "href": "posts/bench_cpm.html#parcel-shen268-with-gsr-1",
+    "title": "Benchmark Neural Predictability of G-factor",
+    "section": "Parcel Shen268 with GSR",
+    "text": "Parcel Shen268 with GSR\n\nFigure 5: CPM prediction between different sex."
+  },
+  {
+    "objectID": "posts/bench_cpm.html#parcel-shen268-without-gsr-1",
+    "href": "posts/bench_cpm.html#parcel-shen268-without-gsr-1",
+    "title": "Benchmark Neural Predictability of G-factor",
+    "section": "Parcel Shen268 without GSR",
+    "text": "Parcel Shen268 without GSR\n\nFigure 6: CPM prediction between different sex."
+  },
+  {
+    "objectID": "posts/bench_cpm.html#parcel-power264-with-gsr-1",
+    "href": "posts/bench_cpm.html#parcel-power264-with-gsr-1",
+    "title": "Benchmark Neural Predictability of G-factor",
+    "section": "Parcel Power264 with GSR",
+    "text": "Parcel Power264 with GSR\n\nFigure 7: CPM prediction between different sex."
+  },
+  {
+    "objectID": "posts/bench_cpm.html#parcel-power264-without-gsr-1",
+    "href": "posts/bench_cpm.html#parcel-power264-without-gsr-1",
+    "title": "Benchmark Neural Predictability of G-factor",
+    "section": "Parcel Power264 without GSR",
+    "text": "Parcel Power264 without GSR\n\nFigure 8: CPM prediction between different sex."
+  },
+  {
+    "objectID": "posts/bench_cpm.html#trends-by-number-of-kept-tasks",
+    "href": "posts/bench_cpm.html#trends-by-number-of-kept-tasks",
+    "title": "Benchmark Neural Predictability of G-factor",
+    "section": "Trends by Number of Kept tasks",
+    "text": "Trends by Number of Kept tasks\n\nFigure 9: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp. when adding low g loading tasks."
+  },
+  {
+    "objectID": "posts/bench_cpm.html#single-task-benchmark",
+    "href": "posts/bench_cpm.html#single-task-benchmark",
+    "title": "Benchmark Neural Predictability of G-factor",
+    "section": "Single Task Benchmark",
+    "text": "Single Task Benchmark\n\nFigure 10: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model."
   },
   {
     "objectID": "posts/main_results.html#definition",
