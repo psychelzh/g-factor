@@ -59,7 +59,7 @@ cfg_rsmp_vars <- dplyr::bind_rows(
   tidyr::chop(c(idx_rsmp, idx_vars))
 
 config_neural <- config_neural |>
-  dplyr::filter(parcel == "Power264", gsr == "without")
+  dplyr::filter(parcel == "Power264")
 hypers_cpm <- hypers_cpm |>
   dplyr::filter(thresh_method == "alpha")
 
