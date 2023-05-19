@@ -35,39 +35,42 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
   list(
     tar_target_raw(
       "mdl_fitted",
-      df_ov |>
+      rlang::expr(
         mutate(
+          !!rlang::ensym(df_ov),
           mdl = map(
             tasks,
-            ~ fit_g(indices, .)
+            ~ fit_g(!!rlang::ensym(indices), .)
           ),
           .keep = "unused"
-        ) |>
-        substitute()
+        )
+      )
     ),
     if (include_var_exp) {
       tar_target_raw(
         "var_exp",
-        mdl_fitted |>
+        rlang::expr(
           mutate(
+            mdl_fitted,
             prop = map_dbl(mdl, calc_var_exp),
             .keep = "unused"
-          ) |>
-          substitute(),
+          )
+        ),
         deployment = "main"
       )
     },
     tar_target_raw(
       "scores_g",
-      mdl_fitted |>
+      rlang::expr(
         mutate(
+          mdl_fitted,
           scores = map(
             mdl,
-            ~ predict_g_score(indices, .)
+            ~ predict_g_score(!!rlang::ensym(indices), .)
           ),
           .keep = "unused"
-        ) |>
-        substitute()
+        )
+      )
     )
   )
 }
@@ -81,8 +84,8 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   data used. The `tar_neural` and `file` fields must be present to specify
 #'   which neural data to use.
 #' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
-#'   the `values` argument of [tarchetypes::tar_map_rep()]. The `kfolds`,
-#'   `thresh_method` and `thresh_level` are required.
+#'   the `values` argument of [tarchetypes::tar_map_rep()]. Note the names must
+#'   be consistent with the names of `formals(do_cpm2)`.
 #' @param subjs_subset The subject list to include in CPM analysis.
 #' @param name_suffix The name suffix for the CPM targets.
 #' @param split_hyper,subjs_info If one of these two parameters is specified,
@@ -102,22 +105,28 @@ permute_cpm2 <- function(behav,
                          split_hyper = NULL,
                          subjs_info = NULL,
                          batches = 4, reps = 5) {
-  neural <- quote(arrow::read_feather(tar_neural))
+  neural <- rlang::expr(arrow::read_feather(tar_neural))
   if (!missing(subjs_subset)) {
-    neural <- substitute(filter(neural, sub_id %in% subjs_subset))
+    neural <- rlang::expr(
+      filter(!!neural, sub_id %in% !!rlang::ensym(subjs_subset))
+    )
   }
   if (!missing(split_hyper)) {
     stopifnot(!missing(subjs_info))
-    neural <- .(substitute(neural)) |>
+    neural <- rlang::expr(
       semi_join(
+        !!neural,
         filter(
-          .(substitute(subjs_info)),
-          .data[[.(split_hyper)]] == .(as.name(split_hyper))
+          !!rlang::ensym(subjs_info),
+          .data[[!!split_hyper]] == !!rlang::ensym(split_hyper)
         ),
         by = "sub_id"
-      ) |>
-      bquote()
+      )
+    )
   }
+  # prepare additional arguments for `do_cpm2()` based on `hypers_cpm`
+  name_args <- intersect(names(formals(do_cpm2)), names(hypers_cpm))
+  args_cpm <- setNames(rlang::syms(name_args), name_args)
   name_result_cpm <- paste0("result_cpm", name_suffix)
   name_cpm_pred <- paste0("cpm_pred", name_suffix)
   name_brain_mask <- paste0("brain_mask", name_suffix)
@@ -130,44 +139,42 @@ permute_cpm2 <- function(behav,
     },
     tarchetypes::tar_map_rep_raw(
       name_result_cpm,
-      behav |>
+      rlang::expr(
         mutate(
+          !!rlang::ensym(behav),
           cpm = map(
             scores,
-            ~ do_cpm2(
-              neural,
-              .,
-              kfolds = kfolds,
-              thresh_method = thresh_method,
-              thresh_level = thresh_level
-            )
+            ~ do_cpm2(!!neural, ., !!!args_cpm)
           ),
           .keep = "unused"
-        ) |>
-        substitute(),
+        )
+      ),
       values = tidyr::expand_grid(config_neural, hypers_cpm),
       # `tar_neural` and `file` are constructed from other core elements
-      columns = quote(-c(tar_neural, file)),
+      columns = rlang::expr(-c(tar_neural, file)),
       batches = batches,
       reps = reps
     ),
     tar_target_raw(
       name_cpm_pred,
-      extract_cpm_pred(
-        .(as.name(name_result_cpm))
-      ) |>
-        bquote(),
+      rlang::expr(extract_cpm_pred(!!rlang::sym(name_result_cpm))),
       deployment = "main"
     ),
     tar_target_raw(
       name_brain_mask,
-      extract_brain_mask(
-        .(as.name(name_result_cpm)),
-        by = .(substitute(
-          any_of(c(names(behav), names(config_neural), names(hypers_cpm)))
-        ))
-      ) |>
-        bquote(),
+      rlang::expr(
+        extract_brain_mask(
+          !!rlang::sym(name_result_cpm),
+          by = any_of(
+            c(
+              names(!!rlang::ensym(behav)),
+              # maybe see https://github.com/r-lib/rlang/issues/1629
+              names(!!substitute(config_neural)),
+              names(!!substitute(hypers_cpm))
+            )
+          )
+        )
+      ),
       deployment = "main"
     )
   )

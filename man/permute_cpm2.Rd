@@ -25,8 +25,8 @@ data used. The \code{tar_neural} and \code{file} fields must be present to speci
 which neural data to use.}
 
 \item{hypers_cpm}{A \code{\link[=data.frame]{data.frame()}} storing the CPM hyper parameters passed to
-the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. The \code{kfolds},
-\code{thresh_method} and \code{thresh_level} are required.}
+the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. Note the names must
+be consistent with the names of \code{formals(do_cpm2)}.}
 
 \item{subjs_subset}{The subject list to include in CPM analysis.}
 
