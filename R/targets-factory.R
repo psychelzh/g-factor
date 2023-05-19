@@ -53,7 +53,8 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
             prop = map_dbl(mdl, calc_var_exp),
             .keep = "unused"
           ) |>
-          substitute()
+          substitute(),
+        deployment = "main"
       )
     },
     tar_target_raw(
@@ -155,7 +156,8 @@ permute_cpm2 <- function(behav,
       extract_cpm_pred(
         .(as.name(name_result_cpm))
       ) |>
-        bquote()
+        bquote(),
+      deployment = "main"
     ),
     tar_target_raw(
       name_brain_mask,
@@ -165,7 +167,8 @@ permute_cpm2 <- function(behav,
           any_of(c(names(behav), names(config_neural), names(hypers_cpm)))
         ))
       ) |>
-        bquote()
+        bquote(),
+      deployment = "main"
     )
   )
 }
