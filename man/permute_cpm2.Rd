@@ -35,7 +35,8 @@ be consistent with the names of \code{formals(do_cpm2)}.}
 \item{split_hyper, subjs_info}{If one of these two parameters is specified,
 the other must be specified, too. \code{split_hyper} specifies the field used to
 split neural data to perform different CPM calculations, e.g., different
-gender. Note this field must be present in both \code{hypers} and \code{subjs_info}.}
+gender. Note this field must be present in both \code{hypers_cpm} and
+\code{subjs_info}.}
 
 \item{batches, reps}{The number of batches and repetitions passed to
 \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}.}

@@ -91,7 +91,8 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #' @param split_hyper,subjs_info If one of these two parameters is specified,
 #'   the other must be specified, too. `split_hyper` specifies the field used to
 #'   split neural data to perform different CPM calculations, e.g., different
-#'   gender. Note this field must be present in both `hypers` and `subjs_info`.
+#'   gender. Note this field must be present in both `hypers_cpm` and
+#'   `subjs_info`.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
