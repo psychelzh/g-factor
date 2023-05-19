@@ -257,7 +257,7 @@ preproc_penncnp <- function(data) {
     mutate(
       across(
         c(NUM6CPT.CPN6_TP, NUM6CPT.CPN6_FN),
-        ~ coalesce(., 0)  + 1 / 3
+        ~ coalesce(., 0) + 1 / 3
       ),
       across(
         c(NUM6CPT.CPN6_FP, NUM6CPT.CPN6_TN),

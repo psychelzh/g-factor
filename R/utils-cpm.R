@@ -17,7 +17,7 @@ do_cpm2 <- function(neural, behav, kfolds, thresh_method, thresh_level,
 extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
   extract_cors <- function(cpm, edge_types = c("pos", "neg", "all")) {
     map_dbl(edge_types, ~ cpm[[str_c("cor_", .)]]$estimate) |>
-      as_tibble_row(.name_repair = ~ edge_types)
+      as_tibble_row(.name_repair = ~edge_types)
   }
   result_cpm |>
     mutate(

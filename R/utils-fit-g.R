@@ -3,7 +3,7 @@ fit_g <- function(data, vars) {
 }
 
 calc_var_exp <- function(fit) {
-  mean(loadings(fit) ^ 2)
+  mean(loadings(fit)^2)
 }
 
 predict_g_score <- function(data, mdl, id_cols = 1) {
