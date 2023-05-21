@@ -64,13 +64,13 @@ list(
     format = "file"
   ),
   prepare_permute_cpm2(
-    config_neural, behav_main, hypers_cpm,
+    config_neural, hypers_cpm, behav_main,
     subjs_subset = subjs_combined
   ),
   prepare_permute_cpm2(
     config_neural,
-    behav_main,
     tidyr::expand_grid(hypers_cpm, hypers_sex),
+    behav_main,
     subjs_subset = subjs_combined,
     name_suffix = "_sex",
     split_hyper = "sex",

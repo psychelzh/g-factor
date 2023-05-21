@@ -6,8 +6,8 @@
 \usage{
 prepare_permute_cpm2(
   config_neural,
-  behav = NULL,
   hypers_cpm = NULL,
+  behav = NULL,
   subjs_subset = NULL,
   name_suffix = "",
   include_file_targets = TRUE,
@@ -20,14 +20,15 @@ prepare_permute_cpm2(
 \arguments{
 \item{config_neural}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of neural
 data used. The \code{tar_neural} and \code{file} fields must be present to specify
-which neural data to use. You can omit all other arguments if you want to
-just add tracking for the neural data.}
-
-\item{behav}{The expression to get behavioral data.}
+which neural data to use.}
 
 \item{hypers_cpm}{A \code{\link[=data.frame]{data.frame()}} storing the CPM hyper parameters passed to
 the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. Note the names must
-be consistent with the argument names of \code{\link[=do_cpm2]{do_cpm2()}}.}
+be consistent with the argument names of \code{\link[=do_cpm2]{do_cpm2()}}. If this argument is
+not specified or is \code{NULL}, it will only return targets tracking the neural
+data.}
+
+\item{behav}{The expression to get behavioral data.}
 
 \item{subjs_subset}{The expression to get the subject list to include in CPM
 analysis.}
@@ -48,7 +49,7 @@ do CPM calculations.}
 }
 \value{
 A list of new target objects to calculate the permutation results.
-If \code{config_neural} is the only specified arguments, a list of targets
+If \code{hypers_cpm} is the not specified or is \code{NULL}, a list of targets
 tracking neural data will be returned.
 }
 \description{

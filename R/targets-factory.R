@@ -81,12 +81,13 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'
 #' @param config_neural A [data.frame()] storing the specifications of neural
 #'   data used. The `tar_neural` and `file` fields must be present to specify
-#'   which neural data to use. You can omit all other arguments if you want to
-#'   just add tracking for the neural data.
-#' @param behav The expression to get behavioral data.
+#'   which neural data to use.
 #' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
 #'   the `values` argument of [tarchetypes::tar_map_rep()]. Note the names must
-#'   be consistent with the argument names of [do_cpm2()].
+#'   be consistent with the argument names of [do_cpm2()]. If this argument is
+#'   not specified or is `NULL`, it will only return targets tracking the neural
+#'   data.
+#' @param behav The expression to get behavioral data.
 #' @param subjs_subset The expression to get the subject list to include in CPM
 #'   analysis.
 #' @param name_suffix A character scalar specifying the name suffix for the CPM
@@ -101,12 +102,12 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
-#'   If `config_neural` is the only specified arguments, a list of targets
+#'   If `hypers_cpm` is the not specified or is `NULL`, a list of targets
 #'   tracking neural data will be returned.
 #' @export
 prepare_permute_cpm2 <- function(config_neural,
-                                 behav = NULL,
                                  hypers_cpm = NULL,
+                                 behav = NULL,
                                  subjs_subset = NULL,
                                  name_suffix = "",
                                  include_file_targets = TRUE,
@@ -117,7 +118,7 @@ prepare_permute_cpm2 <- function(config_neural,
     tar_target(tar_neural, file, format = "file"),
     values = config_neural
   )
-  if (missing(behav)) {
+  if (missing(hypers_cpm) || is.null(hypers_cpm)) {
     return(file_targets)
   }
   neural <- rlang::expr(arrow::read_feather(tar_neural))

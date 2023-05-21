@@ -76,8 +76,8 @@ g_invariance <- tarchetypes::tar_map(
   ),
   prepare_permute_cpm2(
     config_neural,
-    scores_g,
     hypers_cpm,
+    scores_g,
     subjs_subset = subjs_combined,
     include_file_targets = FALSE
   )
@@ -104,8 +104,8 @@ list(
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
   prepare_permute_cpm2(
     config_neural,
-    behav_main,
     hypers_cpm,
+    behav_main,
     subjs_subset = subjs_combined,
     name_suffix = "_main"
   ),
