@@ -42,3 +42,12 @@ extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
       .by = {{ by }}
     )
 }
+
+calc_mask_dice <- function(mask, thresh_prop = 0.995) {
+  do.call(
+    rbind,
+    lapply(mask, `>`, thresh_prop)
+  ) |>
+    proxy::simil(method = "dice") |>
+    unclass()
+}

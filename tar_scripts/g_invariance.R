@@ -142,26 +142,19 @@ list(
   tar_target(
     dice_mask_pairs,
     brain_mask |>
-      filter(n() == 2, .by = c(num_vars, idx_rsmp, modal)) |>
-      pivot_longer(
-        c(pos, neg),
-        names_to = "edge_type",
-        values_to = "mask"
+      group_by(
+        pick(
+          c(num_vars, idx_rsmp,
+            any_of(c(names(config_neural), names(hypers_cpm))))
+        )
       ) |>
-      mutate(mask_bin = map(mask, ~ . > 0.995), .keep = "unused") |>
-      pivot_wider(
-        id_cols = c(num_vars, idx_rsmp, modal, edge_type),
-        names_from = id_pairs,
-        values_from = mask_bin
-      ) |>
-      mutate(
-        dice = map2_dbl(
-          `1`, `2`,
-          ~ rbind(.x, .y) |>
-            proxy::simil(method = "dice") |>
-            unclass()
+      filter(n() == 2) |>
+      summarise(
+        across(
+          any_of(names(edge_types)),
+          list(dice = calc_mask_dice)
         ),
-        .keep = "unused"
+        .groups = "drop"
       )
   )
 )
