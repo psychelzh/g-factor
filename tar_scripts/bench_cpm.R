@@ -63,13 +63,13 @@ list(
     },
     format = "file"
   ),
-  permute_cpm2(
-    behav_main, config_neural, hypers_cpm,
+  prepare_permute_cpm2(
+    config_neural, behav_main, hypers_cpm,
     subjs_subset = subjs_combined
   ),
-  permute_cpm2(
-    behav_main,
+  prepare_permute_cpm2(
     config_neural,
+    behav_main,
     tidyr::expand_grid(hypers_cpm, hypers_sex),
     subjs_subset = subjs_combined,
     name_suffix = "_sex",

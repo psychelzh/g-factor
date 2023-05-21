@@ -79,10 +79,11 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'
 #' This will generate batches of CPM permutation for targets to use.
 #'
-#' @param behav The name for the behavioral data. Should be a symbol.
 #' @param config_neural A [data.frame()] storing the specifications of neural
 #'   data used. The `tar_neural` and `file` fields must be present to specify
-#'   which neural data to use.
+#'   which neural data to use. You can omit all other arguments if you want to
+#'   just add tracking for the neural data.
+#' @param behav The name for the behavioral data. Should be a symbol.
 #' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
 #'   the `values` argument of [tarchetypes::tar_map_rep()]. Note the names must
 #'   be consistent with the names of `formals(do_cpm2)`.
@@ -96,16 +97,25 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
+#'   Only a list of targets tracking neural data will be returned if
+#'   `config_neural` is the only specified arguments.
 #' @export
-permute_cpm2 <- function(behav,
-                         config_neural,
-                         hypers_cpm,
-                         subjs_subset = NULL,
-                         name_suffix = "",
-                         include_file_targets = TRUE,
-                         split_hyper = NULL,
-                         subjs_info = NULL,
-                         batches = 4, reps = 5) {
+prepare_permute_cpm2 <- function(config_neural,
+                                 behav = NULL,
+                                 hypers_cpm = NULL,
+                                 subjs_subset = NULL,
+                                 name_suffix = "",
+                                 include_file_targets = TRUE,
+                                 split_hyper = NULL,
+                                 subjs_info = NULL,
+                                 batches = 4, reps = 5) {
+  file_targets <- tarchetypes::tar_eval(
+    tar_target(tar_neural, file, format = "file"),
+    values = config_neural
+  )
+  if (missing(behav)) {
+    return(file_targets)
+  }
   neural <- rlang::expr(arrow::read_feather(tar_neural))
   if (!missing(subjs_subset)) {
     neural <- rlang::expr(
@@ -132,12 +142,7 @@ permute_cpm2 <- function(behav,
   name_cpm_pred <- paste0("cpm_pred", name_suffix)
   name_brain_mask <- paste0("brain_mask", name_suffix)
   list(
-    if (include_file_targets) {
-      tarchetypes::tar_eval(
-        tar_target(tar_neural, file, format = "file"),
-        values = config_neural
-      )
-    },
+    if (include_file_targets) file_targets,
     tarchetypes::tar_map_rep_raw(
       name_result_cpm,
       rlang::expr(
