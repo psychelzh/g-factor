@@ -23,29 +23,33 @@ data used. The \code{tar_neural} and \code{file} fields must be present to speci
 which neural data to use. You can omit all other arguments if you want to
 just add tracking for the neural data.}
 
-\item{behav}{The name for the behavioral data. Should be a symbol.}
+\item{behav}{The expression to get behavioral data.}
 
 \item{hypers_cpm}{A \code{\link[=data.frame]{data.frame()}} storing the CPM hyper parameters passed to
 the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. Note the names must
-be consistent with the names of \code{formals(do_cpm2)}.}
+be consistent with the argument names of \code{\link[=do_cpm2]{do_cpm2()}}.}
 
-\item{subjs_subset}{The subject list to include in CPM analysis.}
+\item{subjs_subset}{The expression to get the subject list to include in CPM
+analysis.}
 
-\item{name_suffix}{The name suffix for the CPM targets.}
+\item{name_suffix}{A character scalar specifying the name suffix for the CPM
+targets.}
 
 \item{split_hyper, subjs_info}{If one of these two parameters is specified,
-the other must be specified, too. \code{split_hyper} specifies the field used to
-split neural data to perform different CPM calculations, e.g., different
-gender. Note this field must be present in both \code{hypers_cpm} and
-\code{subjs_info}.}
+the other must be specified, too. \code{split_hyper} should be a character
+scalar specifying the field used to split neural data to perform different
+CPM calculations, e.g., different gender. Note this field must be present
+in both \code{hypers_cpm} and \code{subjs_info}. \code{subjs_info} is an expression to get
+the required subjects' information used to filter out corresponding data to
+do CPM calculations.}
 
 \item{batches, reps}{The number of batches and repetitions passed to
 \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}.}
 }
 \value{
 A list of new target objects to calculate the permutation results.
-Only a list of targets tracking neural data will be returned if
-\code{config_neural} is the only specified arguments.
+If \code{config_neural} is the only specified arguments, a list of targets
+tracking neural data will be returned.
 }
 \description{
 This will generate batches of CPM permutation for targets to use.

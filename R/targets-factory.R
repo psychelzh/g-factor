@@ -83,22 +83,26 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   data used. The `tar_neural` and `file` fields must be present to specify
 #'   which neural data to use. You can omit all other arguments if you want to
 #'   just add tracking for the neural data.
-#' @param behav The name for the behavioral data. Should be a symbol.
+#' @param behav The expression to get behavioral data.
 #' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
 #'   the `values` argument of [tarchetypes::tar_map_rep()]. Note the names must
-#'   be consistent with the names of `formals(do_cpm2)`.
-#' @param subjs_subset The subject list to include in CPM analysis.
-#' @param name_suffix The name suffix for the CPM targets.
+#'   be consistent with the argument names of [do_cpm2()].
+#' @param subjs_subset The expression to get the subject list to include in CPM
+#'   analysis.
+#' @param name_suffix A character scalar specifying the name suffix for the CPM
+#'   targets.
 #' @param split_hyper,subjs_info If one of these two parameters is specified,
-#'   the other must be specified, too. `split_hyper` specifies the field used to
-#'   split neural data to perform different CPM calculations, e.g., different
-#'   gender. Note this field must be present in both `hypers_cpm` and
-#'   `subjs_info`.
+#'   the other must be specified, too. `split_hyper` should be a character
+#'   scalar specifying the field used to split neural data to perform different
+#'   CPM calculations, e.g., different gender. Note this field must be present
+#'   in both `hypers_cpm` and `subjs_info`. `subjs_info` is an expression to get
+#'   the required subjects' information used to filter out corresponding data to
+#'   do CPM calculations.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
-#'   Only a list of targets tracking neural data will be returned if
-#'   `config_neural` is the only specified arguments.
+#'   If `config_neural` is the only specified arguments, a list of targets
+#'   tracking neural data will be returned.
 #' @export
 prepare_permute_cpm2 <- function(config_neural,
                                  behav = NULL,
@@ -118,17 +122,22 @@ prepare_permute_cpm2 <- function(config_neural,
   }
   neural <- rlang::expr(arrow::read_feather(tar_neural))
   if (!missing(subjs_subset)) {
-    neural <- rlang::expr(
-      filter(!!neural, sub_id %in% !!rlang::ensym(subjs_subset))
-    )
+    subjs_subset <- rlang::enexpr(subjs_subset)
+    if (!is.null(subjs_subset)) {
+      neural <- rlang::expr(
+        filter(!!neural, sub_id %in% !!subjs_subset)
+      )
+    }
   }
-  if (!missing(split_hyper)) {
+  if (!missing(split_hyper) && !is.null(split_hyper)) {
     stopifnot(!missing(subjs_info))
+    subjs_info <- rlang::enexpr(subjs_info)
+    stopifnot(!is.null(subjs_info))
     neural <- rlang::expr(
       semi_join(
         !!neural,
         filter(
-          !!rlang::ensym(subjs_info),
+          !!subjs_info,
           .data[[!!split_hyper]] == !!rlang::ensym(split_hyper)
         ),
         by = "sub_id"
@@ -147,7 +156,7 @@ prepare_permute_cpm2 <- function(config_neural,
       name_result_cpm,
       rlang::expr(
         mutate(
-          !!rlang::ensym(behav),
+          !!rlang::enexpr(behav),
           cpm = map(
             scores,
             ~ do_cpm2(!!neural, ., !!!args_cpm)
@@ -173,7 +182,7 @@ prepare_permute_cpm2 <- function(config_neural,
           !!rlang::sym(name_result_cpm),
           by = any_of(
             c(
-              names(!!rlang::ensym(behav)),
+              names(!!rlang::enexpr(behav)),
               # maybe see https://github.com/r-lib/rlang/issues/1629
               names(!!substitute(config_neural)),
               names(!!substitute(hypers_cpm))
