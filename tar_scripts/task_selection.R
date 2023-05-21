@@ -15,10 +15,6 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-store_preproc_behav <- fs::path(
-  tar_config_get("store", project = "project_preproc_behav"),
-  "objects"
-)
 
 # prepare static branches targets ----
 config_neural <- config_neural |>
@@ -53,7 +49,7 @@ task_selection <- tarchetypes::tar_map(
 list(
   tarchetypes::tar_file_read(
     mdl_fitted_full,
-    fs::path(store_preproc_behav, "mdl_fitted_full"),
+    fs::path(store_preproc_behav, "objects", "mdl_fitted_full"),
     read = qs::qread(!!.x)
   ),
   tar_target(
@@ -69,7 +65,7 @@ list(
   ),
   tarchetypes::tar_file_read(
     indices_wider_clean,
-    fs::path(store_preproc_behav, "indices_wider_clean"),
+    fs::path(store_preproc_behav, "objects", "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
   tar_target(

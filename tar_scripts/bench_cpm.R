@@ -15,10 +15,6 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-store_preproc_behav <- fs::path(
-  tar_config_get("store", project = "project_preproc_behav"),
-  "objects"
-)
 
 # prepare static branches targets ----
 hypers_sex <- data.frame(sex = c("M", "F"))
@@ -36,12 +32,12 @@ data_subjs <- tarchetypes::tar_map(
 list(
   tarchetypes::tar_file_read(
     subjs_info_clean,
-    fs::path(store_preproc_behav, "subjs_info_clean"),
+    fs::path(store_preproc_behav, "objects", "subjs_info_clean"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
     behav_main,
-    fs::path(store_preproc_behav, "behav_main"),
+    fs::path(store_preproc_behav, "objects", "behav_main"),
     read = qs::qread(!!.x)
   ),
   data_subjs,

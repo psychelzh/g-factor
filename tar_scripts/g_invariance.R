@@ -15,10 +15,6 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-store_preproc_behav <- fs::path(
-  tar_config_get("store", project = "project_preproc_behav"),
-  "objects"
-)
 
 # prepare static branches targets ----
 cfg_rsmp_vars <- dplyr::bind_rows(
@@ -91,12 +87,12 @@ g_invariance <- tarchetypes::tar_map(
 list(
   tarchetypes::tar_file_read(
     indices_wider_clean,
-    fs::path(store_preproc_behav, "indices_wider_clean"),
+    fs::path(store_preproc_behav, "objects", "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
     behav_main,
-    fs::path(store_preproc_behav, "behav_main"),
+    fs::path(store_preproc_behav, "objects", "behav_main"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
