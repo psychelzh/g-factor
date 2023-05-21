@@ -110,30 +110,17 @@ list(
     name_suffix = "_main"
   ),
   g_invariance,
-  combine_targets(
-    data_names,
-    g_invariance,
-    c("num_vars", "id_pairs")
-  ),
-  combine_targets(
-    var_exp,
-    g_invariance,
-    c("num_vars", "id_pairs")
-  ),
-  combine_targets(
-    scores_g,
-    g_invariance,
-    c("num_vars", "id_pairs")
-  ),
-  combine_targets(
-    cpm_pred,
-    g_invariance,
-    c("num_vars", "id_pairs")
-  ),
-  combine_targets(
-    brain_mask,
-    g_invariance,
-    c("num_vars", "id_pairs")
+  lapply(
+    rlang::exprs(
+      data_names,
+      var_exp,
+      scores_g,
+      cpm_pred,
+      brain_mask
+    ),
+    combine_targets,
+    targets = g_invariance,
+    cols_targets = c("num_vars", "id_pairs")
   ),
   tar_target(
     dice_mask_pairs,

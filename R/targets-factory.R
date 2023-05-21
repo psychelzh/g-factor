@@ -6,7 +6,8 @@
 #'   targets.
 #' @returns A new target object to do the given targets combination.
 combine_targets <- function(name, targets, cols_targets) {
-  name <- deparse1(substitute(name))
+  if (!is.name(name)) name <- substitute(name)
+  name <- deparse1(name)
   tarchetypes::tar_combine_raw(
     name,
     targets[[name]],
