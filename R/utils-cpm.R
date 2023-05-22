@@ -43,10 +43,29 @@ extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
     )
 }
 
-calc_mask_dice <- function(mask, thresh_prop = 0.995) {
+calc_mask_dice <- function(mask, thresh_method = c("value", "count"),
+                           thresh_level = NULL) {
+  thresh_method <- match.arg(thresh_method)
+  if (is.null(thresh_level)) {
+    thresh_level <- switch(thresh_method,
+      value = 0.995,
+      count = 100
+    )
+  }
+  thresh_mask <- function(mask) {
+    switch(thresh_method,
+      value = mask > thresh_level,
+      count = {
+        thresh_idx <- order(mask, decreasing = TRUE)[seq_len(thresh_level)]
+        mask_out <- rep(FALSE, length(mask))
+        mask_out[thresh_idx] <- TRUE
+        mask_out
+      }
+    )
+  }
   do.call(
     rbind,
-    lapply(mask, `>`, thresh_prop)
+    lapply(mask, thresh_mask)
   ) |>
     proxy::simil(method = "dice") |>
     unclass()
