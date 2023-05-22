@@ -83,6 +83,57 @@ g_invariance <- tarchetypes::tar_map(
   )
 )
 
+mask_dices <- tarchetypes::tar_map(
+  values = cfg_rsmp_vars |>
+    dplyr::filter(dplyr::n() == 2, .by = num_vars) |>
+    dplyr::select(num_vars, id_pairs) |>
+    dplyr::mutate(
+      name_brain_mask = rlang::syms(
+        paste("brain_mask", num_vars, id_pairs, sep = "_")
+      )
+    ) |>
+    tidyr::pivot_wider(
+      names_from = id_pairs,
+      names_prefix = "pair_",
+      values_from = name_brain_mask
+    ),
+  names = num_vars,
+  list(
+    tarchetypes::tar_map_rep(
+      dice_mask_pairs,
+      bind_rows(pair_1, pair_2) |>
+        group_by(
+          pick(
+            c(idx_rsmp, any_of(c(names(config_neural), names(hypers_cpm))))
+          )
+        ) |>
+        summarise(
+          across(
+            any_of(names(edge_types)),
+            list(
+              dice = ~ calc_mask_dice(
+                .x,
+                binarize_method = binarize_method,
+                binarize_level = binarize_level
+              )
+            )
+          ),
+          .groups = "drop"
+        ),
+      values = dplyr::bind_rows(
+        data.frame(
+          binarize_method = "value",
+          binarize_level = c(0.9, 0.95, 0.99, 0.995)
+        ),
+        data.frame(
+          binarize_method = "count",
+          binarize_level = seq(100, 1000, 100)
+        )
+      )
+    )
+  )
+)
+
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
@@ -122,22 +173,10 @@ list(
     targets = g_invariance,
     cols_targets = c("num_vars", "id_pairs")
   ),
-  tar_target(
+  mask_dices,
+  combine_targets(
     dice_mask_pairs,
-    brain_mask |>
-      group_by(
-        pick(
-          c(num_vars, idx_rsmp,
-            any_of(c(names(config_neural), names(hypers_cpm))))
-        )
-      ) |>
-      filter(n() == 2) |>
-      summarise(
-        across(
-          any_of(names(edge_types)),
-          list(dice = calc_mask_dice)
-        ),
-        .groups = "drop"
-      )
+    targets = mask_dices,
+    cols_targets = "num_vars"
   )
 )
