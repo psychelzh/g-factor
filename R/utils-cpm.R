@@ -43,30 +43,36 @@ extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
     )
 }
 
-calc_mask_dice <- function(mask, thresh_method = c("value", "count"),
-                           thresh_level = NULL) {
-  thresh_method <- match.arg(thresh_method)
-  if (is.null(thresh_level)) {
-    thresh_level <- switch(thresh_method,
+calc_mask_dice <- function(mask, binarize_method = c("value", "count"),
+                           binarize_level = NULL) {
+  binarize_method <- match.arg(binarize_method)
+  if (is.null(binarize_level)) {
+    binarize_level <- switch(binarize_method,
       value = 0.995,
       count = 100
     )
   }
-  thresh_mask <- function(mask) {
-    switch(thresh_method,
-      value = mask > thresh_level,
-      count = {
-        thresh_idx <- order(mask, decreasing = TRUE)[seq_len(thresh_level)]
-        mask_out <- rep(FALSE, length(mask))
-        mask_out[thresh_idx] <- TRUE
-        mask_out
-      }
-    )
-  }
   do.call(
     rbind,
-    lapply(mask, thresh_mask)
+    lapply(
+      mask, binarize_mask,
+      method = binarize_method,
+      level = binarize_level
+    )
   ) |>
     proxy::simil(method = "dice") |>
     unclass()
+}
+
+binarize_mask <- function(mask, method, level) {
+  if (method == "value") {
+    mask_out <- mask > level
+  } else if (method == "count") {
+    mask_idx <- order(mask, decreasing = TRUE)[seq_len(level)]
+    mask_out <- rep(FALSE, length(mask))
+    mask_out[mask_idx] <- TRUE
+  } else {
+    stop("`method` must be either 'value' or 'count'")
+  }
+  mask_out
 }
