@@ -127,13 +127,9 @@ behav_cor <- expand_grid(
   mutate(
     map2(
       tasksel, baseline,
-      ~ {
-        colnames(.x)[[2]] <- "x1"
-        colnames(.y)[[2]] <- "x2"
-        .x |>
-          inner_join(.y, by = "sub_id") |>
-          summarise(estimate = cor(x1, x2, use = "pairwise"))
-      }
+      ~ .x |>
+        inner_join(.y, by = "sub_id") |>
+        summarise(estimate = cor(pick(2), pick(3), use = "pairwise"))
     ) |>
       list_rbind(),
     .keep = "unused"
