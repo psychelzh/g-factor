@@ -123,7 +123,7 @@ mask_dices <- tarchetypes::tar_map(
       values = dplyr::bind_rows(
         data.frame(
           binarize_method = "value",
-          binarize_level = c(0.9, 0.95, 0.99, 0.995)
+          binarize_level = c(0.5, 0.8, 0.9, 0.95, 0.99, 0.995)
         ),
         data.frame(
           binarize_method = "count",
