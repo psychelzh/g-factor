@@ -106,8 +106,9 @@ visualize_network <- function(adj_df, roi_labels,
 #' @param binarize_method A character string of binarization method, should be
 #'   one of `"count"` and `"value"`.
 #' @param binarize_level A numeric value of binarization level, should be a
-#'   number between 0 and 1 if `binarize_method` is `"value"`, or a number
-#'   between 1 and length of `mask` if `binarize_method` is `"count"`.
+#'   number between 0 and 1 (default: `0.95`) if `binarize_method` is `"value"`,
+#'   or a number between 1 and length of `mask` (default: `500`) if
+#'   `binarize_method` is `"count"`.
 #' @returns A logical vector of binarized mask.
 #' @export
 binarize_mask <- function(mask, binarize_method = c("count", "value"),
@@ -128,6 +129,13 @@ binarize_mask <- function(mask, binarize_method = c("count", "value"),
   mask_out
 }
 
+#' Prepare ROI labels
+#'
+#' @param atlas A data frame contains ROI labels and colors of a specific atlas.
+#' @param ... For future usage. Should be empty.
+#' @returns A data frame of ROI labels. Note that the `label_hemi` column is
+#'   added as a combination of `hemi` and `label` columns, separated by `"_"`.
+#' @export
 prepare_roi_labels <- function(atlas, ...) {
   rlang::check_dots_empty()
   dm::dm_flatten_to_tbl(atlas, "roi") |>
@@ -144,7 +152,17 @@ prepare_roi_labels <- function(atlas, ...) {
     mutate(label_hemi = as_factor(label_hemi))
 }
 
-prepare_adjacency <- function(mask, labels = NULL, ...) {
+#' Prepare adjacency matrix
+#'
+#' @param mask A vector of brain mask, should be the upper triangle of the
+#'   original full mask.
+#' @param labels A data frame of ROI labels, should contain `label_hemi` column.
+#'   Typically the output of [prepare_roi_labels()].
+#' @param ... Further arguments passed to [binarize_mask()].
+#' @returns A data frame of adjacency matrix, with columns `row`, `col`,
+#'   `degree`, `count` and `prop`.
+#' @export
+prepare_adjacency <- function(mask, labels, ...) {
   # prepare adjacency matrix in a data.frame
   size <- (sqrt((8 * length(mask)) + 1) + 1) / 2
   mask_bin <- binarize_mask(mask, ...)

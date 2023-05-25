@@ -18,8 +18,9 @@ original full mask.}
 one of \code{"count"} and \code{"value"}.}
 
 \item{binarize_level}{A numeric value of binarization level, should be a
-number between 0 and 1 if \code{binarize_method} is \code{"value"}, or a number
-between 1 and length of \code{mask} if \code{binarize_method} is \code{"count"}.}
+number between 0 and 1 (default: \code{0.95}) if \code{binarize_method} is \code{"value"},
+or a number between 1 and length of \code{mask} (default: \code{500}) if
+\code{binarize_method} is \code{"count"}.}
 }
 \value{
 A logical vector of binarized mask.
