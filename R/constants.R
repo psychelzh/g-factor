@@ -90,8 +90,8 @@ scale_thresh_methods <- list(
 )
 edge_types <- c(
   all = "Combined",
-  neg = "Anti-Corr Networks",
-  pos = "Pos-Corr Networks"
+  pos = "Pos-Corr Networks",
+  neg = "Anti-Corr Networks"
 )
 scale_edge_types <- list(
   name = "Edge Type",
