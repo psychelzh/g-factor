@@ -1,0 +1,44 @@
+## Task condtion: {{ modalities[modal] }}
+
+```{r}
+#| label: fig-mask-chord-{{ modal }}
+#| fig-width: 10
+#| fig-height: 8
+#| fig-cap: Chord diagram of top 500 edges.
+
+data <- brain_mask_main |>
+  filter(modal == "{{ modal }}", gsr == "with") |>
+  pivot_longer(
+    any_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "mask"
+  ) |>
+  mutate(
+    idx = factor(idx, names(meas_behav)),
+    edge_type = factor(edge_type, names(edge_types)),
+    adj_df = map(mask, prepare_adjacency, labels = roi_labels$label_hemi),
+    .keep = "unused"
+  ) |>
+  arrange(idx, edge_type)
+par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
+visualize_network(data$adj_df[[1]], roi_labels)
+mtext(
+  edge_types[[data$edge_type[[1]]]], side = 3, line = 0,
+  at = grconvertX(0.5, "npc", "nic"), outer = TRUE
+)
+mtext(
+  meas_behav[[data$idx[[1]]]], side = 2, line = 0,
+  at = grconvertY(0.5, "npc", "nic"), outer = TRUE
+)
+visualize_network(data$adj_df[[2]], roi_labels)
+mtext(
+  edge_types[[data$edge_type[[2]]]], side = 3, line = 0,
+  at = grconvertX(0.5, "npc", "nic"), outer = TRUE
+)
+visualize_network(data$adj_df[[3]], roi_labels)
+mtext(
+  meas_behav[[data$idx[[3]]]], side = 2, line = 0,
+  at = grconvertY(0.5, "npc", "nic"), outer = TRUE
+)
+visualize_network(data$adj_df[[4]], roi_labels)
+```

@@ -10,7 +10,11 @@ License: MIT + file LICENSE
 Depends: 
     tidyverse
 Imports: 
+    box,
     collapse,
+    conflicted,
+    ggh4x,
+    here,
     lavaan,
     tarchetypes,
     targets
