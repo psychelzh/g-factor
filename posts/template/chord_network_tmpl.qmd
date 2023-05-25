@@ -20,6 +20,11 @@ data <- brain_mask_main |>
     .keep = "unused"
   ) |>
   arrange(idx, edge_type)
+# see https://stackoverflow.com/a/24438639/5996475
+# The main point here is that we need to add an outer margin to the plot so that
+# the row and column labels are added there. Note there might be an alternative way
+# to use patchwork package, but for now it depends on this issue:
+# https://github.com/thomasp85/patchwork/issues/322
 par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
 visualize_network(data$adj_df[[1]], roi_labels)
 mtext(
