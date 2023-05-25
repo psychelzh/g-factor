@@ -15,12 +15,10 @@ csl: modified-chicago.csl
 ```{r}
 #| label: setup
 
-options(box.path = here::here())
 conflicted::conflicts_prefer(dplyr::filter())
-library(tidyverse)
+devtools::load_all()
 library(lavaan)
 library(circlize)
-box::use(R/constants[...])
 knitr::opts_chunk$set(dev = "ragg_png")
 ```
 
@@ -572,10 +570,9 @@ cpm_pred |>
 #| results: asis
 
 targets::tar_load(brain_mask_main, store = store_g_invariance)
-source(here::here("R/brain_mask.R"))
-roi_labels <- prepare_roi_labels(
-  readRDS(here::here("config/atlas_power.rds"))
-)
+roi_labels <- here::here("config/atlas_power.rds") |> 
+  readRDS() |> 
+  prepare_roi_labels()
 config <- distinct(brain_mask_main, modal)
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
