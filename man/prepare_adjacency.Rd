@@ -2,22 +2,33 @@
 % Please edit documentation in R/brain_mask.R
 \name{prepare_adjacency}
 \alias{prepare_adjacency}
+\alias{prepare_adj_df}
+\alias{prepare_adj_mat}
 \title{Prepare adjacency matrix}
 \usage{
-prepare_adjacency(mask, labels, ...)
+prepare_adj_df(mask, ..., labels = NULL)
+
+prepare_adj_mat(mask, ..., labels = NULL, which = "degree", diagonal = 0)
 }
 \arguments{
 \item{mask}{A vector of brain mask, should be the upper triangle of the
 original full mask.}
 
-\item{labels}{A data frame of ROI labels, should contain \code{label_hemi} column.
-Typically the output of \code{\link[=prepare_roi_labels]{prepare_roi_labels()}}.}
-
 \item{...}{Further arguments passed to \code{\link[=binarize_mask]{binarize_mask()}}.}
+
+\item{labels}{A data frame of ROI labels, should contain \code{label_hemi} column.
+Typically the output of \code{\link[=prepare_roi_labels]{prepare_roi_labels()}}. If not \code{NULL}, the bare
+adjacency matrix will be returned.}
+
+\item{which}{The index to transform to matrix. Default to \code{"degree"}, means
+the original binary matrix or summarized degree matrix.}
+
+\item{diagonal}{Value set to diagnol, default to 0.}
 }
 \value{
-A data frame of adjacency matrix, with columns \code{row}, \code{col},
-\code{degree}, \code{count} and \code{prop}.
+For \code{prepare_adj_df}, a data frame of adjacency matrix, with columns
+\code{row}, \code{col}, \code{degree}, \code{count} and \code{prop}. For \code{prepare_adj_mat}, a matrix
+with values from \code{which} is returned.
 }
 \description{
 Prepare adjacency matrix

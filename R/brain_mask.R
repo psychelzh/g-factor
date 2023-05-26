@@ -154,31 +154,66 @@ prepare_roi_labels <- function(atlas, ...) {
 
 #' Prepare adjacency matrix
 #'
+#' @name prepare_adjacency
 #' @param mask A vector of brain mask, should be the upper triangle of the
 #'   original full mask.
-#' @param labels A data frame of ROI labels, should contain `label_hemi` column.
-#'   Typically the output of [prepare_roi_labels()].
 #' @param ... Further arguments passed to [binarize_mask()].
-#' @returns A data frame of adjacency matrix, with columns `row`, `col`,
-#'   `degree`, `count` and `prop`.
+#' @param labels A data frame of ROI labels, should contain `label_hemi` column.
+#'   Typically the output of [prepare_roi_labels()]. If not `NULL`, the bare
+#'   adjacency matrix will be returned.
+#' @param which The index to transform to matrix. Default to `"degree"`, means
+#'   the original binary matrix or summarized degree matrix.
+#' @param diagonal Value set to diagnol, default to 0.
+#' @returns For `prepare_adj_df`, a data frame of adjacency matrix, with columns
+#'   `row`, `col`, `degree`, `count` and `prop`. For `prepare_adj_mat`, a matrix
+#'   with values from `which` is returned.
+NULL
+
+#' @rdname prepare_adjacency
 #' @export
-prepare_adjacency <- function(mask, labels, ...) {
+prepare_adj_df <- function(mask, ..., labels = NULL) {
   # prepare adjacency matrix in a data.frame
   size <- (sqrt((8 * length(mask)) + 1) + 1) / 2
   mask_bin <- binarize_mask(mask, ...)
-  expand_grid(row = seq_len(size), col = seq_len(size)) |>
+  adj_df <- expand_grid(row = seq_len(size), col = seq_len(size)) |>
     filter(row < col) |> # upper triangle has larger column index
-    add_column(val = mask_bin) |>
-    mutate(
+    add_column(degree = mask_bin)
+  if (!is.null(labels)) {
+    adj_df <- mutate(
       across(
         c(row, col),
         \(x) labels[x]
       )
     ) |>
-    summarise(
-      degree = sum(val),
-      count = n(),
-      prop = degree / count,
-      .by = c(row, col)
-    )
+      summarise(
+        degree = sum(degree),
+        count = n(),
+        prop = degree / count,
+        .by = c(row, col)
+      )
+  }
+  adj_df
+}
+
+#' @rdname prepare_adjacency
+#' @export
+prepare_adj_mat <- function(mask, ..., labels = NULL, which = "degree",
+                            diagonal = 0) {
+  adj_df <- prepare_adj_df(mask, ..., labels = labels) |>
+    select(row, col, all_of(which))
+  size <- with(adj_df, n_distinct(c(row, col)))
+  diags <- expand_grid(row = seq_len(size), col = seq_len(size)) |>
+    filter(row == col) |>
+    add_column("{which}" := diagonal)
+  adj_mat <- bind_rows(adj_df, diags) |>
+    pivot_wider(
+      names_from = col,
+      names_sort = TRUE,
+      values_from = all_of(which),
+      values_fill = rlang::list2("{which}" := 0)
+    ) |>
+    column_to_rownames("row") |>
+    as.matrix()
+  adj_mat <- adj_mat + t(adj_mat)
+  adj_mat
 }
