@@ -16,3 +16,6 @@ project_g_invariance:
 project_task_selection:
   script: tar_scripts/task_selection.R
   store: _targets/task_selection
+project_g_invariance_shen268:
+  script: tar_scripts/g_invariance_shen268.R
+  store: _targets/g_invariance_shen268
