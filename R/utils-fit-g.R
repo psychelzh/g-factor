@@ -1,3 +1,4 @@
+#' @import lavaan
 fit_g <- function(data, vars) {
   efa(data, ov.names = vars, std.ov = TRUE, missing = "ml")
 }

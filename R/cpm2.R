@@ -23,6 +23,7 @@
 #'   * cor_{pos,neg,all}: Correlation test result between predicted and true
 #'   behavior.
 #' @author Liang Zhang <psychelzh@outlook.com>
+#' @importFrom collapse %r-% %r/%
 #' @export
 cpm2 <- function(data, behav = NULL, kfolds = NULL,
                  bias_correct = NULL,

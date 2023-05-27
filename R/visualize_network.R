@@ -11,6 +11,7 @@
 #' @param group_by_hemi A logical value indicating whether to group ROIs by
 #'   hemisphere.
 #' @returns Invisible `NULL`.
+#' @import circlize
 #' @export
 visualize_network <- function(adj_df, roi_labels,
                               link_val = NULL,
