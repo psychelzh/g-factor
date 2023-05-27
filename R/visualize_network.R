@@ -3,30 +3,38 @@
 #' @param adj_df A data frame contains adjacency matrix, should be the upper
 #'   triangle of the original full matrix.
 #' @param roi_labels A data frame contains ROI labels and colors.
-#' @param link_val A character string of link value, should be one of `"degree"`
-#'   and `"prop"`.
+#' @param link_val <[`tidy-select`][dplyr::dplyr_tidy_select]> Variable names
+#'   from `adj_df` used as the value of links. If `NULL`, the link value will be
+#'   set as the third column of `adj_df`.
 #' @param link_color A character string of length two, specifying the color of
 #'   the lowest and highest link value.
+#' @param group_by_hemi A logical value indicating whether to group ROIs by
+#'   hemisphere.
 #' @returns Invisible `NULL`.
 #' @export
 visualize_network <- function(adj_df, roi_labels,
-                              link_val = c("degree", "prop"),
-                              link_color = c("white", "black")) {
-  link_val <- match.arg(link_val)
+                              link_val = NULL,
+                              link_color = c("white", "black"),
+                              group_by_hemi = TRUE) {
+  if (is.null(link_val)) link_val <- 3
+  col_label <- if (group_by_hemi) "label_hemi" else "label"
+  col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
   # setup grid colors
   grid_colors <- roi_labels |>
-    distinct(label_hemi, color_hemi) |>
+    distinct(pick(all_of(c(col_label, col_color)))) |>
     deframe()
-  # separate into hemispheres
-  label_hemis <- unique(roi_labels$label_hemi)
-  groups <- setNames(
-    str_extract(label_hemis, "left|right"),
-    label_hemis
-  )
+  if (group_by_hemi) {
+    # extract hemisphere group names
+    label_hemis <- unique(roi_label[[col_label]])
+    groups <- setNames(
+      str_extract(label_hemis, "left|right"),
+      label_hemis
+    )
+  }
   # plot chord diagram with groups support
   circos.clear()
   chordDiagram(
-    select(adj_df, 1, 2, all_of(link_val)),
+    select(adj_df, 1, 2, {{ link_val }}),
     grid.col = grid_colors,
     col = colorRamp2(
       range(adj_df[[3]]),
@@ -38,7 +46,7 @@ visualize_network <- function(adj_df, roi_labels,
       track.margin = c(mm_h(6), 0)
     ),
     annotationTrack = "grid",
-    group = groups
+    group = if (group_by_hemi) groups
   )
   circos.track(
     track.index = 2,
@@ -65,20 +73,22 @@ visualize_network <- function(adj_df, roi_labels,
     },
     bg.border = NA
   )
-  highlight.sector(
-    names(groups)[groups == "left"],
-    track.index = 1,
-    text = "Left Heimisphere",
-    col = NA,
-    facing = "bending"
-  )
-  highlight.sector(
-    names(groups)[groups == "right"],
-    track.index = 1,
-    text = "Right Heimisphere",
-    col = NA,
-    facing = "bending"
-  )
+  if (group_by_hemi) {
+    highlight.sector(
+      names(groups)[groups == "left"],
+      track.index = 1,
+      text = "Left Heimisphere",
+      col = NA,
+      facing = "bending"
+    )
+    highlight.sector(
+      names(groups)[groups == "right"],
+      track.index = 1,
+      text = "Right Heimisphere",
+      col = NA,
+      facing = "bending"
+    )
+  }
   circos.clear()
   invisible()
 }
