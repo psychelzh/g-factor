@@ -116,3 +116,28 @@ prepare_roi_labels <- function(atlas, ...) {
     arrange(hemi, network) |>
     mutate(label_hemi = as_factor(label_hemi))
 }
+
+#' Prepare adjacency matrix
+#'
+#' @name prepare_adjacency
+#' @param mask A vector of brain mask, should be the upper triangle of the
+#'   original full mask.
+#' @param ... Further arguments passed to [binarize_mask()].
+#' @returns A `data.frame` with `row`, `col` and additional values.
+prepare_adjacency <- function(mask, ...) {
+  size <- (sqrt((8 * length(mask)) + 1) + 1) / 2
+  mask_bin <- binarize_mask(mask, ...)
+  adj_df_upper <- expand_grid(
+    row = seq_len(size),
+    col = seq_len(size)
+  ) |>
+    filter(row < col) |> # upper triangle has larger column index
+    add_column(
+      bin = mask_bin,
+      frac = mask * mask_bin
+    )
+  adj_df_lower <- adj_df_upper
+  # swap row and column
+  colnames(adj_df_lower)[1:2] <- colnames(adj_df_lower)[c(2, 1)]
+  bind_rows(adj_df_upper, adj_df_lower)
+}
