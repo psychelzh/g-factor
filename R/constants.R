@@ -120,5 +120,6 @@ get_store_path <- function(project) {
 }
 store_preproc_behav <- get_store_path("project_preproc_behav")
 store_bench_cpm <- get_store_path("project_bench_cpm")
+store_cpm_main <- get_store_path("project_cpm_main")
 store_task_selection <- get_store_path("project_task_selection")
 store_g_invariance <- get_store_path("project_g_invariance")

@@ -54,8 +54,9 @@ cfg_rsmp_vars <- dplyr::bind_rows(
 ) |>
   tidyr::chop(c(idx_rsmp, idx_vars))
 
+# compare two parcellations
 config_neural <- config_neural |>
-  dplyr::filter(parcel == "Power264")
+  dplyr::filter(gsr == "with")
 hypers_cpm <- hypers_cpm |>
   dplyr::filter(thresh_method == "alpha")
 
@@ -142,32 +143,20 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
-    behav_main,
-    fs::path(store_preproc_behav, "objects", "behav_main"),
-    read = qs::qread(!!.x)
-  ),
-  tarchetypes::tar_file_read(
     subjs_combined,
     file_subjs_combined,
     read = as.numeric(read_lines(!!.x))
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
-  prepare_permute_cpm2(
-    config_neural,
-    hypers_cpm,
-    behav_main,
-    subjs_subset = subjs_combined,
-    name_suffix = "_main"
-  ),
+  prepare_permute_cpm2(config_neural),
   g_invariance,
   lapply(
     rlang::exprs(
       data_names,
       var_exp,
       scores_g,
-      cpm_pred,
-      brain_mask
+      cpm_pred
     ),
     combine_targets,
     targets = g_invariance,
