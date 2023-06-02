@@ -56,8 +56,15 @@ list(
         pluck("scores", 1, "sub_id")
     )
   ),
+  include_reg_covars(
+    behav_main,
+    covars = c("age", "sex"),
+    subjs_info = subjs_info_clean,
+    name_suffix = "_reg_covars"
+  ),
   tar_target(
-    subjs_combined_file, {
+    subjs_combined_file,
+    {
       write_lines(subjs_combined, file_subjs_combined)
       file_subjs_combined
     },
@@ -68,13 +75,9 @@ list(
     subjs_subset = subjs_combined
   ),
   prepare_permute_cpm2(
-    config_neural,
-    tidyr::expand_grid(hypers_cpm, hypers_sex),
-    behav_main,
+    config_neural, hypers_cpm, behav_main_reg_covars,
     subjs_subset = subjs_combined,
-    name_suffix = "_sex",
-    split_hyper = "sex",
-    subjs_info = subjs_info_clean,
+    name_suffix = "_reg_covars",
     include_file_targets = FALSE
   )
 )

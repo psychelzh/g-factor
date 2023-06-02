@@ -78,6 +78,42 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
   )
 }
 
+#' Target factory to include regression covariates
+#'
+#' This will generate targets to include regression covariates in the behavior
+#' data.
+#'
+#' @param behav The expression to get behavioral data.
+#' @param covars A character vector specifying the covariates to include.
+#' @param subjs_info The expression to get the subject information data.
+#' @param name_suffix A character scalar specifying the name suffix for the
+#'   targets.
+#' @returns A new target object to include regression covariates.
+#' @export
+include_reg_covars <- function(behav, covars, subjs_info,
+                               name_suffix = "_reg_covars") {
+  name_behav <- deparse1(substitute(behav))
+  formula <- as.formula(paste("g ~", paste(covars, collapse = " + ")))
+  tar_target_raw(
+    paste0(name_behav, name_suffix),
+    rlang::expr(
+      mutate(
+        !!rlang::enexpr(behav),
+        scores = map(
+          scores,
+          ~ . |>
+            mutate(
+              g = . |>
+                left_join(!!rlang::enexpr(subjs_info), by = "sub_id") |>
+                lm(!!formula, data = _, na.action = na.exclude) |>
+                resid()
+            )
+        )
+      )
+    )
+  )
+}
+
 #' Target factory for CPM permutation
 #'
 #' This will generate batches of CPM permutation for targets to use.
