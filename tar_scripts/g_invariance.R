@@ -58,7 +58,10 @@ cfg_rsmp_vars <- dplyr::bind_rows(
 config_neural <- config_neural |>
   dplyr::filter(gsr == "with")
 hypers_cpm <- hypers_cpm |>
-  dplyr::filter(thresh_method == "alpha")
+  dplyr::filter(
+    thresh_method == "alpha",
+    thresh_level == 0.01
+  )
 
 g_invariance <- tarchetypes::tar_map(
   values = cfg_rsmp_vars,
@@ -75,11 +78,25 @@ g_invariance <- tarchetypes::tar_map(
     indices_wider_clean,
     data_names
   ),
+  include_reg_covars(
+    scores_g,
+    covars = c("age", "sex"),
+    subjs_info = subjs_info_clean,
+    name_suffix = "_reg_covars"
+  ),
   prepare_permute_cpm2(
     config_neural,
     hypers_cpm,
     scores_g,
     subjs_subset = subjs_combined,
+    include_file_targets = FALSE
+  ),
+  prepare_permute_cpm2(
+    config_neural,
+    hypers_cpm,
+    scores_g_reg_covars,
+    subjs_subset = subjs_combined,
+    name_suffix = "_reg_covars",
     include_file_targets = FALSE
   )
 )
@@ -137,6 +154,11 @@ mask_dices <- tarchetypes::tar_map(
 
 # targets pipeline ----
 list(
+  tarchetypes::tar_file_read(
+    subjs_info_clean,
+    fs::path(store_preproc_behav, "objects", "subjs_info_clean"),
+    read = qs::qread(!!.x)
+  ),
   tarchetypes::tar_file_read(
     indices_wider_clean,
     fs::path(store_preproc_behav, "objects", "indices_wider_clean"),
