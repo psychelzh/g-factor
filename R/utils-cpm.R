@@ -1,4 +1,12 @@
 #' Perform CPM by correctly join neural and behavioral data
+#'
+#' @param neural A `data.frame` storing the neural data.
+#' @param behav A `data.frame` storing the behavioral data.
+#' @param kfolds,thresh_method,thresh_level,bias_correct See `cpm2()`.
+#' @param id_cols A character vector specifying the column names for subject
+#'   identifiers.
+#' @returns A list of results from `cpm2()`.
+#' @export
 do_cpm2 <- function(neural, behav, kfolds, thresh_method, thresh_level,
                     bias_correct = TRUE, id_cols = "sub_id") {
   neural |>
@@ -14,6 +22,13 @@ do_cpm2 <- function(neural, behav, kfolds, thresh_method, thresh_level,
     )
 }
 
+#' Extract CPM prediction results
+#'
+#' @param result_cpm A list of results from `cpm2()`.
+#' @param col_cpm A character vector specifying the column names for CPM
+#'   prediction results.
+#' @returns A data frame with CPM prediction results.
+#' @export
 extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
   extract_cors <- function(cpm, edge_types = c("pos", "neg", "all")) {
     map_dbl(edge_types, ~ cpm[[str_c("cor_", .)]]$estimate) |>
@@ -27,6 +42,15 @@ extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
     )
 }
 
+#' Extract CPM mask results
+#'
+#' @param result_cpm A list of results from `cpm2()`.
+#' @param by A character vector specifying the column names for grouping
+#'  variables.
+#' @param col_cpm A character vector specifying the column names for CPM
+#'  prediction results.
+#' @returns A data frame with CPM mask results.
+#' @export
 extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
   aggregate_masks <- function(cpm, edge_types = c("pos", "neg")) {
     map(

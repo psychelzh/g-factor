@@ -14,6 +14,19 @@ do_cpm2(
   id_cols = "sub_id"
 )
 }
+\arguments{
+\item{neural}{A \code{data.frame} storing the neural data.}
+
+\item{behav}{A \code{data.frame} storing the behavioral data.}
+
+\item{kfolds, thresh_method, thresh_level, bias_correct}{See \code{cpm2()}.}
+
+\item{id_cols}{A character vector specifying the column names for subject
+identifiers.}
+}
+\value{
+A list of results from \code{cpm2()}.
+}
 \description{
 Perform CPM by correctly join neural and behavioral data
 }
