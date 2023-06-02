@@ -30,11 +30,11 @@ hypers_cpm <- tidyr::expand_grid(
   dplyr::bind_rows(
     tibble::tibble(
       thresh_method = "alpha",
-      thresh_level = 0.01
+      thresh_level = c(0.01, 0.005, 0.001)
     ),
     tibble::tibble(
       thresh_method = "sparsity",
-      thresh_level = 0.01
+      thresh_level = c(0.01, 0.025, 0.05, 0.1)
     )
   )
 )
