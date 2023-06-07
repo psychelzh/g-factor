@@ -84,15 +84,23 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #' data.
 #'
 #' @param behav The expression to get behavioral data.
-#' @param covars A character vector specifying the covariates to include.
 #' @param subjs_info The expression to get the subject information data.
+#' @param covars A character vector specifying the covariates to include. Note
+#'   the covariates must be present in `subjs_info`. If this argument is not
+#'   specified or is `NULL`, all covariates in `subjs_info` will be included.
 #' @param name_suffix A character scalar specifying the name suffix for the
 #'   targets.
 #' @returns A new target object to include regression covariates.
 #' @export
-include_reg_covars <- function(behav, covars, subjs_info,
+include_reg_covars <- function(behav, subjs_info,
+                               covars = NULL,
                                name_suffix = "_reg_covars") {
   name_behav <- deparse1(substitute(behav))
+  if (is.null(covars)) {
+    covars <- rlang::expr(
+      setdiff(names(!!rlang::enexpr(subjs_info)), "sub_id")
+    )
+  }
   tar_target_raw(
     paste0(name_behav, name_suffix),
     rlang::expr(

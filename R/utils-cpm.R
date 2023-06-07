@@ -66,20 +66,3 @@ extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
       .by = {{ by }}
     )
 }
-
-#' Regress out covariates
-#'
-#' @param data A data frame with subject identifiers and outcome variable.
-#' @param covars A character vector specifying covariates.
-#' @param subjs_info A data frame with subject identifiers and covariates.
-#' @returns A data frame with residuals.
-#' @export
-regress_covariates <- function(data, covars, subjs_info) {
-  name_outcome <- names(data)[2]
-  formula <- as.formula(
-    paste(name_outcome, "~", paste(covars, collapse = " + "))
-  )
-  data_combined <- left_join(data, subjs_info, by = "sub_id")
-  data[[2]] <- resid(lm(formula, data = data_combined, na.action = na.exclude))
-  data
-}

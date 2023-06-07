@@ -30,8 +30,8 @@ data_subjs <- tarchetypes::tar_map(
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
-    subjs_info_clean,
-    fs::path(store_preproc_behav, "objects", "subjs_info_clean"),
+    subjs_covariates,
+    fs::path(store_preproc_behav, "objects", "subjs_covariates"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
@@ -57,8 +57,7 @@ list(
   ),
   include_reg_covars(
     behav_main,
-    covars = c("age", "sex"),
-    subjs_info = subjs_info_clean,
+    subjs_info = subjs_covariates,
     name_suffix = "_reg_covars"
   ),
   tar_target(
