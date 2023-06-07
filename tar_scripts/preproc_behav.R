@@ -45,24 +45,11 @@ preproc_behav <- tarchetypes::tar_map(
 
 # targets pipeline ----
 list(
-  tarchetypes::tar_file_read(
-    indices_selection,
-    "config/indices_selection.csv",
-    read = read_csv(!!.x, show_col_types = FALSE)
-  ),
+  # part I: subjs info ----
   tarchetypes::tar_file_read(
     sub_id_transform,
     "config/sub_id_transform.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
-  ),
-  tarchetypes::tar_file_read(
-    data_penncnp,
-    "data/behav/penncnp.csv",
-    read = read_csv(!!.x, show_col_types = FALSE)
-  ),
-  tar_target(
-    indices_penncnp,
-    preproc_penncnp(data_penncnp)
   ),
   tarchetypes::tar_file_read(
     data_clean,
@@ -100,6 +87,8 @@ list(
       select(sub_id, age, sex, site, mean_fd_rest, mean_fd_task) |>
       drop_na()
   ),
+  # part II: indices ----
+  preproc_behav,
   tar_target(
     indices_keepTrack,
     preproc_existed(
@@ -116,6 +105,12 @@ list(
       disp_name = "FM"
     )
   ),
+  tarchetypes::tar_file_read(
+    indices_penncnp,
+    "data/behav/penncnp.csv",
+    read = read_csv(!!.x, show_col_types = FALSE) |>
+      preproc_penncnp()
+  ),
   tar_target(
     indices_Raven,
     preproc_existed(
@@ -124,7 +119,6 @@ list(
       disp_name = "RAPM"
     )
   ),
-  preproc_behav,
   tarchetypes::tar_combine(
     indices,
     preproc_behav[[1]],
@@ -142,6 +136,11 @@ list(
         indices_Raven
       ) |>
       correct_subjs_id(sub_id_transform)
+  ),
+  tarchetypes::tar_file_read(
+    indices_selection,
+    "config/indices_selection.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
   ),
   tar_target(indices_clean, clean_indices(indices, indices_selection)),
   tar_target(
@@ -164,6 +163,7 @@ list(
       ungroup() |>
       semi_join(subjs_info_clean, by = "sub_id")
   ),
+  # part III: factor analysis ----
   tarchetypes::tar_file_read(
     mdl_spec,
     "config/behav.lavaan",
