@@ -7,20 +7,21 @@ file_subjs_combined <- "data/subjs_combined"
 
 # basic configurations for CPM modeling ----
 config_neural <- tidyr::expand_grid(
-  modal = c("nbackfull", "rest", "run1rest"),
+  cond = c("nbackrun1", "rest", "run1rest"),
   parcel = c("nn268", "Power264"),
+  filt = c("bandpass", "lowpass"),
   gsr = c("with", "without")
 ) |>
   dplyr::mutate(
     file = fs::path(
       "data/neural",
       sprintf(
-        "FC_modal-%s_parcel-%s_gsr-%s.arrow",
-        modal, parcel, gsr
+        "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
+        cond, parcel, filt, gsr
       )
     ),
     tar_neural = paste(
-      "file_neural", modal, parcel, gsr,
+      "file_neural", cond, parcel, filt, gsr,
       sep = "_"
     ) |>
       rlang::syms()
@@ -30,7 +31,7 @@ hypers_cpm <- tidyr::expand_grid(
   dplyr::bind_rows(
     tibble::tibble(
       thresh_method = "alpha",
-      thresh_level = c(0.01, 0.005, 0.001)
+      thresh_level = c(0.05, 0.01, 0.005, 0.001)
     ),
     tibble::tibble(
       thresh_method = "sparsity",
@@ -49,15 +50,15 @@ scale_sexes <- list(
 )
 
 # scales for neural parameters
-modalities <- c(
+conds <- c(
   run1rest = "Combined",
   nbackfull = "Task",
   rest = "Resting"
 )
-scale_modalities <- list(
-  name = "Modality",
-  limits = names(modalities),
-  labels = modalities
+scale_conds <- list(
+  name = "Task Condition",
+  limits = names(conds),
+  labels = conds
 )
 parcels <- c(
   nn268 = "Shen268",
@@ -67,6 +68,15 @@ scale_parcels <- list(
   name = "Parcellation",
   limits = names(parcels),
   labels = parcels
+)
+filts <- c(
+  bandpass = "Bandpass",
+  lowpass = "Lowpass"
+)
+scale_filts <- list(
+  name = "Filtering Method",
+  limits = names(filts),
+  labels = filts
 )
 gsrs <- c(
   with = "With GSR",
@@ -89,7 +99,7 @@ scale_thresh_methods <- list(
   labels = thresh_methods
 )
 edge_types <- c(
-  all = "Combined",
+  all = "Combined Networks",
   pos = "Pos-Corr Networks",
   neg = "Anti-Corr Networks"
 )
@@ -101,13 +111,24 @@ scale_edge_types <- list(
 
 # scales for behavioral parameters
 meas_behav <- c(
-  g_full = "G-Factor",
+  g_full = "G Overall",
   rapm = "RAPM"
 )
 scale_meas_behv <- list(
   name = "Behavioral Measure",
   limits = names(meas_behav),
   labels = meas_behav
+)
+
+# scales for binarize parameters
+binarize_methods <- c(
+  value = "Minimal Proportion",
+  count = "Top N Edges"
+)
+scale_binarize_methods <- list(
+  name = "Network Binarize Method",
+  limits = names(binarize_methods),
+  labels = binarize_methods
 )
 
 # meta data for targets projects ----
