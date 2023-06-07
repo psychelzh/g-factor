@@ -46,11 +46,6 @@ preproc_behav <- tarchetypes::tar_map(
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
-    subjs_info,
-    "data/subjs.csv",
-    read = read_csv(!!.x, show_col_types = FALSE)
-  ),
-  tarchetypes::tar_file_read(
     indices_selection,
     "config/indices_selection.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
@@ -74,18 +69,36 @@ list(
     "data/behav/data_clean.csv",
     read = read_csv(!!.x, show_col_types = FALSE)
   ),
+  tarchetypes::tar_file_read(
+    subjs_info,
+    "data/subjs.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
+  ),
+  tarchetypes::tar_file_read(
+    subjs_fd,
+    "data/subj_fd.csv",
+    read = read_csv(!!.x, show_col_types = FALSE)
+  ),
   tar_target(
     subjs_info_clean,
     data_clean |>
-      select(sub_id = ID, age_survey = Age, gender_survey = Gender) |>
+      rename(sub_id = ID, age_survey = Age, gender_survey = Gender) |>
       correct_subjs_id(sub_id_transform) |>
       full_join(subjs_info, by = "sub_id") |>
       mutate(
         age = coalesce(age, age_survey),
         sex = c("M", "F")[coalesce(gender, gender_survey)],
-        .keep = "unused"
+        site = if_else(sub_id < 10000, "BJ", "CQ")
       ) |>
+      select(sub_id, age, sex, site) |>
       filter(!is.na(age), !is.na(sex))
+  ),
+  tar_target(
+    subjs_covariates,
+    subjs_info_clean |>
+      full_join(subjs_fd, by = "sub_id") |>
+      select(sub_id, age, sex, site, mean_fd_rest, mean_fd_task) |>
+      drop_na()
   ),
   tar_target(
     indices_keepTrack,
@@ -111,7 +124,6 @@ list(
       disp_name = "RAPM"
     )
   ),
-  # targets_preproc_behav.R
   preproc_behav,
   tarchetypes::tar_combine(
     indices,
