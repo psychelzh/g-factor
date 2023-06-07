@@ -19,8 +19,7 @@ future::plan(future.callr::callr)
 # prepare static branches targets ----
 hypers_sex <- data.frame(sex = c("M", "F"))
 data_subjs <- tarchetypes::tar_map(
-  values = config_neural |>
-    dplyr::filter(parcel == "nn268", gsr == "without"),
+  values = dplyr::distinct(config_neural, cond, .keep_all = TRUE),
   names = modal,
   tar_target(
     subjs_pattern,
