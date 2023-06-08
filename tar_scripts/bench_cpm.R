@@ -57,11 +57,6 @@ list(
         pluck("scores", 1, "sub_id")
     )
   ),
-  include_reg_covars(
-    behav_main,
-    subjs_info = subjs_covariates,
-    name_suffix = "_reg_covars"
-  ),
   tar_target(
     subjs_combined_file,
     {
@@ -75,9 +70,10 @@ list(
     subjs_subset = subjs_combined
   ),
   prepare_permute_cpm2(
-    config_neural, hypers_cpm, behav_main_reg_covars,
+    config_neural, hypers_cpm, behav_main,
     subjs_subset = subjs_combined,
     name_suffix = "_reg_covars",
-    after_reg_covars = TRUE
+    subjs_info = subjs_covariates,
+    reg_covars = TRUE
   )
 )

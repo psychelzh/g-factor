@@ -48,9 +48,19 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
 #'   covariates will be included.
 #' @returns A data frame with residuals.
 #' @export
-regress_covariates <- function(data, subjs_info, covars = NULL) {
+regress_covariates <- function(data, subjs_info, covars = NULL,
+                               cond = NULL) {
   if (is.null(covars)) {
     covars <- names(subjs_info)[-1]
+    if (!is.null(cond)) {
+      covars <- setdiff(
+        covars,
+        switch(cond,
+          nbackrun1 = "mean_fd_rest",
+          rest = "mean_fd_task"
+        )
+      )
+    }
   }
   data |>
     left_join(subjs_info, by = "sub_id") |>

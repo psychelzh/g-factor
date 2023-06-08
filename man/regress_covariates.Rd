@@ -4,7 +4,7 @@
 \alias{regress_covariates}
 \title{Regress out covariates}
 \usage{
-regress_covariates(data, subjs_info, covars = NULL)
+regress_covariates(data, subjs_info, covars = NULL, cond = NULL)
 }
 \arguments{
 \item{data}{A data frame with subject identifiers and outcome variables.}

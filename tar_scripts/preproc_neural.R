@@ -15,7 +15,7 @@ future::plan(future.callr::callr)
 config_origin <- config_file_tracking(config_neural)
 config_reg_covars <- config_file_tracking(
   config_neural,
-  after_reg_covars = TRUE,
+  reg_covars = TRUE,
   name_suffix = "_reg_covars"
 )
 
@@ -33,7 +33,7 @@ list(
     tar_target(
       tar_neural_reg_covars, {
         arrow::read_feather(tar_neural) |>
-          regress_covariates(subjs_covariates) |>
+          regress_covariates(subjs_covariates, cond = cond) |>
           arrow::write_feather(file_reg_covars)
         file_reg_covars
       },

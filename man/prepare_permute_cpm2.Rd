@@ -13,7 +13,7 @@ prepare_permute_cpm2(
   include_file_targets = TRUE,
   split_hyper = NULL,
   subjs_info = NULL,
-  after_reg_covars = FALSE,
+  reg_covars = FALSE,
   batches = 4,
   reps = 5
 )
@@ -48,10 +48,10 @@ in both \code{hypers_cpm} and \code{subjs_info}. \code{subjs_info} is an express
 the required subjects' information used to filter out corresponding data to
 do CPM calculations.}
 
-\item{after_reg_covars}{A logical value indicating if the regression
-covariates should be included in the neural data. If \code{TRUE}, the neural
-data will be the result of regression covariates. If \code{FALSE}, the neural
-data will be the original data.}
+\item{reg_covars}{A logical value indicating if the regression covariates
+should be included in the neural data. If \code{TRUE}, the neural data will be
+the result of regression covariates. If \code{FALSE}, the neural data will be
+the original data.}
 
 \item{batches, reps}{The number of batches and repetitions passed to
 \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}.}

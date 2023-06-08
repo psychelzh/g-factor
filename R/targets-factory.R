@@ -78,42 +78,6 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
   )
 }
 
-#' Target factory to include regression covariates
-#'
-#' This will generate targets to include regression covariates in the behavior
-#' data.
-#'
-#' @param behav The expression to get behavioral data.
-#' @param subjs_info The expression to get the subject information data.
-#' @param covars A character vector specifying the covariates to include. Note
-#'   the covariates must be present in `subjs_info`. If this argument is not
-#'   specified or is `NULL`, all covariates in `subjs_info` will be included.
-#' @param name_suffix A character scalar specifying the name suffix for the
-#'   targets.
-#' @returns A new target object to include regression covariates.
-#' @export
-include_reg_covars <- function(behav, subjs_info,
-                               covars = NULL,
-                               name_suffix = "_reg_covars") {
-  name_behav <- deparse1(substitute(behav))
-  tar_target_raw(
-    paste0(name_behav, name_suffix),
-    rlang::expr(
-      mutate(
-        !!rlang::enexpr(behav),
-        scores = map(
-          scores,
-          ~ regress_covariates(
-            .,
-            covars = !!covars,
-            subjs_info = !!rlang::enexpr(subjs_info)
-          )
-        )
-      )
-    )
-  )
-}
-
 #' Target factory for CPM permutation
 #'
 #' This will generate batches of CPM permutation for targets to use.
@@ -140,10 +104,10 @@ include_reg_covars <- function(behav, subjs_info,
 #'   in both `hypers_cpm` and `subjs_info`. `subjs_info` is an expression to get
 #'   the required subjects' information used to filter out corresponding data to
 #'   do CPM calculations.
-#' @param after_reg_covars A logical value indicating if the regression
-#'   covariates should be included in the neural data. If `TRUE`, the neural
-#'   data will be the result of regression covariates. If `FALSE`, the neural
-#'   data will be the original data.
+#' @param reg_covars A logical value indicating if the regression covariates
+#'   should be included in the neural data. If `TRUE`, the neural data will be
+#'   the result of regression covariates. If `FALSE`, the neural data will be
+#'   the original data.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
@@ -158,9 +122,9 @@ prepare_permute_cpm2 <- function(config_neural,
                                  include_file_targets = TRUE,
                                  split_hyper = NULL,
                                  subjs_info = NULL,
-                                 after_reg_covars = FALSE,
+                                 reg_covars = FALSE,
                                  batches = 4, reps = 5) {
-  config_neural <- config_file_tracking(config_neural, after_reg_covars)
+  config_neural <- config_file_tracking(config_neural, reg_covars)
   file_targets <- tarchetypes::tar_eval(
     tar_target(tar_neural, file, format = "file"),
     values = config_neural
@@ -176,6 +140,25 @@ prepare_permute_cpm2 <- function(config_neural,
         filter(!!neural, sub_id %in% !!subjs_subset)
       )
     }
+  }
+  behav <- rlang::enexpr(behav)
+  if (reg_covars) {
+    stopifnot(!missing(subjs_info))
+    subjs_info <- rlang::enexpr(subjs_info)
+    stopifnot(!is.null(subjs_info))
+    behav <- rlang::expr(
+      mutate(
+        !!behav,
+        scores = map(
+          scores,
+          ~ regress_covariates(
+            data = .,
+            subjs_info = !!subjs_info,
+            cond = cond
+          )
+        )
+      )
+    )
   }
   if (!missing(split_hyper) && !is.null(split_hyper)) {
     stopifnot(!missing(subjs_info))
@@ -204,7 +187,7 @@ prepare_permute_cpm2 <- function(config_neural,
       name_result_cpm,
       rlang::expr(
         mutate(
-          !!rlang::enexpr(behav),
+          !!behav,
           cpm = map(
             scores,
             ~ do_cpm2(!!neural, ., !!!args_cpm)
@@ -244,20 +227,20 @@ prepare_permute_cpm2 <- function(config_neural,
 }
 
 # helper functions ----
+
 #' Configure file tracking for neural data
 #'
 #' @param config A [data.frame()] storing the specifications of neural data
 #'   used.
-#' @param after_reg_covars A logical value indicating if using the neural data
-#'   after regression covariates.
+#' @param reg_covars A logical value indicating if using the neural data after
+#'   regression covariates.
 #' @param name_suffix A character scalar specifying the name suffix for the
 #'   targets.
-#' @returns A new [data.frame()] with the `file` and `tar_neural` fields
-#'   added.
+#' @returns A new [data.frame()] with the `file` and `tar_neural` fields added.
 #' @export
-config_file_tracking <- function(config, after_reg_covars = FALSE,
+config_file_tracking <- function(config, reg_covars = FALSE,
                                  name_suffix = "") {
-  if (!after_reg_covars) {
+  if (!reg_covars) {
     dir_data <- "data/neural"
     name_prefix <- "file_neural"
   } else {
