@@ -96,11 +96,6 @@ include_reg_covars <- function(behav, subjs_info,
                                covars = NULL,
                                name_suffix = "_reg_covars") {
   name_behav <- deparse1(substitute(behav))
-  if (is.null(covars)) {
-    covars <- rlang::expr(
-      setdiff(names(!!rlang::enexpr(subjs_info)), "sub_id")
-    )
-  }
   tar_target_raw(
     paste0(name_behav, name_suffix),
     rlang::expr(
@@ -136,6 +131,8 @@ include_reg_covars <- function(behav, subjs_info,
 #'   analysis.
 #' @param name_suffix A character scalar specifying the name suffix for the CPM
 #'   targets.
+#' @param include_file_targets A logical value indicating if the targets
+#'   tracking the neural data should be included.
 #' @param split_hyper,subjs_info If one of these two parameters is specified,
 #'   the other must be specified, too. `split_hyper` should be a character
 #'   scalar specifying the field used to split neural data to perform different

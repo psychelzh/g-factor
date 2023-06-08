@@ -42,17 +42,27 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
 
 #' Regress out covariates
 #'
-#' @param data A data frame with subject identifiers and outcome variable.
+#' @param data A data frame with subject identifiers and outcome variables.
 #' @param subjs_info A data frame with subject identifiers and covariates.
-#' @param covars A character vector specifying covariates.
+#' @param covars A character vector specifying covariates. If `NULL`, all
+#'   covariates will be included.
 #' @returns A data frame with residuals.
 #' @export
-regress_covariates <- function(data, subjs_info, covars) {
-  name_outcome <- names(data)[2]
-  formula <- as.formula(
-    paste(name_outcome, "~", paste(covars, collapse = " + "))
-  )
-  data_combined <- left_join(data, subjs_info, by = "sub_id")
-  data[[2]] <- resid(lm(formula, data = data_combined, na.action = na.exclude))
-  data
+regress_covariates <- function(data, subjs_info, covars = NULL) {
+  if (is.null(covars)) {
+    covars <- names(subjs_info)[-1]
+  }
+  data |>
+    left_join(subjs_info, by = "sub_id") |>
+    mutate(
+      across(
+        # the first column is the subject identifier
+        all_of(names(data)[-1]),
+        ~ paste(cur_column(), "~", paste(covars, collapse = " + ")) |>
+          as.formula() |>
+          lm(na.action = na.exclude) |>
+          resid()
+      )
+    ) |>
+    select(all_of(names(data)))
 }
