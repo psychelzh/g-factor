@@ -11,33 +11,7 @@ config_neural <- tidyr::expand_grid(
   parcel = c("nn268", "Power264"),
   filt = c("bandpass", "lowpass"),
   gsr = c("with", "without")
-) |>
-  dplyr::mutate(
-    file = fs::path(
-      "data/neural",
-      sprintf(
-        "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
-        cond, parcel, filt, gsr
-      )
-    ),
-    tar_neural = paste(
-      "file_neural", cond, parcel, filt, gsr,
-      sep = "_"
-    ) |>
-      rlang::syms(),
-    file_reg_covars = fs::path(
-      "data/reg_covars",
-      sprintf(
-        "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
-        cond, parcel, filt, gsr
-      )
-    ),
-    tar_reg_covars = paste(
-      "file_neural_reg_covars", cond, parcel, filt, gsr,
-      sep = "_"
-    ) |>
-      rlang::syms()
-  )
+)
 hypers_cpm <- tidyr::expand_grid(
   tibble::tibble(kfolds = 10),
   dplyr::bind_rows(

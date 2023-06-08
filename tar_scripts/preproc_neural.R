@@ -12,6 +12,12 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
+config_origin <- config_file_tracking(config_neural)
+config_reg_covars <- config_file_tracking(
+  config_neural,
+  after_reg_covars = TRUE,
+  name_suffix = "_reg_covars"
+)
 
 list(
   tarchetypes::tar_file_read(
@@ -21,11 +27,11 @@ list(
   ),
   tarchetypes::tar_eval(
     tar_target(tar_neural, file, format = "file"),
-    values = config_neural
+    values = config_origin
   ),
   tarchetypes::tar_eval(
     tar_target(
-      tar_reg_covars, {
+      tar_neural_reg_covars, {
         arrow::read_feather(tar_neural) |>
           regress_covariates(subjs_covariates) |>
           arrow::write_feather(file_reg_covars)
@@ -33,6 +39,10 @@ list(
       },
       format = "file"
     ),
-    values = config_neural
+    values = dplyr::inner_join(
+      config_origin,
+      config_reg_covars,
+      by = names(config_neural)
+    )
   )
 )

@@ -19,7 +19,9 @@ future::plan(future.callr::callr)
 # prepare static branches targets ----
 hypers_sex <- data.frame(sex = c("M", "F"))
 data_subjs <- tarchetypes::tar_map(
-  values = dplyr::distinct(config_neural, cond, .keep_all = TRUE),
+  values = config_neural |>
+    config_file_tracking() |>
+    dplyr::distinct(cond, .keep_all = TRUE),
   names = modal,
   tar_target(
     subjs_pattern,
@@ -76,6 +78,6 @@ list(
     config_neural, hypers_cpm, behav_main_reg_covars,
     subjs_subset = subjs_combined,
     name_suffix = "_reg_covars",
-    include_file_targets = FALSE
+    after_reg_covars = TRUE
   )
 )

@@ -140,6 +140,10 @@ include_reg_covars <- function(behav, subjs_info,
 #'   in both `hypers_cpm` and `subjs_info`. `subjs_info` is an expression to get
 #'   the required subjects' information used to filter out corresponding data to
 #'   do CPM calculations.
+#' @param after_reg_covars A logical value indicating if the regression
+#'   covariates should be included in the neural data. If `TRUE`, the neural
+#'   data will be the result of regression covariates. If `FALSE`, the neural
+#'   data will be the original data.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
@@ -154,7 +158,9 @@ prepare_permute_cpm2 <- function(config_neural,
                                  include_file_targets = TRUE,
                                  split_hyper = NULL,
                                  subjs_info = NULL,
+                                 after_reg_covars = FALSE,
                                  batches = 4, reps = 5) {
+  config_neural <- config_file_tracking(config_neural, after_reg_covars)
   file_targets <- tarchetypes::tar_eval(
     tar_target(tar_neural, file, format = "file"),
     values = config_neural
@@ -235,4 +241,42 @@ prepare_permute_cpm2 <- function(config_neural,
       deployment = "main"
     )
   )
+}
+
+# helper functions ----
+#' Configure file tracking for neural data
+#'
+#' @param config A [data.frame()] storing the specifications of neural data
+#'   used.
+#' @param after_reg_covars A logical value indicating if using the neural data
+#'   after regression covariates.
+#' @param name_suffix A character scalar specifying the name suffix for the
+#'   targets.
+#' @returns A new [data.frame()] with the `file` and `tar_neural` fields
+#'   added.
+#' @export
+config_file_tracking <- function(config, after_reg_covars = FALSE,
+                                 name_suffix = "") {
+  if (!after_reg_covars) {
+    dir_data <- "data/neural"
+    name_prefix <- "file_neural"
+  } else {
+    dir_data <- "data/reg_covars"
+    name_prefix <- "file_neural_reg_covars"
+  }
+  config |>
+    dplyr::mutate(
+      "{paste0('file', name_suffix)}" := fs::path(
+        dir_data,
+        sprintf(
+          "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
+          cond, parcel, filt, gsr
+        )
+      ),
+      "{paste0('tar_neural', name_suffix)}" := paste(
+        name_prefix, cond, parcel, filt, gsr,
+        sep = "_"
+      ) |>
+        rlang::syms()
+    )
 }

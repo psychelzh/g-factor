@@ -3,6 +3,7 @@
 export(binarize_mask)
 export(calc_mask_dice)
 export(calc_var_exp)
+export(config_file_tracking)
 export(cpm)
 export(cpm2)
 export(do_cpm2)
