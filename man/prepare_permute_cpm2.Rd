@@ -36,6 +36,9 @@ analysis.}
 \item{name_suffix}{A character scalar specifying the name suffix for the CPM
 targets.}
 
+\item{include_file_targets}{A logical value indicating if the targets
+tracking the neural data should be included.}
+
 \item{split_hyper, subjs_info}{If one of these two parameters is specified,
 the other must be specified, too. \code{split_hyper} should be a character
 scalar specifying the field used to split neural data to perform different

@@ -4,14 +4,21 @@
 \alias{include_reg_covars}
 \title{Target factory to include regression covariates}
 \usage{
-include_reg_covars(behav, covars, subjs_info, name_suffix = "_reg_covars")
+include_reg_covars(
+  behav,
+  subjs_info,
+  covars = NULL,
+  name_suffix = "_reg_covars"
+)
 }
 \arguments{
 \item{behav}{The expression to get behavioral data.}
 
-\item{covars}{A character vector specifying the covariates to include.}
-
 \item{subjs_info}{The expression to get the subject information data.}
+
+\item{covars}{A character vector specifying the covariates to include. Note
+the covariates must be present in \code{subjs_info}. If this argument is not
+specified or is \code{NULL}, all covariates in \code{subjs_info} will be included.}
 
 \item{name_suffix}{A character scalar specifying the name suffix for the
 targets.}
