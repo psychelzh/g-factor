@@ -124,31 +124,31 @@ prepare_permute_cpm2 <- function(config_neural,
                                  subjs_info = NULL,
                                  reg_covars = FALSE,
                                  batches = 4, reps = 5) {
-  config_neural <- config_file_tracking(config_neural, reg_covars)
+  config_neural_files <- config_file_tracking(config_neural, reg_covars)
   file_targets <- tarchetypes::tar_eval(
     tar_target(tar_neural, file, format = "file"),
-    values = config_neural
+    values = config_neural_files
   )
   if (missing(hypers_cpm) || is.null(hypers_cpm)) {
     return(file_targets)
   }
-  neural <- rlang::expr(arrow::read_feather(tar_neural))
+  neural_parsed <- rlang::expr(arrow::read_feather(tar_neural))
   if (!missing(subjs_subset)) {
     subjs_subset <- rlang::enexpr(subjs_subset)
     if (!is.null(subjs_subset)) {
-      neural <- rlang::expr(
-        filter(!!neural, sub_id %in% !!subjs_subset)
+      neural_parsed <- rlang::expr(
+        filter(!!neural_parsed, sub_id %in% !!subjs_subset)
       )
     }
   }
-  behav <- rlang::enexpr(behav)
+  behav_parsed <- rlang::enexpr(behav)
   if (reg_covars) {
     stopifnot(!missing(subjs_info))
     subjs_info <- rlang::enexpr(subjs_info)
     stopifnot(!is.null(subjs_info))
-    behav <- rlang::expr(
+    behav_parsed <- rlang::expr(
       mutate(
-        !!behav,
+        !!behav_parsed,
         scores = map(
           scores,
           ~ regress_covariates(
@@ -164,9 +164,9 @@ prepare_permute_cpm2 <- function(config_neural,
     stopifnot(!missing(subjs_info))
     subjs_info <- rlang::enexpr(subjs_info)
     stopifnot(!is.null(subjs_info))
-    neural <- rlang::expr(
+    neural_parsed <- rlang::expr(
       semi_join(
-        !!neural,
+        !!neural_parsed,
         filter(
           !!subjs_info,
           .data[[!!split_hyper]] == !!rlang::ensym(split_hyper)
@@ -187,15 +187,15 @@ prepare_permute_cpm2 <- function(config_neural,
       name_result_cpm,
       rlang::expr(
         mutate(
-          !!behav,
+          !!behav_parsed,
           cpm = map(
             scores,
-            ~ do_cpm2(!!neural, ., !!!args_cpm)
+            ~ do_cpm2(!!neural_parsed, ., !!!args_cpm)
           ),
           .keep = "unused"
         )
       ),
-      values = tidyr::expand_grid(config_neural, hypers_cpm),
+      values = tidyr::expand_grid(config_neural_files, hypers_cpm),
       # `tar_neural` and `file` are constructed from other core elements
       columns = rlang::expr(-c(tar_neural, file)),
       batches = batches,
