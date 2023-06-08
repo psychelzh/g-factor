@@ -61,7 +61,8 @@ regress_covariates <- function(data, subjs_info, covars = NULL) {
         ~ paste(cur_column(), "~", paste(covars, collapse = " + ")) |>
           as.formula() |>
           lm(na.action = na.exclude) |>
-          resid()
+          resid() |>
+          as.vector()
       )
     ) |>
     select(all_of(names(data)))
