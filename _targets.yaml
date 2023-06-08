@@ -19,3 +19,6 @@ project_task_selection:
 project_cpm_main:
   script: tar_scripts/cpm_main.R
   store: _targets/cpm_main
+project_preproc_neural:
+  script: tar_scripts/preproc_neural.R
+  store: _targets/preproc_neural

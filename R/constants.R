@@ -24,6 +24,18 @@ config_neural <- tidyr::expand_grid(
       "file_neural", cond, parcel, filt, gsr,
       sep = "_"
     ) |>
+      rlang::syms(),
+    file_reg_covars = fs::path(
+      "data/reg_covars",
+      sprintf(
+        "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
+        cond, parcel, filt, gsr
+      )
+    ),
+    tar_reg_covars = paste(
+      "file_neural_reg_covars", cond, parcel, filt, gsr,
+      sep = "_"
+    ) |>
       rlang::syms()
   )
 hypers_cpm <- tidyr::expand_grid(
