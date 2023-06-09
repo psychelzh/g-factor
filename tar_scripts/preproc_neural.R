@@ -34,7 +34,7 @@ list(
       tar_neural_reg_covars, {
         arrow::read_feather(tar_neural) |>
           regress_covariates(subjs_covariates, cond = cond) |>
-          arrow::write_feather(file_reg_covars)
+          arrow::write_feather(file_reg_covars, compression = FALSE)
         file_reg_covars
       },
       format = "file"
