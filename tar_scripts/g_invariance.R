@@ -56,7 +56,10 @@ cfg_rsmp_vars <- dplyr::bind_rows(
 
 # compare two parcellations
 config_neural <- config_neural |>
-  dplyr::filter(gsr == "with")
+  dplyr::filter(
+    filt == "bandpass",
+    gsr == "with"
+  )
 hypers_cpm <- hypers_cpm |>
   dplyr::filter(
     thresh_method == "alpha",
@@ -78,12 +81,6 @@ g_invariance <- tarchetypes::tar_map(
     indices_wider_clean,
     data_names
   ),
-  include_reg_covars(
-    scores_g,
-    covars = c("age", "sex"),
-    subjs_info = subjs_info_clean,
-    name_suffix = "_reg_covars"
-  ),
   prepare_permute_cpm2(
     config_neural,
     hypers_cpm,
@@ -92,12 +89,11 @@ g_invariance <- tarchetypes::tar_map(
     include_file_targets = FALSE
   ),
   prepare_permute_cpm2(
-    config_neural,
-    hypers_cpm,
-    scores_g_reg_covars,
+    config_neural, hypers_cpm, scores_g,
     subjs_subset = subjs_combined,
     name_suffix = "_reg_covars",
-    include_file_targets = FALSE
+    subjs_info = subjs_covariates,
+    reg_covars = TRUE
   )
 )
 
@@ -105,9 +101,18 @@ mask_dices <- tarchetypes::tar_map(
   values = cfg_rsmp_vars |>
     dplyr::filter(dplyr::n() == 2, .by = num_vars) |>
     dplyr::select(num_vars, id_pairs) |>
+    tidyr::expand_grid(reg_covars = c("no", "yes")) |>
     dplyr::mutate(
       name_brain_mask = rlang::syms(
-        paste("brain_mask", num_vars, id_pairs, sep = "_")
+        paste(
+          ifelse(
+            reg_covars == "no",
+            "brain_mask",
+            "brain_mask_reg_covars"
+          ),
+          num_vars, id_pairs,
+          sep = "_"
+        )
       )
     ) |>
     tidyr::pivot_wider(
@@ -115,7 +120,7 @@ mask_dices <- tarchetypes::tar_map(
       names_prefix = "pair_",
       values_from = name_brain_mask
     ),
-  names = num_vars,
+  names = c(num_vars, reg_covars),
   list(
     tarchetypes::tar_map_rep(
       dice_mask_pairs,
@@ -155,8 +160,8 @@ mask_dices <- tarchetypes::tar_map(
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
-    subjs_info_clean,
-    fs::path(store_preproc_behav, "objects", "subjs_info_clean"),
+    subjs_covariates,
+    fs::path(store_preproc_behav, "objects", "subjs_covariates"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
