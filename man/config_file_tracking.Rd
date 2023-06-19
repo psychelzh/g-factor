@@ -4,14 +4,21 @@
 \alias{config_file_tracking}
 \title{Configure file tracking for neural data}
 \usage{
-config_file_tracking(config, reg_covars = FALSE, name_suffix = "")
+config_file_tracking(
+  config,
+  dir_neural = "data/neural",
+  tar_name_neural = "file_neural",
+  name_suffix = ""
+)
 }
 \arguments{
 \item{config}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of neural data
 used.}
 
-\item{reg_covars}{A logical value indicating if using the neural data after
-regression covariates.}
+\item{dir_neural}{A character scalar specifying the directory of neural data.}
+
+\item{tar_name_neural}{A character scalar specifying the name of the target
+tracking the neural data.}
 
 \item{name_suffix}{A character scalar specifying the name suffix for the
 targets.}

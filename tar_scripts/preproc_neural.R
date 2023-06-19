@@ -15,8 +15,15 @@ future::plan(future.callr::callr)
 config_origin <- config_file_tracking(config_neural)
 config_reg_covars <- config_file_tracking(
   config_neural,
-  reg_covars = TRUE,
+  dir_neural = "data/reg_covars",
+  tar_name_neural = "file_neural_reg_covars",
   name_suffix = "_reg_covars"
+)
+config_reg_site <- config_file_tracking(
+  config_neural,
+  dir_neural = "data/reg_site",
+  tar_name_neural = "file_neural_reg_site",
+  name_suffix = "_reg_site"
 )
 
 list(
@@ -26,7 +33,7 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file"),
+    tar_target(tar_neural, file, format = "file_fast"),
     values = config_origin
   ),
   tarchetypes::tar_eval(
@@ -42,6 +49,26 @@ list(
     values = dplyr::inner_join(
       config_origin,
       config_reg_covars,
+      by = names(config_neural)
+    )
+  ),
+  tarchetypes::tar_eval(
+    tar_target(
+      tar_neural_reg_site, {
+        arrow::read_feather(tar_neural) |>
+          regress_covariates(
+            subjs_covariates,
+            covars = "site",
+            cond = cond
+          ) |>
+          arrow::write_feather(file_reg_site, compression = FALSE)
+        file_reg_site
+      },
+      format = "file"
+    ),
+    values = dplyr::inner_join(
+      config_origin,
+      config_reg_site,
       by = names(config_neural)
     )
   )

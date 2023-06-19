@@ -235,32 +235,28 @@ prepare_permute_cpm2 <- function(config_neural,
 #'
 #' @param config A [data.frame()] storing the specifications of neural data
 #'   used.
-#' @param reg_covars A logical value indicating if using the neural data after
-#'   regression covariates.
+#' @param dir_neural A character scalar specifying the directory of neural data.
+#' @param tar_name_neural A character scalar specifying the name of the target
+#'   tracking the neural data.
 #' @param name_suffix A character scalar specifying the name suffix for the
 #'   targets.
 #' @returns A new [data.frame()] with the `file` and `tar_neural` fields added.
 #' @export
-config_file_tracking <- function(config, reg_covars = FALSE,
+config_file_tracking <- function(config,
+                                 dir_neural = "data/neural",
+                                 tar_name_neural = "file_neural",
                                  name_suffix = "") {
-  if (!reg_covars) {
-    dir_data <- "data/neural"
-    name_prefix <- "file_neural"
-  } else {
-    dir_data <- "data/reg_covars"
-    name_prefix <- "file_neural_reg_covars"
-  }
   config |>
     dplyr::mutate(
       "{paste0('file', name_suffix)}" := fs::path(
-        dir_data,
+        dir_neural,
         sprintf(
           "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
           cond, parcel, filt, gsr
         )
       ),
       "{paste0('tar_neural', name_suffix)}" := paste(
-        name_prefix, cond, parcel, filt, gsr,
+        tar_name_neural, cond, parcel, filt, gsr,
         sep = "_"
       ) |>
         rlang::syms()
