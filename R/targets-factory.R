@@ -1,3 +1,6 @@
+#' @import targets
+NULL
+
 #' Target factory to combine targets from different batches
 #'
 #' @param name The name for the target. Should be a symbol.
