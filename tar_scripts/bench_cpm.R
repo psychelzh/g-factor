@@ -17,7 +17,6 @@ tar_source()
 future::plan(future.callr::callr)
 
 # prepare static branches targets ----
-hypers_sex <- data.frame(sex = c("M", "F"))
 data_subjs <- tarchetypes::tar_map(
   values = config_neural |>
     config_file_tracking() |>
@@ -71,9 +70,11 @@ list(
   ),
   prepare_permute_cpm2(
     config_neural, hypers_cpm, behav_main,
+    dir_neural = "data/reg_covars",
+    tar_name_neural = "file_neural_reg_covars",
     subjs_subset = subjs_combined,
     name_suffix = "_reg_covars",
     subjs_info = subjs_covariates,
-    reg_covars = TRUE
+    covars = TRUE
   )
 )

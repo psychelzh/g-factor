@@ -89,11 +89,14 @@ g_invariance <- tarchetypes::tar_map(
     include_file_targets = FALSE
   ),
   prepare_permute_cpm2(
-    config_neural, hypers_cpm, scores_g,
+    config_neural,
+    dir_neural = "data/reg_covars",
+    tar_name_neural = "file_neural_reg_covars",
+    hypers_cpm, scores_g,
     subjs_subset = subjs_combined,
     name_suffix = "_reg_covars",
     subjs_info = subjs_covariates,
-    reg_covars = TRUE
+    covars = TRUE
   )
 )
 
