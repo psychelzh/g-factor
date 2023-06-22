@@ -102,13 +102,13 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   targets.
 #' @param include_file_targets A logical value indicating if the targets
 #'   tracking the neural data should be included.
-#' @param split_hyper,subjs_info If one of these two parameters is specified,
-#'   the other must be specified, too. `split_hyper` should be a character
-#'   scalar specifying the field used to split neural data to perform different
-#'   CPM calculations, e.g., different gender. Note this field must be present
-#'   in both `hypers_cpm` and `subjs_info`. `subjs_info` is an expression to get
-#'   the required subjects' information used to filter out corresponding data to
-#'   do CPM calculations.
+#' @param subjs_info The expression to get the required subjects' information
+#'   used to filter out corresponding data to do CPM calculations.
+#' @param split_hyper A character scalar specifying the field used to split
+#'   subjects. If this is specified, the subjects will be split by the values
+#'   of this field, and the corresponding data will be used to do CPM
+#'   calculations. Note this field must also be present in `subjs_info` and
+#'   `hypers_cpm`.
 #' @param covars A character vector specifying the covariates to regress out. If
 #'   `TRUE`, all covariates will be included. If `NULL`, no covariates will be
 #'   included. Note for performance considerations, regression is not done for
@@ -127,8 +127,8 @@ prepare_permute_cpm2 <- function(config_neural,
                                  subjs_subset = NULL,
                                  name_suffix = "",
                                  include_file_targets = TRUE,
-                                 split_hyper = NULL,
                                  subjs_info = NULL,
+                                 split_hyper = NULL,
                                  covars = NULL,
                                  batches = 4, reps = 5) {
   config_neural_files <- config_file_tracking(config_neural, ...)

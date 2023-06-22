@@ -12,8 +12,8 @@ prepare_permute_cpm2(
   subjs_subset = NULL,
   name_suffix = "",
   include_file_targets = TRUE,
-  split_hyper = NULL,
   subjs_info = NULL,
+  split_hyper = NULL,
   covars = NULL,
   batches = 4,
   reps = 5
@@ -44,13 +44,14 @@ targets.}
 \item{include_file_targets}{A logical value indicating if the targets
 tracking the neural data should be included.}
 
-\item{split_hyper, subjs_info}{If one of these two parameters is specified,
-the other must be specified, too. \code{split_hyper} should be a character
-scalar specifying the field used to split neural data to perform different
-CPM calculations, e.g., different gender. Note this field must be present
-in both \code{hypers_cpm} and \code{subjs_info}. \code{subjs_info} is an expression to get
-the required subjects' information used to filter out corresponding data to
-do CPM calculations.}
+\item{subjs_info}{The expression to get the required subjects' information
+used to filter out corresponding data to do CPM calculations.}
+
+\item{split_hyper}{A character scalar specifying the field used to split
+subjects. If this is specified, the subjects will be split by the values
+of this field, and the corresponding data will be used to do CPM
+calculations. Note this field must also be present in \code{subjs_info} and
+\code{hypers_cpm}.}
 
 \item{covars}{A character vector specifying the covariates to regress out. If
 \code{TRUE}, all covariates will be included. If \code{NULL}, no covariates will be
