@@ -35,6 +35,13 @@ scale_sexes <- list(
   labels = sexes
 )
 
+sites <- c(BJ = "Beijing", CQ = "Chongqing")
+scale_sites <- list(
+  name = "Site",
+  limits = names(sites),
+  labels = sites
+)
+
 # scales for neural parameters
 conds <- c(
   run1rest = "Combined",
