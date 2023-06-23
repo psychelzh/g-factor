@@ -45,7 +45,7 @@ scale_sites <- list(
 # scales for neural parameters
 conds <- c(
   run1rest = "Combined",
-  nbackfull = "Task",
+  nbackrun1 = "Task",
   rest = "Resting"
 )
 scale_conds <- list(
