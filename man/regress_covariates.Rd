@@ -4,15 +4,22 @@
 \alias{regress_covariates}
 \title{Regress out covariates}
 \usage{
-regress_covariates(data, subjs_info, covars = NULL, cond = NULL)
+regress_covariates(data, subjs_info, covars = everything(), cond = NA)
 }
 \arguments{
 \item{data}{A data frame with subject identifiers and outcome variables.}
 
-\item{subjs_info}{A data frame with subject identifiers and covariates.}
+\item{subjs_info}{A data frame with subject identifiers and covariates. The
+FD values should be named as \code{mean_fd_task} and \code{mean_fd_rest} for n-back
+task and resting state data, respectively. And the first column should be
+the subject identifier.}
 
-\item{covars}{A character vector specifying covariates. If \code{NULL}, all
-covariates will be included.}
+\item{covars}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Quoted expressions
+specifying covariates to be regressed out.}
+
+\item{cond}{A character string specifying which FD values to be regressed
+out. It can be either \code{nbackrun1} (task) or \code{rest}. If it is \code{NA}, the
+covariates will be regressed out for all conditions.}
 }
 \value{
 A data frame with residuals.

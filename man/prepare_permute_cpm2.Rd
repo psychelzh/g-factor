@@ -53,8 +53,8 @@ of this field, and the corresponding data will be used to do CPM
 calculations. Note this field must also be present in \code{subjs_info} and
 \code{hypers_cpm}.}
 
-\item{covars}{A character vector specifying the covariates to regress out. If
-\code{TRUE}, all covariates will be included. If \code{NULL}, no covariates will be
+\item{covars}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Quoted expressions
+specifying covariates to be regressed out. If \code{NULL}, no covariates will be
 included. Note for performance considerations, regression is not done for
 neural data, and you need to specify the corresponding neural data by
 adding arguments in \code{...}.}

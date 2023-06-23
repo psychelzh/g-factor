@@ -43,36 +43,42 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
 #' Regress out covariates
 #'
 #' @param data A data frame with subject identifiers and outcome variables.
-#' @param subjs_info A data frame with subject identifiers and covariates.
-#' @param covars A character vector specifying covariates. If `NULL`, all
-#'   covariates will be included.
+#' @param subjs_info A data frame with subject identifiers and covariates. The
+#'   FD values should be named as `mean_fd_task` and `mean_fd_rest` for n-back
+#'   task and resting state data, respectively. And the first column should be
+#'   the subject identifier.
+#' @param covars <[`tidy-select`][dplyr_tidy_select]> Quoted expressions
+#'   specifying covariates to be regressed out.
+#' @param cond A character string specifying which FD values to be regressed
+#'   out. It can be either `nbackrun1` (task) or `rest`. If it is `NA`, the
+#'   covariates will be regressed out for all conditions.
 #' @returns A data frame with residuals.
 #' @export
-regress_covariates <- function(data, subjs_info, covars = NULL,
-                               cond = NULL) {
-  if (is.null(covars)) {
-    covars <- names(subjs_info)[-1]
-    if (!is.null(cond)) {
-      covars <- setdiff(
-        covars,
-        switch(cond,
-          nbackrun1 = "mean_fd_rest",
-          rest = "mean_fd_task"
-        )
+regress_covariates <- function(data, subjs_info, covars = everything(),
+                               cond = NA) {
+  # handle user identifier and condition specific values
+  name_covars <- subjs_info |>
+    select(
+      {{ covars }} & !1 & !contains("mean_fd"),
+      switch(cond,
+        nbackrun1 = "mean_fd_task",
+        rest = "mean_fd_rest",
+        contains("mean_fd")
       )
-    }
-  }
+    ) |>
+    names()
   data |>
     left_join(subjs_info, by = "sub_id") |>
     mutate(
       across(
         # the first column is the subject identifier
         all_of(names(data)[-1]),
-        ~ paste(cur_column(), "~", paste(covars, collapse = " + ")) |>
-          as.formula() |>
-          lm(na.action = na.exclude) |>
-          resid() |>
-          as.vector()
+        ~ lm(
+          as.formula(
+            paste(cur_column(), "~", paste(name_covars, collapse = " + "))
+          ),
+          na.action = na.exclude
+        ) |> residuals.lm() |> as.vector()
       )
     ) |>
     select(all_of(names(data)))

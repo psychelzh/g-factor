@@ -109,8 +109,8 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   of this field, and the corresponding data will be used to do CPM
 #'   calculations. Note this field must also be present in `subjs_info` and
 #'   `hypers_cpm`.
-#' @param covars A character vector specifying the covariates to regress out. If
-#'   `TRUE`, all covariates will be included. If `NULL`, no covariates will be
+#' @param covars <[`tidy-select`][dplyr_tidy_select]> Quoted expressions
+#'   specifying covariates to be regressed out. If `NULL`, no covariates will be
 #'   included. Note for performance considerations, regression is not done for
 #'   neural data, and you need to specify the corresponding neural data by
 #'   adding arguments in `...`.
@@ -161,10 +161,6 @@ prepare_permute_cpm2 <- function(config_neural,
       covars = covars,
       cond = rlang::expr(cond)
     )
-    if (isTRUE(covars)) {
-      # do not need to specify `covars` in `args_reg_covars`
-      args_reg_covars <- args_reg_covars[-2]
-    }
     behav_parsed <- rlang::expr(
       mutate(
         !!behav_parsed,
