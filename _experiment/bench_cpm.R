@@ -23,8 +23,8 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
-    behav_main,
-    fs::path(store_preproc_behav, "objects", "behav_main"),
+    behav_main_resid,
+    fs::path(store_preproc_behav, "objects", "behav_main_resid"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
@@ -35,31 +35,10 @@ list(
   prepare_permute_cpm2(
     config_neural |>
       dplyr::filter(parcel == "nn268", filt == "bandpass", gsr == "with"),
-    hypers_cpm, behav_main,
-    dir_neural = "data/reg_site",
-    tar_name_neural = "file_neural_reg_site",
+    hypers_cpm, behav_main_resid,
+    dir_neural = "data/reg_covars",
+    tar_name_neural = "file_neural_reg_covars",
     subjs_subset = subjs_combined,
-    name_suffix = "_reg_site",
-    subjs_info = subjs_covariates,
-    covars = "site"
-  ),
-  prepare_permute_cpm2(
-    config_neural |>
-      dplyr::filter(parcel == "nn268", filt == "bandpass", gsr == "with"),
-    hypers_cpm, behav_main,
-    subjs_subset = subjs_combined,
-    name_suffix = "_reg_sex",
-    subjs_info = subjs_covariates,
-    covars = "sex"
-  ),
-  prepare_permute_cpm2(
-    config_neural |>
-      dplyr::filter(parcel == "nn268", filt == "bandpass", gsr == "with"),
-    hypers_cpm, behav_main,
-    include_file_targets = FALSE,
-    subjs_subset = subjs_combined,
-    name_suffix = "_reg_site_orig",
-    subjs_info = subjs_covariates,
-    covars = "site"
+    name_suffix = "_reg_covars"
   )
 )
