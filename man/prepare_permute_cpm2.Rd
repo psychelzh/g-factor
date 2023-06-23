@@ -14,7 +14,6 @@ prepare_permute_cpm2(
   include_file_targets = TRUE,
   subjs_info = NULL,
   split_hyper = NULL,
-  covars = NULL,
   batches = 4,
   reps = 5
 )
@@ -33,7 +32,8 @@ data.}
 \item{behav}{The expression to get behavioral data.}
 
 \item{...}{Additional arguments passed to \code{\link[=config_file_tracking]{config_file_tracking()}}. This is
-especially useful when you specified \code{covars} to regress out covariates.}
+especially useful when covariates regression has been done on the
+behavioral data.}
 
 \item{subjs_subset}{The expression to get the subject list to include in CPM
 analysis.}
@@ -52,12 +52,6 @@ subjects. If this is specified, the subjects will be split by the values
 of this field, and the corresponding data will be used to do CPM
 calculations. Note this field must also be present in \code{subjs_info} and
 \code{hypers_cpm}.}
-
-\item{covars}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Quoted expressions
-specifying covariates to be regressed out. If \code{NULL}, no covariates will be
-included. Note for performance considerations, regression is not done for
-neural data, and you need to specify the corresponding neural data by
-adding arguments in \code{...}.}
 
 \item{batches, reps}{The number of batches and repetitions passed to
 \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}.}
