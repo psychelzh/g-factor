@@ -3,8 +3,8 @@ title: Intelligence and sampling of cognitive tasks
 author: Liang Zhang
 date: 2023-02-24
 format:
-    revealjs:
-        code-fold: false
+  revealjs:
+    code-fold: false
 execute:
   warning: false
   message: false
@@ -14,14 +14,12 @@ csl: modified-chicago.csl
 
 ```{r}
 #| label: setup
-#| include: false
 
-library(tidyverse)
-library(ggwordcloud)
-library(brainconn)
+conflicted::conflicts_prefer(dplyr::filter())
+devtools::load_all()
 library(lavaan)
-Sys.setenv("TAR_PROJECT" = "project_g_invariance")
-edge_types <- c("pos", "neg", "all")
+library(circlize)
+knitr::opts_chunk$set(dev = "ragg_png")
 ```
 
 # Issues on Intelligence
@@ -63,16 +61,16 @@ Savants are those with very high specific abilities but no general intelligence 
 
 -   Here we focus on the issue of tasks sampling
 
-    -   Task sampling representativeness
+-   Task sampling representativeness
 
-    -   Factor analysis method
+-   Factor analysis method
 :::
 
 ## Invariance of g
 
 ::: columns
 ::: {.column width="50%"}
-![Test batteries used](images/johnson2004.png){alt="Test batteries used" fig-align="center"}
+![Test batteries used](images/johnson2004.png){fig-align="center"}
 :::
 
 ::: {.column width="50%"}
@@ -97,11 +95,11 @@ Savants are those with very high specific abilities but no general intelligence 
 ::: incremental
 -   There are several different factor analysis modeling method:
 
-    -   Spearman Model
+-   Spearman Model
 
-    -   Bifactor Model
+-   Bifactor Model
 
-    -   Orthogonalized Hierarchical Model
+-   Orthogonalized Hierarchical Model
 
 -   Jensen [-@jensen1998] found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000.
 :::
@@ -111,15 +109,15 @@ Savants are those with very high specific abilities but no general intelligence 
 ::: incremental
 -   What is the clear relationship between the invariance of g and task sampling?
 
-    -   Task number
+-   Task number
 
-    -   Task domain
+-   Task domain
 
-    -   Neural predictability
+-   Neural predictability
 
-    -   Factor model selection
+-   Factor model selection
 
-    -   Relationship with the score of Raven's Advanced Progressive Matrices (RAPM)
+-   Relationship with the score of Raven's Advanced Progressive Matrices (RAPM)
 :::
 
 # Our Dataset
@@ -127,27 +125,26 @@ Savants are those with very high specific abilities but no general intelligence 
 ## Cognitive Tasks {.smaller}
 
 -   19 Tasks (20 task indices) included
-    -   **Working Memory** (*5*): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span
-    -   **Response Inhibition** (*3*): Anti-Saccade (2 indices), Stop-Signal, Stroop
-    -   **Shifting** *(3*): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment
-    -   **Learning and Memory** (*3*): Face Name Association, Symbol Memory, Pattern Separation
-    -   **Attention and Speed** (*5*): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time
+-   **Working Memory** (*5*): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span
+-   **Response Inhibition** (*3*): Anti-Saccade (2 indices), Stop-Signal, Stroop
+-   **Shifting** *(3*): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment
+-   **Learning and Memory** (*3*): Face Name Association, Symbol Memory, Pattern Separation
+-   **Attention and Speed** (*5*): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time
 
 ## Sample Size
 
 ```{r}
 targets::tar_load(
   c(subjs_info_clean, indices_wider_clean),
-  store = "_store_behav"
+  store = store_preproc_behav
 )
-subjs_fmri <- targets::tar_read(fc_data_matched) |>
-  select(sub_id) |>
-  inner_join(subjs_info_clean, by = "sub_id")
-subjs_info_full <- subjs_info_clean |>
+targets::tar_load(subjs_combined, store = store_bench_cpm)
+descr_behav <- subjs_info_clean |>
   semi_join(indices_wider_clean, by = "sub_id") |>
-  select(sub_id, age, sex)
-descr_behav <- report::report_participants(subjs_info_full)
-descr_fmri <- subjs_fmri |>
+  select(sub_id, age, sex) |>
+  report::report_participants()
+descr_fmri <- subjs_info_clean |>
+  filter(sub_id %in% subjs_combined) |>
   select(sub_id, age, sex) |>
   report::report_participants()
 ```
@@ -184,12 +181,12 @@ indices_wider_clean |>
   pivot_longer(-sub_id, names_to = "task_index", values_to = "score") |>
   select(-sub_id) |>
   ggplot(aes(score)) +
-  geom_histogram() +
-  facet_wrap(~ task_index, scales = "free") +
+  geom_histogram(bins = 30, na.rm = TRUE) +
+  facet_wrap(~task_index, scales = "free") +
   theme_bw()
 ```
 
-# Task Number and Task Domain
+# Task Number
 
 Basically, the direct method is to check g scores estimated from different number of tasks sampled from the test bank.
 
@@ -207,7 +204,8 @@ Here we used 4 tasks at minimal, because g factor modeling from 3 tasks is a sat
 #|   **Variance Explained by the g Factor.** The horizontal line gives the variance explained
 #|   by the g factor estimated from all the tasks.
 
-targets::tar_load(c(var_exp, var_exp_full))
+targets::tar_load(var_exp, store = store_g_invariance)
+targets::tar_load(var_exp_full, store = store_preproc_behav)
 var_exp |>
   ggplot(aes(num_vars, prop)) +
   ggdist::stat_slabinterval() +
@@ -234,13 +232,16 @@ var_exp |>
 #|   horizontal line is the correlation between gF score estimated from all task
 #|   indices and RAPM.
 
-targets::tar_load(c(scores_g, scores_g_full))
-targets::tar_load(indices_rapm, store = "_store_behav")
+targets::tar_load(scores_g, store = store_g_invariance)
+targets::tar_load(
+  c(scores_g_full, indices_rapm),
+  store = store_preproc_behav
+)
 cor_rapm_full <- scores_g_full |>
   inner_join(indices_rapm, by = "sub_id") |>
   summarise(cor = cor(g, RAPM, use = "pairwise"))
 cor_rapm_sampled <- scores_g |>
-  unnest(scores) |> 
+  unnest(scores) |>
   inner_join(indices_rapm, by = "sub_id") |>
   summarise(
     cor = cor(g, RAPM, use = "pairwise"),
@@ -260,7 +261,7 @@ cor_rapm_sampled |>
   labs(x = "Number of Tasks", y = "Correlation Coefficient")
 ```
 
-## High RAPM Correlation tasks
+<!-- ## High RAPM Correlation tasks -->
 
 ```{r}
 #| label: fig-rapm-cor-tasks
@@ -268,9 +269,9 @@ cor_rapm_sampled |>
 #| fig-height: 5
 #| fig-cap: >
 #|   **Top RAPM correlated tasks.** The tasks for each top 10 samples are displayed.
-#| cache: true
+#| eval: false
 
-targets::tar_load(data_names)
+targets::tar_load(data_names, store = store_g_invariance)
 tasks_high_cor_rapm <- cor_rapm_sampled |>
   slice_max(cor, n = 10, by = num_vars) |>
   inner_join(
@@ -298,51 +299,67 @@ tasks_high_cor_rapm |>
 #| fig-cap: >
 #|   **Prediction Trending (based on CPM)**.
 
-targets::tar_load(c(cpm_pred, cpm_pred_main))
-idx_name <- c(g_full = "All Tasks", rapm = "RAPM")
-preds_main <- cpm_pred_main |> 
-  summarise(across(all_of(edge_types), mean), .by = idx) |> 
-  pivot_longer(
-    all_of(edge_types),
-    names_to = "edge_type",
-    values_to = "cor"
-  ) |> 
-  mutate(idx_name = idx_name[idx])
-preds_sampled <- cpm_pred |> 
+targets::tar_load(c(cpm_pred, cpm_pred_main), store = store_g_invariance)
+preds_main <- cpm_pred_main |>
+  filter(gsr == "with") |>
   summarise(
-    across(all_of(edge_types), mean),
-    .by = c(num_vars, id_pairs, idx_rsmp, starts_with("thresh"))
-  ) |> 
+    across(all_of(names(edge_types)), mean),
+    .by = c(idx, any_of(c(names(config_neural), names(hypers_cpm))))
+  ) |>
   pivot_longer(
-    all_of(edge_types),
+    all_of(names(edge_types)),
     names_to = "edge_type",
-    values_to = "cor"
+    values_to = "estimate"
+  ) |>
+  mutate(
+    modal = factor(modal, names(modalities)),
+    idx = factor(idx, names(meas_behav))
+  )
+preds_sampled <- cpm_pred |>
+  filter(gsr == "with") |>
+  summarise(
+    across(all_of(names(edge_types)), mean),
+    .by = c(
+      num_vars, id_pairs, idx_rsmp,
+      any_of(c(names(config_neural), names(hypers_cpm)))
+    )
+  ) |>
+  pivot_longer(
+    all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |>
+  mutate(
+    edge_type = factor(edge_type, names(edge_types)),
+    modal = factor(modal, names(modalities))
   )
 preds_sampled |>
-  ggplot(aes(num_vars, cor)) +
+  ggplot(aes(num_vars, estimate)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
-  geomtextpath::geom_texthline(
-    aes(label = idx_name, yintercept = cor, color = idx_name),
-    preds_main,
-    hjust = 1
+  geom_hline(
+    aes(color = idx, yintercept = estimate),
+    preds_main
   ) +
-  scale_color_viridis_d(guide = "none") +
+  # geomtextpath::geom_texthline(
+  #   aes(label = meas_behav[idx], yintercept = estimate, color = idx),
+  #   preds_main,
+  #   hjust = 1
+  # ) +
+  rlang::exec(scale_color_viridis_d, !!!scale_meas_behv) +
   facet_grid(
     rows = vars(edge_type),
+    cols = vars(modal),
     labeller = labeller(
-      edge_type = c(
-        all = "Combined",
-        neg = "Anti-Corr Networks",
-        pos = "Pos-Corr Networks"
-      )
+      edge_type = edge_types,
+      modal = modalities
     )
   ) +
   ggpubr::theme_pubclean() +
   labs(x = "Number of Tasks", y = "Correlation Coefficient")
 ```
 
-## High Neural Correlation Tasks {.smaller}
+<!-- ## High Neural Correlation Tasks {.smaller} -->
 
 <!-- TODO: this is not the best method for domain checking -->
 
@@ -353,6 +370,7 @@ preds_sampled |>
 #| fig-cap: >
 #|   **Top predictability tasks.** The tasks for each top 10 predictability samples are displayed.
 #| cache: true
+#| eval: false
 
 tasks_high_pred <- preds_sampled |>
   slice_max(cor, n = 10, by = c(num_vars, edge_type)) |>
@@ -387,16 +405,195 @@ tasks_high_pred |>
 -   Here we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks.
 :::
 
-## Brain Networks for Most Predictable
+## Correlation between estimated g in Pairwise Sampling {.smaller}
+
+```{r}
+#| label: fig-g-pair-cor
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **The correlation between g scores estimated from each pair of sampling.**
+#|   For each sampling, a pair of equal-number tasks are drawed without
+#|   replacement. So the maximal number of tasks will be 10, and this figure
+#|   shows that the correlations between the paired g scores increase as the
+#|   number of tasks increase.
+
+scores_g |>
+  group_by(num_vars, idx_rsmp) |>
+  filter(n() == 2) |>
+  summarise(
+    estimate = cor(scores[[1]]$g, scores[[2]]$g, use = "pairwise"),
+    .groups = "drop"
+  ) |>
+  ggplot(aes(num_vars, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubclean() +
+  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
+```
+
+::: notes
+Seemingly the correlation reaches a plateau? But I am doubting here.
+:::
+
+```{r}
+#| label: load-data-dice
+
+targets::tar_load(dice_mask_pairs, store = store_g_invariance)
+dice_clean <- dice_mask_pairs |>
+  filter(gsr == "with") |>
+  pivot_longer(
+    contains("dice"),
+    names_to = c("edge_type", ".value"),
+    names_pattern = "(.+)_(.+)"
+  ) |>
+  mutate(
+    modal = factor(modal, names(modalities)),
+    edge_type = factor(edge_type, names(edge_types))
+  )
+```
+
+## Similarity Between Predictive Network of Pairs
+
+```{r}
+#| label: fig-dice-value
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Dice coefficient between each pair of predictive network in pairwise
+#|   sampling.** The edges are kept when given proportion of resamples selected.
+#|   Here only the results from task state are shown.
+
+dice_clean |>
+  filter(binarize_method == "value", modal == "nbackfull") |>
+  ggplot(aes(num_vars, dice)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubclean() +
+  ggh4x::facet_nested(
+    edge_type ~ "Minimal Proportion" + binarize_level,
+    # rows = vars(edge_type),
+    # cols = vars(binarize_level),
+    labeller = labeller(
+      edge_type = edge_types
+    )
+  ) +
+  labs(x = "Number of Tasks", y = "Dice Similarity")
+```
+
+## Similarity Between Predictive Network of Pairs
+
+```{r}
+#| label: fig-dice-count
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **Dice coefficient between each pair of predictive network in pairwise
+#|   sampling.** Only the most selected of given number of edges are kept. Here
+#|   only the results from task state are shown.
+
+dice_clean |>
+  filter(
+    binarize_method == "count",
+    binarize_level %in% seq(200, 1000, 200),
+    modal == "nbackfull"
+  ) |>
+  ggplot(aes(num_vars, dice)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubclean() +
+  ggh4x::facet_nested(
+    edge_type ~ "Top N Edges" + binarize_level,
+    # rows = vars(edge_type),
+    # cols = vars(binarize_level),
+    labeller = labeller(
+      edge_type = edge_types
+    )
+  ) +
+  labs(x = "Number of Tasks", y = "Dice Similarity")
+```
+
+## A Caveat
+
+```{r}
+#| label: fig-pair-flaw
+#| fig-width: 12
+#| fig-height: 6
+#| fig-cap: >
+#|   **Check if pairs are really independent.**
+
+cpm_pred |>
+  filter(gsr == "with") |>
+  filter(n_distinct(id_pairs) == 2, .by = num_vars) |>
+  summarise(
+    across(all_of(names(edge_types)), mean),
+    .by = c(
+      num_vars, id_pairs, idx_rsmp,
+      any_of(names(config_neural)),
+      any_of(names(hypers_cpm))
+    )
+  ) |>
+  pivot_longer(
+    all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |>
+  pivot_wider(
+    names_from = id_pairs,
+    values_from = estimate
+  ) |>
+  ggplot(aes(`1`, `2`, color = modal)) +
+  geom_point() +
+  ggpmisc::stat_correlation(
+    ggpmisc::use_label(c("r", "p")),
+    small.p = TRUE
+  ) +
+  facet_grid(
+    edge_type ~ num_vars,
+    labeller = labeller(
+      edge_type = edge_types,
+      num_vars = label_both
+    )
+  ) +
+  rlang::exec(scale_color_viridis_d, scale_modalities) +
+  labs(x = "First Sample", y = "Second Sample") +
+  theme_bw()
+```
+
+# Predictable Brain Networks Analysis
+
+```{r}
+#| label: render-brain-mask
+#| results: asis
+
+targets::tar_load(brain_mask_main, store = store_g_invariance)
+roi_labels <- here::here("config/atlas_power.rds") |> 
+  readRDS() |> 
+  prepare_roi_labels()
+config <- distinct(brain_mask_main, modal)
+for (row in seq_len(nrow(config))) {
+  knitr::knit_expand(
+    "template/chord_network_tmpl.qmd",
+    modal = config$modal[[row]]
+  ) |>
+    knitr::knit(text = _, quiet = TRUE) |>
+    cat()
+  cat("\n\n")
+}
+```
 
 ```{r}
 #| label: fig-brainnet-pred
+#| eval: false
 #| fig-width: 16
 #| fig-height: 8
 #| fig-cap: >
-#|   **The brain networks of the most predictable sample.** Here we can find the difference between
-#|   postive correlation networks and negative correlation networks.
-#| cache: true
+#|   **The brain networks of the most predictable sample.** Here we can find the
+#|   difference between postive correlation networks and negative correlation
+#|   networks.
 
 # network atlas
 network_labs_shen_268 <- c(
@@ -410,7 +607,7 @@ network_labs_shen_268 <- c(
   VA = "Visual Association"
 )
 cols <- setNames(
-  ggthemes::colorblind_pal()(length(network_labs_shen_268)) ,
+  ggthemes::colorblind_pal()(length(network_labs_shen_268)),
   network_labs_shen_268
 )
 vis_mask <- function(mask, thresh_prop = 0.995) {
@@ -440,12 +637,12 @@ data_masks <- preds_sampled |>
       \(num_vars, id_pairs, data, ...) {
         targets::tar_read_raw(
           str_c("brain_mask", num_vars, id_pairs, sep = "_")
-        ) |> 
+        ) |>
           pivot_longer(
             any_of(edge_types),
             names_to = "edge_type",
             values_to = "mask"
-          ) |> 
+          ) |>
           semi_join(data)
       }
     )
@@ -475,287 +672,6 @@ ggpubr::ggarrange(
   common.legend = TRUE,
   legend.grob = ggpubr::get_legend(data_plots$plots[[10]], position = "top")
 )
-```
-
-## Correlation between estimated g in Pairwise Sampling {.smaller}
-
-```{r}
-#| label: fig-g-pair-cor
-#| fig-width: 8
-#| fig-height: 6
-#| fig-cap: >
-#|   **The correlation between g scores estimated from each pair of sampling.** For each sampling,
-#|   a pair of equal-number tasks are drawed without replacement. So the maximal
-#|   number of tasks will be 10, and this figure shows that the correlations between
-#|   the paired g scores increase as the number of tasks increase.
-
-scores_g |>
-  filter(n() == 2, .by = c(num_vars, idx_rsmp)) |> 
-  pivot_wider(
-    id_cols = c(num_vars, idx_rsmp),
-    names_from = id_pairs,
-    values_from = scores
-  ) |> 
-  mutate(
-    cor = map2_dbl(
-      `1`, `2`,
-      ~ cor(.x$g, .y$g, use = "pairwise")
-    ),
-    .keep = "unused"
-  ) |> 
-  ggplot(aes(num_vars, cor)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
-  ggpubr::theme_pubclean() +
-  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
-```
-
-::: notes
-Seemingly the correlation reaches a plateau? But I am doubting here.
-:::
-
-## Similarity Between Predictive Network of Pairs
-
-```{r}
-#| label: fig-network-pair-dice
-#| fig-width: 8
-#| fig-height: 6
-#| fig-cap: >
-#|   **Dice coefficient between each pair of predictive network in pairwise sampling.**
-
-targets::tar_load(dice_mask_pairs)
-dice_mask_pairs |>
-  ggplot(aes(num_vars, dice)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
-  ggpubr::theme_pubclean() +
-  facet_grid(
-    rows = vars(edge_type),
-    labeller = labeller(
-      edge_type = c(
-        all = "Combined",
-        neg = "Anti-Corr Networks",
-        pos = "Pos-Corr Networks"
-      )
-    )
-  ) +
-  labs(x = "Number of Tasks", y = "Dice Similarity")
-```
-
-## A Caveat
-
-```{r}
-#| label: fig-pair-flaw
-#| fig-width: 12
-#| fig-height: 6
-#| fig-cap: >
-#|   **Pairs are not really independent.**
-
-cpm_pred |>
-  filter(n_distinct(id_pairs) == 2, .by = num_vars) |> 
-  summarise(
-    across(all_of(edge_types), mean),
-    .by = c(num_vars, id_pairs, idx_rsmp, starts_with("thresh"))
-  ) |>
-  pivot_longer(
-    all_of(edge_types),
-    names_to = "edge_type",
-    values_to = "pred"
-  ) |> 
-  pivot_wider(
-    names_from = id_pairs,
-    values_from = pred
-  ) |> 
-  ggplot(aes(`1`, `2`)) +
-  geom_point() +
-  ggpmisc::stat_correlation(ggpmisc::use_label(c("r", "p")), color = "red", small.p = TRUE) +
-  facet_grid(edge_type ~ num_vars, labeller = label_both) +
-  labs(x = "First Sample", y = "Second Sample") +
-  theme_bw()
-```
-
-# Polish Factor Model
-
-Now we return to use all the indices of the tasks. The first thing we can try is to fit a better factor model.
-
-## The poor fit of one-g model
-
-```{r}
-#| label: fig-loading-one-factor
-#| fig-height: 6
-#| fig-width: 8
-#| fig-cap: >
-#|   **Factor loadings for one factor only.** Note the largest loadings are 
-#|   mainly from response time tasks. The fit measures are also low.
-
-targets::tar_load(mdl_fitted_full, store = "_store_g_stability")
-df_print <- fitMeasures(mdl_fitted_full, c("cfi", "tli", "rmsea")) |> 
-  as_tibble_row() |> 
-  rename_with(toupper) |> 
-  mutate(across(.fns = ~ round(., 2)))
-standardizedSolution(mdl_fitted_full) |> 
-  filter(lhs == "g", op == "=~") |> 
-  select(variable = rhs, loading = est.std) |> 
-  ggplot(aes(loading, fct_reorder(variable, loading))) +
-  geom_point() +
-  ggpp::geom_table_npc(
-    data = tibble(x = 0.05, y = 0.95, tb = list(df_print)),
-    mapping = aes(npcx = x, npcy = y, label = tb)
-  ) +
-  labs(x = "Loading", y = "Task Index") +
-  theme_bw()
-```
-
-## Enhance Model Fitting
-
-Given the previous model does not fit well, item deletion and model re-factor (hierarchical model) are tried. The deleted items are:
-
--   All the inhibition tasks (anti-saccade, stop signal, stroop), because they do not fit well as an inhibition factor.
-
--   Penn line orientation task is related to perception, which does not have enough similar tasks.
-
--   Spatial 2-back task, because its correlation with other WM tasks is relatively low and its loading on WM factor is low.
-
-## Better Model {.smaller}
-
-```{r}
-#| label: fig-better-model
-#| fig-width: 8
-#| fig-height: 5
-#| fig-cap: >
-#|   **Visualization of the new model.** Hierarchical model is more accepted by
-#|   researchers.
-
-targets::tar_load(mdl_fitted, store = "_store_behav")
-semPlot::semPaths(
-  mdl_fitted, 
-  whatLabels = "std", 
-  intercepts = FALSE, 
-  nCharNodes = 0,
-  edge.label.cex = 0.75
-)
-```
-
-```{r}
-#| label: tbl-fitmeasure-better-model
-#| tbl-cap: >
-#|   **Fit measures.**
-
-fitMeasures(mdl_fitted, c("cfi", "tli", "rmsea")) |> 
-  as_tibble_row() |> 
-  rename_with(toupper) |> 
-  mutate(across(.fns = ~ round(., 2))) |> 
-  knitr::kable()
-```
-
-## Correlation between two G factor scores
-
-```{r}
-#| label: fig-cor-between-g
-#| fig-height: 6
-#| fig-width: 8
-#| fig-cap: >
-#|   **Correlation between g factor scores.** The correlation is very high, which
-#|   is just as what Jensen had found.
-
-tibble(
-  score_g_one = lavPredict(mdl_fitted_full)[, "g"],
-  score_g_better = lavPredict(mdl_fitted)[, "g"]
-) |> 
-  ggplot(aes(score_g_one, score_g_better)) +
-  geom_point() +
-  ggpmisc::stat_correlation(ggpmisc::use_label(c("R", "P")), small.p = TRUE) +
-  theme_bw() +
-  coord_fixed() +
-  labs(x = "Spearman Model", y = "Hierarchical Model")
-```
-
-# More on CPM results for g
-
-Here we do two comparisons:
-
--   Is the hierarchical model has better CPM prediction result?
-
--   Is the neural network from a task-state fMRI has better CPM prediction result?
-
-## Model comparison
-
-```{r}
-#| label: fig-model-cmp
-#| fig-height: 6
-#| fig-width: 8
-#| fig-cap: >
-#|   **Predictability difference between two models.** 
-
-targets::tar_load(cpmcors, store = "_store_task_fmri")
-cpmcors |>
-  filter(modal == "rest", parcel == "nn268", gsr == "without", 
-         thresh_method == "alpha", latent == "g") |> 
-  select(starts_with("tar"), edge_type, cor = estimate) |> 
-  mutate(model = "Spearman") |> 
-  bind_rows(
-    cpm_pred_main |> 
-      filter(thresh_method == "alpha") |> 
-      pivot_longer(
-        all_of(edge_types),
-        names_to = "edge_type",
-        values_to = "cor"
-      ) |> 
-      mutate(model = "Hierarchical")
-  ) |> 
-  ggplot(aes(model, cor)) +
-  ggdist::stat_dotsinterval() +
-  ggpubr::stat_compare_means(method = "t.test") +
-  facet_grid(
-    cols = vars(edge_type),
-    labeller = labeller(
-      edge_type = c(
-        all = "Combined",
-        neg = "Anti-Corr Networks",
-        pos = "Pos-Corr Networks"
-      )
-    )
-  ) +
-  ggpubr::theme_pubclean() +
-  labs(x = "Model Type",  y = "Neural Correlation")
-```
-
-## Task vs Rest fMRI
-
-```{r}
-#| label: fig-modal-cmp
-#| fig-height: 6
-#| fig-width: 8
-#| fig-cap: >
-#|   **Predictability difference between two fMRI modality.** 
-
-cpmcors |> 
-  filter(modal %in% c("rest", "nbackfull"), parcel == "nn268", gsr == "without", 
-         thresh_method == "alpha", latent == "g") |> 
-  ggplot(aes(modal, estimate)) +
-  ggdist::stat_dotsinterval() +
-  ggpubr::stat_compare_means(method = "t.test") +
-  facet_grid(
-    cols = vars(edge_type),
-    labeller = labeller(
-      edge_type = c(
-        all = "Combined",
-        neg = "Anti-Corr Networks",
-        pos = "Pos-Corr Networks"
-      )
-    )
-  ) +
-  scale_x_discrete(
-    "Modality", 
-    labels = c(
-      nbackfull = "Task (N-back)",
-      rest = "Resting"
-    )
-  ) +
-  scale_y_continuous("Neural Correlation") +
-  ggpubr::theme_pubclean()
 ```
 
 # References

@@ -16,3 +16,12 @@ project_g_invariance:
 project_task_selection:
   script: tar_scripts/task_selection.R
   store: _targets/task_selection
+project_cpm_main:
+  script: tar_scripts/cpm_main.R
+  store: _targets/cpm_main
+project_preproc_neural:
+  script: tar_scripts/preproc_neural.R
+  store: _targets/preproc_neural
+experiment_bench_cpm:
+  script: _experiment/bench_cpm.R
+  store: _targets/_experiment/bench_cpm

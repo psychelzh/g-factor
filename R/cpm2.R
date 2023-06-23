@@ -23,6 +23,7 @@
 #'   * cor_{pos,neg,all}: Correlation test result between predicted and true
 #'   behavior.
 #' @author Liang Zhang <psychelzh@outlook.com>
+#' @importFrom collapse %r-% %r/% fmean fsd
 #' @export
 cpm2 <- function(data, behav = NULL, kfolds = NULL,
                  bias_correct = NULL,
@@ -128,6 +129,6 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
 
 critical_r <- function(n, alpha) {
   df <- n - 2
-  ct <- qt( alpha/2, df, lower.tail = FALSE )
-  sqrt( (ct^2) / ( (ct^2) + df ) )
+  ct <- qt(alpha / 2, df, lower.tail = FALSE)
+  sqrt((ct^2) / ((ct^2) + df))
 }

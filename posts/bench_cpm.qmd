@@ -17,17 +17,7 @@ bibliography: references.bib
 #| include: false
 
 conflicted::conflicts_prefer(dplyr::filter(), dplyr::lag())
-library(tidyverse)
-source(here::here("R/constants.R"))
-get_store_path <- function(project) {
-  here::here() |>
-    withr::with_dir(
-      targets::tar_config_get("store", project = project)
-    ) |>
-    here::here()
-}
-store_bench_cpm <- get_store_path("project_bench_cpm")
-store_task_selection <- get_store_path("project_task_selection")
+devtools::load_all()
 ```
 
 # FMRI Sample Description
@@ -127,13 +117,9 @@ behav_cor <- expand_grid(
   mutate(
     map2(
       tasksel, baseline,
-      ~ {
-        colnames(.x)[[2]] <- "x1"
-        colnames(.y)[[2]] <- "x2"
-        .x |>
-          inner_join(.y, by = "sub_id") |>
-          summarise(estimate = cor(x1, x2, use = "pairwise"))
-      }
+      ~ .x |>
+        inner_join(.y, by = "sub_id") |>
+        summarise(estimate = cor(pick(2), pick(3), use = "pairwise"))
     ) |>
       list_rbind(),
     .keep = "unused"

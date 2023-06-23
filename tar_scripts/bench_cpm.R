@@ -15,16 +15,12 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-store_preproc_behav <- fs::path(
-  tar_config_get("store", project = "project_preproc_behav"),
-  "objects"
-)
 
 # prepare static branches targets ----
-hypers_sex <- data.frame(sex = c("M", "F"))
 data_subjs <- tarchetypes::tar_map(
   values = config_neural |>
-    dplyr::filter(parcel == "nn268", gsr == "without"),
+    config_file_tracking() |>
+    dplyr::distinct(cond, .keep_all = TRUE),
   names = modal,
   tar_target(
     subjs_pattern,
@@ -35,13 +31,13 @@ data_subjs <- tarchetypes::tar_map(
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
-    subjs_info_clean,
-    fs::path(store_preproc_behav, "subjs_info_clean"),
+    subjs_covariates,
+    fs::path(store_preproc_behav, "objects", "subjs_covariates"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
     behav_main,
-    fs::path(store_preproc_behav, "behav_main"),
+    fs::path(store_preproc_behav, "objects", "behav_main"),
     read = qs::qread(!!.x)
   ),
   data_subjs,
@@ -61,24 +57,30 @@ list(
     )
   ),
   tar_target(
-    subjs_combined_file, {
+    subjs_combined_file,
+    {
       write_lines(subjs_combined, file_subjs_combined)
       file_subjs_combined
     },
     format = "file"
   ),
-  permute_cpm2(
-    behav_main, config_neural, hypers_cpm,
+  prepare_permute_cpm2(
+    config_neural, hypers_cpm, behav_main,
     subjs_subset = subjs_combined
   ),
-  permute_cpm2(
-    behav_main,
+  prepare_permute_cpm2(
     config_neural,
-    tidyr::expand_grid(hypers_cpm, hypers_sex),
+    tidyr::expand_grid(
+      hypers_cpm,
+      site = names(sites)
+    ),
+    behav_main,
+    dir_neural = "data/reg_covars",
+    tar_name_neural = "file_neural_reg_covars",
     subjs_subset = subjs_combined,
-    name_suffix = "_sex",
-    split_hyper = "sex",
-    subjs_info = subjs_info_clean,
-    include_file_targets = FALSE
+    name_suffix = "_reg.all_split.site",
+    subjs_info = subjs_covariates,
+    split_hyper = "site",
+    covars = TRUE
   )
 )

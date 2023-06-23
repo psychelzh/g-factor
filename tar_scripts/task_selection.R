@@ -9,22 +9,21 @@ tar_option_set(
   retrieval = "worker",
   error = "null",
   format = "qs",
-  controller = crew::crew_controller_local(workers = 8, auto_scale = "one")
+  controller = crew::crew_controller_local(workers = 8)
 )
 
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-store_preproc_behav <- fs::path(
-  tar_config_get("store", project = "project_preproc_behav"),
-  "objects"
-)
 
 # prepare static branches targets ----
 config_neural <- config_neural |>
   dplyr::filter(parcel == "Power264")
 hypers_cpm <- hypers_cpm |>
-  dplyr::filter(thresh_method == "alpha")
+  dplyr::filter(
+    thresh_method == "alpha",
+    thresh_level == 0.01
+  )
 
 hypers_behav <- data.frame(n_rm = 1:(max_num_vars - 3))
 task_selection <- tarchetypes::tar_map(
@@ -39,10 +38,10 @@ task_selection <- tarchetypes::tar_map(
       data_names,
       include_var_exp = FALSE
     ),
-    permute_cpm2(
-      scores_g,
+    prepare_permute_cpm2(
       config_neural,
       hypers_cpm,
+      scores_g,
       subjs_subset = subjs_combined,
       include_file_targets = FALSE
     )
@@ -53,7 +52,7 @@ task_selection <- tarchetypes::tar_map(
 list(
   tarchetypes::tar_file_read(
     mdl_fitted_full,
-    fs::path(store_preproc_behav, "mdl_fitted_full"),
+    fs::path(store_preproc_behav, "objects", "mdl_fitted_full"),
     read = qs::qread(!!.x)
   ),
   tar_target(
@@ -69,7 +68,7 @@ list(
   ),
   tarchetypes::tar_file_read(
     indices_wider_clean,
-    fs::path(store_preproc_behav, "indices_wider_clean"),
+    fs::path(store_preproc_behav, "objects", "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
   tar_target(
@@ -83,10 +82,10 @@ list(
         )
       )
   ),
-  permute_cpm2(
-    scores_single,
+  prepare_permute_cpm2(
     config_neural,
     hypers_cpm,
+    scores_single,
     subjs_subset = subjs_combined,
     name_suffix = "_single"
   ),

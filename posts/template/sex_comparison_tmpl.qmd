@@ -6,7 +6,7 @@
 #| fig-height: 8
 #| fig-cap: CPM prediction between different sex.
 
-cpm_pred_sex |> 
+cpm_pred_sex |>
   filter(
     thresh_method == "alpha",
     parcel == "{{ parcel }}",
@@ -16,7 +16,7 @@ cpm_pred_sex |>
     cols = all_of(names(edge_types)),
     names_to = "edge_type",
     values_to = "estimate"
-  ) |> 
+  ) |>
   mutate(
     idx = factor(idx, names(meas_behav)),
     sex = factor(sex, names(sexes)),
@@ -35,9 +35,9 @@ cpm_pred_sex |>
   ) +
   rlang::exec(scale_x_discrete, !!!scale_meas_behv) +
   rlang::exec(
-    scale_fill_brewer, 
-    !!!scale_sexes, 
-    palette = "Paired", 
+    scale_fill_brewer,
+    !!!scale_sexes,
+    palette = "Paired",
     aesthetics = "fill"
   ) +
   theme_bw() +

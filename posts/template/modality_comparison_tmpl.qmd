@@ -6,7 +6,7 @@
 #| fig-height: 8
 #| fig-cap: CPM prediction among different modality.
 
-cpm_pred |> 
+cpm_pred |>
   filter(
     parcel == "{{ parcel }}",
     gsr == "{{ gsr }}"
@@ -15,7 +15,7 @@ cpm_pred |>
     cols = all_of(names(edge_types)),
     names_to = "edge_type",
     values_to = "estimate"
-  ) |> 
+  ) |>
   mutate(
     thresh_method = factor(thresh_method, names(thresh_methods)),
     idx = factor(idx, names(meas_behav)),
@@ -34,9 +34,9 @@ cpm_pred |>
   ) +
   rlang::exec(scale_x_discrete, !!!scale_meas_behv) +
   rlang::exec(
-    scale_fill_brewer, 
-    !!!scale_modalities, 
-    palette = "Dark2", 
+    scale_fill_brewer,
+    !!!scale_modalities,
+    palette = "Dark2",
     aesthetics = "fill"
   ) +
   theme_bw() +

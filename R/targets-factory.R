@@ -1,3 +1,6 @@
+#' @import targets
+NULL
+
 #' Target factory to combine targets from different batches
 #'
 #' @param name The name for the target. Should be a symbol.
@@ -6,7 +9,10 @@
 #'   targets.
 #' @returns A new target object to do the given targets combination.
 combine_targets <- function(name, targets, cols_targets) {
-  name <- deparse1(substitute(name))
+  if (tryCatch(!is.name(name), error = \(e) TRUE)) {
+    name <- substitute(name)
+  }
+  name <- deparse1(name)
   tarchetypes::tar_combine_raw(
     name,
     targets[[name]],
@@ -35,38 +41,42 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
   list(
     tar_target_raw(
       "mdl_fitted",
-      df_ov |>
+      rlang::expr(
         mutate(
+          !!rlang::ensym(df_ov),
           mdl = map(
             tasks,
-            ~ fit_g(indices, .)
+            ~ fit_g(!!rlang::ensym(indices), .)
           ),
           .keep = "unused"
-        ) |>
-        substitute()
+        )
+      )
     ),
     if (include_var_exp) {
       tar_target_raw(
         "var_exp",
-        mdl_fitted |>
+        rlang::expr(
           mutate(
+            mdl_fitted,
             prop = map_dbl(mdl, calc_var_exp),
             .keep = "unused"
-          ) |>
-          substitute()
+          )
+        ),
+        deployment = "main"
       )
     },
     tar_target_raw(
       "scores_g",
-      mdl_fitted |>
+      rlang::expr(
         mutate(
+          mdl_fitted,
           scores = map(
             mdl,
-            ~ predict_g_score(indices, .)
+            ~ predict_g_score(!!rlang::ensym(indices), .)
           ),
           .keep = "unused"
-        ) |>
-        substitute()
+        )
+      )
     )
   )
 }
@@ -75,97 +85,192 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'
 #' This will generate batches of CPM permutation for targets to use.
 #'
-#' @param behav The name for the behavioral data. Should be a symbol.
 #' @param config_neural A [data.frame()] storing the specifications of neural
 #'   data used. The `tar_neural` and `file` fields must be present to specify
 #'   which neural data to use.
 #' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
-#'   the `values` argument of [tarchetypes::tar_map_rep()]. The `kfolds`,
-#'   `thresh_method` and `thresh_level` are required.
-#' @param subjs_subset The subject list to include in CPM analysis.
-#' @param name_suffix The name suffix for the CPM targets.
-#' @param split_hyper,subjs_info If one of these two parameters is specified,
-#'   the other must be specified, too. `split_hyper` specifies the field used to
-#'   split neural data to perform different CPM calculations, e.g., different
-#'   gender. Note this field must be present in both `hypers` and `subjs_info`.
+#'   the `values` argument of [tarchetypes::tar_map_rep()]. Note the names must
+#'   be consistent with the argument names of [do_cpm2()]. If this argument is
+#'   not specified or is `NULL`, it will only return targets tracking the neural
+#'   data.
+#' @param behav The expression to get behavioral data.
+#' @param ... Additional arguments passed to [config_file_tracking()]. This is
+#'   especially useful when you specified `covars` to regress out covariates.
+#' @param subjs_subset The expression to get the subject list to include in CPM
+#'   analysis.
+#' @param name_suffix A character scalar specifying the name suffix for the CPM
+#'   targets.
+#' @param include_file_targets A logical value indicating if the targets
+#'   tracking the neural data should be included.
+#' @param subjs_info The expression to get the required subjects' information
+#'   used to filter out corresponding data to do CPM calculations.
+#' @param split_hyper A character scalar specifying the field used to split
+#'   subjects. If this is specified, the subjects will be split by the values
+#'   of this field, and the corresponding data will be used to do CPM
+#'   calculations. Note this field must also be present in `subjs_info` and
+#'   `hypers_cpm`.
+#' @param covars A character vector specifying the covariates to regress out. If
+#'   `TRUE`, all covariates will be included. If `NULL`, no covariates will be
+#'   included. Note for performance considerations, regression is not done for
+#'   neural data, and you need to specify the corresponding neural data by
+#'   adding arguments in `...`.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
+#'   If `hypers_cpm` is the not specified or is `NULL`, a list of targets
+#'   tracking neural data will be returned.
 #' @export
-permute_cpm2 <- function(behav,
-                         config_neural,
-                         hypers_cpm,
-                         subjs_subset = NULL,
-                         name_suffix = "",
-                         include_file_targets = TRUE,
-                         split_hyper = NULL,
-                         subjs_info = NULL,
-                         batches = 4, reps = 5) {
-  neural <- quote(arrow::read_feather(tar_neural))
-  if (!missing(subjs_subset)) {
-    neural <- substitute(filter(neural, sub_id %in% subjs_subset))
+prepare_permute_cpm2 <- function(config_neural,
+                                 hypers_cpm = NULL,
+                                 behav = NULL,
+                                 ...,
+                                 subjs_subset = NULL,
+                                 name_suffix = "",
+                                 include_file_targets = TRUE,
+                                 subjs_info = NULL,
+                                 split_hyper = NULL,
+                                 covars = NULL,
+                                 batches = 4, reps = 5) {
+  config_neural_files <- config_file_tracking(config_neural, ...)
+  file_targets <- tarchetypes::tar_eval(
+    tar_target(tar_neural, file, format = "file"),
+    values = config_neural_files
+  )
+  if (missing(hypers_cpm) || is.null(hypers_cpm)) {
+    return(file_targets)
   }
-  if (!missing(split_hyper)) {
+  neural_parsed <- rlang::expr(arrow::read_feather(tar_neural))
+  if (!missing(subjs_subset)) {
+    subjs_subset <- rlang::enexpr(subjs_subset)
+    if (!is.null(subjs_subset)) {
+      neural_parsed <- rlang::expr(
+        filter(!!neural_parsed, sub_id %in% !!subjs_subset)
+      )
+    }
+  }
+  behav_parsed <- rlang::enexpr(behav)
+  if (!is.null(covars) ||
+    (!missing(split_hyper) && !is.null(split_hyper))) {
     stopifnot(!missing(subjs_info))
-    neural <- .(substitute(neural)) |>
+    subjs_info <- rlang::enexpr(subjs_info)
+    stopifnot(!is.null(subjs_info))
+  }
+  if (!is.null(covars)) {
+    args_reg_covars <- rlang::list2(
+      subjs_info = subjs_info,
+      covars = covars,
+      cond = rlang::expr(cond)
+    )
+    if (isTRUE(covars)) {
+      # do not need to specify `covars` in `args_reg_covars`
+      args_reg_covars <- args_reg_covars[-2]
+    }
+    behav_parsed <- rlang::expr(
+      mutate(
+        !!behav_parsed,
+        scores = map(
+          scores,
+          ~ regress_covariates(
+            data = .,
+            !!!args_reg_covars
+          )
+        )
+      )
+    )
+  }
+  if (!missing(split_hyper) && !is.null(split_hyper)) {
+    neural_parsed <- rlang::expr(
       semi_join(
+        !!neural_parsed,
         filter(
-          .(substitute(subjs_info)),
-          .data[[.(split_hyper)]] == .(as.name(split_hyper))
+          !!subjs_info,
+          .data[[!!split_hyper]] == !!rlang::ensym(split_hyper)
         ),
         by = "sub_id"
-      ) |>
-      bquote()
+      )
+    )
   }
+  # prepare additional arguments for `do_cpm2()` based on `hypers_cpm`
+  name_args <- intersect(names(formals(do_cpm2)), names(hypers_cpm))
+  args_cpm <- setNames(rlang::syms(name_args), name_args)
   name_result_cpm <- paste0("result_cpm", name_suffix)
   name_cpm_pred <- paste0("cpm_pred", name_suffix)
   name_brain_mask <- paste0("brain_mask", name_suffix)
   list(
-    if (include_file_targets) {
-      tarchetypes::tar_eval(
-        tar_target(tar_neural, file, format = "file"),
-        values = config_neural
-      )
-    },
+    if (include_file_targets) file_targets,
     tarchetypes::tar_map_rep_raw(
       name_result_cpm,
-      behav |>
+      rlang::expr(
         mutate(
+          !!behav_parsed,
           cpm = map(
             scores,
-            ~ do_cpm2(
-              neural,
-              .,
-              kfolds = kfolds,
-              thresh_method = thresh_method,
-              thresh_level = thresh_level
-            )
+            ~ do_cpm2(!!neural_parsed, ., !!!args_cpm)
           ),
           .keep = "unused"
-        ) |>
-        substitute(),
-      values = tidyr::expand_grid(config_neural, hypers_cpm),
+        )
+      ),
+      values = tidyr::expand_grid(config_neural_files, hypers_cpm),
       # `tar_neural` and `file` are constructed from other core elements
-      columns = quote(-c(tar_neural, file)),
+      columns = rlang::expr(-c(tar_neural, file)),
       batches = batches,
       reps = reps
     ),
     tar_target_raw(
       name_cpm_pred,
-      extract_cpm_pred(
-        .(as.name(name_result_cpm))
-      ) |>
-        bquote()
+      rlang::expr(extract_cpm_pred(!!rlang::sym(name_result_cpm))),
+      deployment = "main"
     ),
     tar_target_raw(
       name_brain_mask,
-      extract_brain_mask(
-        .(as.name(name_result_cpm)),
-        by = .(substitute(
-          any_of(c(names(behav), names(config_neural), names(hypers_cpm)))
-        ))
-      ) |>
-        bquote()
+      rlang::expr(
+        extract_brain_mask(
+          !!rlang::sym(name_result_cpm),
+          by = any_of(
+            c(
+              names(!!rlang::enexpr(behav)),
+              # maybe see https://github.com/r-lib/rlang/issues/1629
+              names(!!substitute(config_neural)),
+              names(!!substitute(hypers_cpm))
+            )
+          )
+        )
+      ),
+      deployment = "main"
     )
   )
+}
+
+# helper functions ----
+
+#' Configure file tracking for neural data
+#'
+#' @param config A [data.frame()] storing the specifications of neural data
+#'   used.
+#' @param dir_neural A character scalar specifying the directory of neural data.
+#' @param tar_name_neural A character scalar specifying the name of the target
+#'   tracking the neural data.
+#' @param name_suffix A character scalar specifying the name suffix for the
+#'   targets.
+#' @returns A new [data.frame()] with the `file` and `tar_neural` fields added.
+#' @export
+config_file_tracking <- function(config,
+                                 dir_neural = "data/neural",
+                                 tar_name_neural = "file_neural",
+                                 name_suffix = "") {
+  config |>
+    dplyr::mutate(
+      "{paste0('file', name_suffix)}" := fs::path(
+        dir_neural,
+        sprintf(
+          "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
+          cond, parcel, filt, gsr
+        )
+      ),
+      "{paste0('tar_neural', name_suffix)}" := paste(
+        tar_name_neural, cond, parcel, filt, gsr,
+        sep = "_"
+      ) |>
+        rlang::syms()
+    )
 }
