@@ -109,7 +109,7 @@
     "href": "posts/main_results.html#measure-of-g",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Measure of g",
-    "text": "Measure of g\n\n\nTwo major influences: sampling of participants and sampling of cognitive tasks\nHere we focus on the issue of tasks sampling\n\nTask sampling representativeness\nFactor analysis method"
+    "text": "Measure of g\n\n\nTwo major influences: sampling of participants and sampling of cognitive tasks\nHere we focus on the issue of tasks sampling\nTask sampling representativeness\nFactor analysis method"
   },
   {
     "objectID": "posts/main_results.html#invariance-of-g",
@@ -130,28 +130,28 @@
     "href": "posts/main_results.html#factor-modeling",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Factor Modeling",
-    "text": "Factor Modeling\n\n\nThere are several different factor analysis modeling method:\n\nSpearman Model\nBifactor Model\nOrthogonalized Hierarchical Model\n\nJensen (1998) found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000."
+    "text": "Factor Modeling\n\n\nThere are several different factor analysis modeling method:\nSpearman Model\nBifactor Model\nOrthogonalized Hierarchical Model\nJensen (1998) found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000."
   },
   {
     "objectID": "posts/main_results.html#sampling-of-tasks",
     "href": "posts/main_results.html#sampling-of-tasks",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Sampling of tasks",
-    "text": "Sampling of tasks\n\n\nWhat is the clear relationship between the invariance of g and task sampling?\n\nTask number\nTask domain\nNeural predictability\nFactor model selection\nRelationship with the score of Raven’s Advanced Progressive Matrices (RAPM)"
+    "text": "Sampling of tasks\n\n\nWhat is the clear relationship between the invariance of g and task sampling?\nTask number\nTask domain\nNeural predictability\nFactor model selection\nRelationship with the score of Raven’s Advanced Progressive Matrices (RAPM)"
   },
   {
     "objectID": "posts/main_results.html#cognitive-tasks",
     "href": "posts/main_results.html#cognitive-tasks",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Cognitive Tasks",
-    "text": "Cognitive Tasks\n\n19 Tasks (20 task indices) included\n\nWorking Memory (5): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span\nResponse Inhibition (3): Anti-Saccade (2 indices), Stop-Signal, Stroop\nShifting (3): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment\nLearning and Memory (3): Face Name Association, Symbol Memory, Pattern Separation\nAttention and Speed (5): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time"
+    "text": "Cognitive Tasks\n\n19 Tasks (20 task indices) included\nWorking Memory (5): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span\nResponse Inhibition (3): Anti-Saccade (2 indices), Stop-Signal, Stroop\nShifting (3): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment\nLearning and Memory (3): Face Name Association, Symbol Memory, Pattern Separation\nAttention and Speed (5): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time"
   },
   {
     "objectID": "posts/main_results.html#sample-size",
     "href": "posts/main_results.html#sample-size",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Sample Size",
-    "text": "Sample Size\n\nBehavior sample: 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)\nFMRI sample: 846 participants (Mean age = 20.9, SD = 2.1, range: [17, 29]; Sex: 64.2% females, 35.8% males, 0.0% other)"
+    "text": "Sample Size\n\nBehavior sample: 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)\nFMRI sample: 745 participants (Mean age = 20.9, SD = 2.2, range: [17, 29]; Sex: 63.0% females, 37.0% males, 0.0% other)"
   },
   {
     "objectID": "posts/main_results.html#missing-pattern",
@@ -179,97 +179,62 @@
     "href": "posts/main_results.html#correlation-with-rapm",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Correlation with RAPM",
-    "text": "Correlation with RAPM\n\nFigure 4: Correlation with Raven’s Advanced Progressive Matrices (RAPM) scores. The horizontal line is the correlation between gF score estimated from all task indices and RAPM."
-  },
-  {
-    "objectID": "posts/main_results.html#high-rapm-correlation-tasks",
-    "href": "posts/main_results.html#high-rapm-correlation-tasks",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "High RAPM Correlation tasks",
-    "text": "High RAPM Correlation tasks\n\nFigure 5: Top RAPM correlated tasks. The tasks for each top 10 samples are displayed."
+    "text": "Correlation with RAPM\n\n\nFigure 4: Correlation with Raven’s Advanced Progressive Matrices (RAPM) scores. The horizontal line is the correlation between gF score estimated from all task indices and RAPM."
   },
   {
     "objectID": "posts/main_results.html#neural-predictability",
     "href": "posts/main_results.html#neural-predictability",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Neural Predictability",
-    "text": "Neural Predictability\n\nFigure 6: Prediction Trending (based on CPM)."
-  },
-  {
-    "objectID": "posts/main_results.html#high-neural-correlation-tasks",
-    "href": "posts/main_results.html#high-neural-correlation-tasks",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "High Neural Correlation Tasks",
-    "text": "High Neural Correlation Tasks\n\n\nFigure 7: Top predictability tasks. The tasks for each top 10 predictability samples are displayed.\n\nReaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.\nHere we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks."
-  },
-  {
-    "objectID": "posts/main_results.html#brain-networks-for-most-predictable",
-    "href": "posts/main_results.html#brain-networks-for-most-predictable",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Brain Networks for Most Predictable",
-    "text": "Brain Networks for Most Predictable\n\nFigure 8: The brain networks of the most predictable sample. Here we can find the difference between postive correlation networks and negative correlation networks."
+    "text": "Neural Predictability\n\n\n\nFigure 5: Prediction Trending (based on CPM).\n\nReaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.\nHere we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks."
   },
   {
     "objectID": "posts/main_results.html#correlation-between-estimated-g-in-pairwise-sampling",
     "href": "posts/main_results.html#correlation-between-estimated-g-in-pairwise-sampling",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Correlation between estimated g in Pairwise Sampling",
-    "text": "Correlation between estimated g in Pairwise Sampling\n\nFigure 9: The correlation between g scores estimated from each pair of sampling. For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.\nSeemingly the correlation reaches a plateau? But I am doubting here."
+    "text": "Correlation between estimated g in Pairwise Sampling\n\nFigure 6: The correlation between g scores estimated from each pair of sampling. For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.\nSeemingly the correlation reaches a plateau? But I am doubting here."
   },
   {
     "objectID": "posts/main_results.html#similarity-between-predictive-network-of-pairs",
     "href": "posts/main_results.html#similarity-between-predictive-network-of-pairs",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "Similarity Between Predictive Network of Pairs",
-    "text": "Similarity Between Predictive Network of Pairs\n\nFigure 10: Dice coefficient between each pair of predictive network in pairwise sampling."
+    "text": "Similarity Between Predictive Network of Pairs\n\nFigure 7: Dice coefficient between each pair of predictive network in pairwise sampling. The edges are kept when given proportion of resamples selected. Here only the results from task state are shown."
+  },
+  {
+    "objectID": "posts/main_results.html#similarity-between-predictive-network-of-pairs-1",
+    "href": "posts/main_results.html#similarity-between-predictive-network-of-pairs-1",
+    "title": "Intelligence and sampling of cognitive tasks",
+    "section": "Similarity Between Predictive Network of Pairs",
+    "text": "Similarity Between Predictive Network of Pairs\n\nFigure 8: Dice coefficient between each pair of predictive network in pairwise sampling. Only the most selected of given number of edges are kept. Here only the results from task state are shown."
   },
   {
     "objectID": "posts/main_results.html#a-caveat",
     "href": "posts/main_results.html#a-caveat",
     "title": "Intelligence and sampling of cognitive tasks",
     "section": "A Caveat",
-    "text": "A Caveat\n\nFigure 11: Pairs are not really independent."
+    "text": "A Caveat\n\nFigure 9: Check if pairs are really independent."
   },
   {
-    "objectID": "posts/main_results.html#the-poor-fit-of-one-g-model",
-    "href": "posts/main_results.html#the-poor-fit-of-one-g-model",
+    "objectID": "posts/main_results.html#task-condtion-task",
+    "href": "posts/main_results.html#task-condtion-task",
     "title": "Intelligence and sampling of cognitive tasks",
-    "section": "The poor fit of one-g model",
-    "text": "The poor fit of one-g model\n\nFigure 12: Factor loadings for one factor only. Note the largest loadings are mainly from response time tasks. The fit measures are also low."
+    "section": "Task condtion: Task",
+    "text": "Task condtion: Task\n\nFigure 10: Chord diagram of top 500 edges."
   },
   {
-    "objectID": "posts/main_results.html#enhance-model-fitting",
-    "href": "posts/main_results.html#enhance-model-fitting",
+    "objectID": "posts/main_results.html#task-condtion-resting",
+    "href": "posts/main_results.html#task-condtion-resting",
     "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Enhance Model Fitting",
-    "text": "Enhance Model Fitting\nGiven the previous model does not fit well, item deletion and model re-factor (hierarchical model) are tried. The deleted items are:\n\nAll the inhibition tasks (anti-saccade, stop signal, stroop), because they do not fit well as an inhibition factor.\nPenn line orientation task is related to perception, which does not have enough similar tasks.\nSpatial 2-back task, because its correlation with other WM tasks is relatively low and its loading on WM factor is low."
+    "section": "Task condtion: Resting",
+    "text": "Task condtion: Resting\n\nFigure 11: Chord diagram of top 500 edges."
   },
   {
-    "objectID": "posts/main_results.html#better-model",
-    "href": "posts/main_results.html#better-model",
+    "objectID": "posts/main_results.html#task-condtion-combined",
+    "href": "posts/main_results.html#task-condtion-combined",
     "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Better Model",
-    "text": "Better Model\n\nFigure 13: Visualization of the new model. Hierarchical model is more accepted by researchers.\n\n\n\nTable 1: Fit measures.\n\n\nCFI\nTLI\nRMSEA\n\n\n\n\n0.93\n0.91\n0.04"
-  },
-  {
-    "objectID": "posts/main_results.html#correlation-between-two-g-factor-scores",
-    "href": "posts/main_results.html#correlation-between-two-g-factor-scores",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Correlation between two G factor scores",
-    "text": "Correlation between two G factor scores\n\nFigure 14: Correlation between g factor scores. The correlation is very high, which is just as what Jensen had found."
-  },
-  {
-    "objectID": "posts/main_results.html#model-comparison",
-    "href": "posts/main_results.html#model-comparison",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Model comparison",
-    "text": "Model comparison\n\nFigure 15: Predictability difference between two models."
-  },
-  {
-    "objectID": "posts/main_results.html#task-vs-rest-fmri",
-    "href": "posts/main_results.html#task-vs-rest-fmri",
-    "title": "Intelligence and sampling of cognitive tasks",
-    "section": "Task vs Rest fMRI",
-    "text": "Task vs Rest fMRI\n\nFigure 16: Predictability difference between two fMRI modality."
+    "section": "Task condtion: Combined",
+    "text": "Task condtion: Combined\n\nFigure 12: Chord diagram of top 500 edges."
   }
 ]
