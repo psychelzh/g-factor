@@ -20,7 +20,10 @@ future::plan(future.callr::callr)
 config_neural <- config_neural |>
   dplyr::filter(parcel == "Power264")
 hypers_cpm <- hypers_cpm |>
-  dplyr::filter(thresh_method == "alpha")
+  dplyr::filter(
+    thresh_method == "alpha",
+    thresh_level == 0.01
+  )
 
 hypers_behav <- data.frame(n_rm = 1:(max_num_vars - 3))
 task_selection <- tarchetypes::tar_map(
