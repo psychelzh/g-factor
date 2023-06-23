@@ -149,11 +149,12 @@ prepare_permute_cpm2 <- function(config_neural,
     }
   }
   behav_parsed <- rlang::enexpr(behav)
-  if (!is.null(covars) ||
+  if ((!missing(covars) && !is.null(covars <- rlang::enexpr(covars))) ||
     (!missing(split_hyper) && !is.null(split_hyper))) {
-    stopifnot(!missing(subjs_info))
-    subjs_info <- rlang::enexpr(subjs_info)
-    stopifnot(!is.null(subjs_info))
+    stopifnot(
+      !missing(subjs_info) &&
+        !is.null(subjs_info <- rlang::enexpr(subjs_info))
+    )
   }
   if (!is.null(covars)) {
     args_reg_covars <- rlang::list2(
