@@ -4,16 +4,22 @@
 \alias{prepare_adjacency}
 \title{Prepare adjacency matrix}
 \usage{
-prepare_adjacency(mask, ...)
+prepare_adjacency(mask, ..., value = c("binary", "frac"), diagonal = NA)
 }
 \arguments{
 \item{mask}{A vector of brain mask, should be the upper triangle of the
 original full mask.}
 
 \item{...}{Further arguments passed to \code{\link[=binarize_mask]{binarize_mask()}}.}
+
+\item{value}{A character string specifying the value of the adjacency matrix.
+If \code{"binary"}, the adjacency matrix will be binary. If \code{"frac"}, the
+adjacency matrix will be the fraction of the mask.}
+
+\item{diagonal}{The value of the diagonal of the adjacency matrix.}
 }
 \value{
-A \code{data.frame} with \code{row}, \code{col} and additional values.
+The adjacency \code{matrix}.
 }
 \description{
 Prepare adjacency matrix
