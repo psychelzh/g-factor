@@ -110,6 +110,8 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   of this field, and the corresponding data will be used to do CPM
 #'   calculations. Note this field must also be present in `subjs_info` and
 #'   `hypers_cpm`.
+#' @param covars A character vector specifying the column names of covariates
+#'   to be included. See [regress_covariates()] for more details.
 #' @param batches,reps The number of batches and repetitions passed to
 #'   [tarchetypes::tar_map_rep()].
 #' @returns A list of new target objects to calculate the permutation results.
@@ -125,6 +127,7 @@ prepare_permute_cpm2 <- function(config_neural,
                                  include_file_targets = TRUE,
                                  subjs_info = NULL,
                                  split_hyper = NULL,
+                                 covars = NULL,
                                  batches = 4, reps = 5) {
   config_neural_files <- config_file_tracking(config_neural, ...)
   file_targets <- tarchetypes::tar_eval(
@@ -144,11 +147,29 @@ prepare_permute_cpm2 <- function(config_neural,
     }
   }
   behav_parsed <- rlang::enexpr(behav)
-  if (!missing(split_hyper) && !is.null(split_hyper)) {
+  if (!is.null(covars) || !is.null(split_hyper)) {
     stopifnot(
       !missing(subjs_info) &&
         !is.null(subjs_info <- rlang::enexpr(subjs_info))
     )
+  }
+  if (!is.null(covars)) {
+    behav_parsed <- rlang::expr(
+      mutate(
+        !!behav_parsed,
+        scores = map(
+          scores,
+          ~ regress_covariates(
+            .,
+            subjs_info = !!subjs_info,
+            covars = !!covars,
+            cond = cond
+          )
+        )
+      )
+    )
+  }
+  if (!is.null(split_hyper)) {
     neural_parsed <- rlang::expr(
       semi_join(
         !!neural_parsed,

@@ -14,6 +14,7 @@ prepare_permute_cpm2(
   include_file_targets = TRUE,
   subjs_info = NULL,
   split_hyper = NULL,
+  covars = NULL,
   batches = 4,
   reps = 5
 )
@@ -52,6 +53,9 @@ subjects. If this is specified, the subjects will be split by the values
 of this field, and the corresponding data will be used to do CPM
 calculations. Note this field must also be present in \code{subjs_info} and
 \code{hypers_cpm}.}
+
+\item{covars}{A character vector specifying the column names of covariates
+to be included. See \code{\link[=regress_covariates]{regress_covariates()}} for more details.}
 
 \item{batches, reps}{The number of batches and repetitions passed to
 \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}.}
