@@ -4,7 +4,7 @@
 \alias{regress_covariates}
 \title{Regress out covariates}
 \usage{
-regress_covariates(data, subjs_info, covars = NULL, cond = NULL)
+regress_covariates(data, subjs_info, covars = TRUE, cond = NULL)
 }
 \arguments{
 \item{data}{A data frame with subject identifiers and outcome variables.}
@@ -14,13 +14,14 @@ FD values should be named as \code{mean_fd_task} and \code{mean_fd_rest} for n-b
 task and resting state data, respectively. And the first column should be
 the subject identifier.}
 
-\item{covars}{A character vector specifying the column names of covariates
-to be included. If set as \code{NULL} (default), all covariates will be
-included.}
+\item{covars}{A character vector specifying the column names of covariates to
+be included. If set as \code{TRUE} (default), all covariates will be regressed
+out (not including FD values, those are treated in \code{cond}). If set as
+\code{NULL}, no covariates will be regressed out.}
 
 \item{cond}{A character string specifying which FD values to be regressed
-out. It can be either \code{nbackrun1}, \code{rest}, or \code{run1rest}. If set as
-\code{NULL} (default), no FD values will be regressed out.}
+out. It can be either \code{nbackrun1}, \code{rest}, or \code{run1rest}. If set as \code{NULL}
+(default), no FD values will be regressed out.}
 }
 \value{
 A data frame with residuals.

@@ -47,18 +47,23 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
 #'   FD values should be named as `mean_fd_task` and `mean_fd_rest` for n-back
 #'   task and resting state data, respectively. And the first column should be
 #'   the subject identifier.
-#' @param covars A character vector specifying the column names of covariates
-#'   to be included. If set as `NULL` (default), all covariates will be
-#'   included.
+#' @param covars A character vector specifying the column names of covariates to
+#'   be included. If set as `TRUE` (default), all covariates will be regressed
+#'   out (not including FD values, those are treated in `cond`). If set as
+#'   `NULL`, no covariates will be regressed out.
 #' @param cond A character string specifying which FD values to be regressed
-#'   out. It can be either `nbackrun1`, `rest`, or `run1rest`. If set as
-#'   `NULL` (default), no FD values will be regressed out.
+#'   out. It can be either `nbackrun1`, `rest`, or `run1rest`. If set as `NULL`
+#'   (default), no FD values will be regressed out.
 #' @returns A data frame with residuals.
 #' @export
-regress_covariates <- function(data, subjs_info, covars = NULL, cond = NULL) {
+regress_covariates <- function(data, subjs_info, covars = TRUE, cond = NULL) {
   # handle user identifier and condition specific FD values
   names_mean_fd <- c("mean_fd_task", "mean_fd_rest")
   if (is.null(covars)) {
+    # return the original data
+    return(data)
+  }
+  if (isTRUE(covars)) {
     covars <- setdiff(names(subjs_info)[-1], names_mean_fd)
   }
   if (!is.null(cond)) {
