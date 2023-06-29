@@ -1,6 +1,6 @@
 on:
   push:
-    branches: develop
+    branches: [main, develop]
 
 name: Render and Publish
 
