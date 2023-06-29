@@ -1,7 +1,7 @@
 ---
 title: The neural substrates of general cognitive ability based on multiple cognitive tasks
 author: Liang Zhang
-date: 2023-02-24
+date: 2023-06-30
 format:
   revealjs:
     code-fold: false
