@@ -1,5 +1,5 @@
 ---
-title: Intelligence and sampling of cognitive tasks
+title: The neural substrates of general cognitive ability based on multiple cognitive tasks
 author: Liang Zhang
 date: 2023-02-24
 format:
@@ -17,8 +17,6 @@ csl: modified-chicago.csl
 
 conflicted::conflicts_prefer(dplyr::filter())
 devtools::load_all()
-library(lavaan)
-library(circlize)
 knitr::opts_chunk$set(dev = "ragg_png")
 ```
 
@@ -30,20 +28,20 @@ knitr::opts_chunk$set(dev = "ragg_png")
 The definition was never and probably won't be consistent.
 :::
 
-::: incremental
 -   Binet: "judgment, otherwise called good sense, practical sense, initiative, the faculty of adapting one's self to circumstances"
 -   Gardner: "the ability to solve problems, or to create products, that are valued within one or more cultural settings"
 -   "Ability to understand complex ideas, to adapt effectively to the environment, to learn from experience, to engage in various forms of reasoning, to overcome obstacles by taking thought." [@neisser1996]
 -   "\[A\] very general mental capability that, among other things, involves the ability to reason, plan, solve problems, think abstractly, comprehend complex ideas, learn quickly and learn from experience. It is not merely book learning, a narrow academic skill, or test-taking smarts. Rather, it reflects a broader and deeper capability for comprehending our surroundings catching on, making sense of things, or figuring out what to do." [@gottfredson1997]
 -   "A general cognitive ability related to solving problems efficiently and effectively" [@thecamb2021]
-:::
 
 ## Intelligence and g
 
 ::: incremental
--   g-factor was first proposed by Spearman [-@spearman1904] to account for the "positive manifold" phenomenon of cognitive tests.
+-   General intelligence (i.e., g-factor) was first proposed by Spearman [-@spearman1904] to account for the "positive manifold" phenomenon of cognitive tests.
 
 -   Given the term "intelligence" is hard to define and easily leads to confusion, many researchers (see Jensen [-@jensen1998]) focused on the g (i.e., general intelligence) [@haier2017; @thecamb2021].
+
+-   Current cognitive scientists also defined intelligence as general cognitive ability [@thecamb2021], which can be derived by multiple cognitive tasks
 :::
 
 ## Diagram of g and its Relatives
@@ -61,9 +59,23 @@ Savants are those with very high specific abilities but no general intelligence 
 
 -   Here we focus on the issue of tasks sampling
 
--   Task sampling representativeness
+    -   Factor analysis method
 
--   Factor analysis method
+    -   Task sampling representativeness
+:::
+
+## Factor Modeling
+
+::: incremental
+-   There are several different factor analysis modeling method:
+
+    -   Spearman Model
+
+    -   Bifactor Model
+
+    -   Orthogonalized Hierarchical Model
+
+-   Jensen [-@jensen1998] found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000. Here we just focus the classical Spearman model for its simplicity.
 :::
 
 ## Invariance of g
@@ -90,34 +102,23 @@ Savants are those with very high specific abilities but no general intelligence 
 :::
 :::
 
-## Factor Modeling
+## Number of tasks used in international projects {.smaller}
+
+| Project                   | Number of Cognitive Tasks | Ref                                   |
+|---------------------|---------------------|------------------------------|
+| UK Biobank (2004)         | 4                         | Cox S. R. et al., 2019                |
+| HCP (2009)                | 12                        | Julien Dubois et al., 2018            |
+| Aging Brain Cohort (2021) | 5 (part of NIH toolbox)   | Roger D. Newman-Norlund, et al., 2021 |
+| ABCD Study (2015)         | 10 (7 from NIH toolbox)   | Wesley K. Thompson, et al., 2018      |
+
+## Research Questions
 
 ::: incremental
--   There are several different factor analysis modeling method:
-
--   Spearman Model
-
--   Bifactor Model
-
--   Orthogonalized Hierarchical Model
-
--   Jensen [-@jensen1998] found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000.
-:::
-
-## Sampling of tasks
-
-::: incremental
--   What is the clear relationship between the invariance of g and task sampling?
-
--   Task number
-
--   Task domain
-
--   Neural predictability
-
--   Factor model selection
-
--   Relationship with the score of Raven's Advanced Progressive Matrices (RAPM)
+-   How the number of tasks affect the measure of g?
+    -   More reliable and more valid?
+-   Can neural predictability be improved by including more tasks?
+    -   More predictable and shows more reliable predicting networks?
+-   What are the exact neural substrate of g based on multiple cognitive tasks.
 :::
 
 # Our Dataset
@@ -125,17 +126,17 @@ Savants are those with very high specific abilities but no general intelligence 
 ## Cognitive Tasks {.smaller}
 
 -   19 Tasks (20 task indices) included
--   **Working Memory** (*5*): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span
--   **Response Inhibition** (*3*): Anti-Saccade (2 indices), Stop-Signal, Stroop
--   **Shifting** *(3*): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment
--   **Learning and Memory** (*3*): Face Name Association, Symbol Memory, Pattern Separation
--   **Attention and Speed** (*5*): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time
+    -   **Working Memory** (*5*): Letter 3-back, Spatial 2-back, Keep Track, Operation Complex Span, Symmetry Complex Span
+    -   **Response Inhibition** (*3*): Anti-Saccade (2 indices), Stop-Signal, Stroop
+    -   **Shifting** (*3*): Size-Life Judgment, Color-Shape Judgment, Number-Letter Judgment
+    -   **Learning and Memory** (*3*): Face Name Association, Symbol Memory, Pattern Separation
+    -   **Attention and Speed** (*5*): Continuous Performance Test, Filtering Task, Line Orientation, Simple Reaction Time, Choice Reaction Time
 
 ## Sample Size
 
 ```{r}
 targets::tar_load(
-  c(subjs_info_clean, indices_wider_clean),
+  c(subjs_info_clean, indices_wider_clean, indices_clean),
   store = store_preproc_behav
 )
 targets::tar_load(subjs_combined, store = store_bench_cpm)
@@ -153,12 +154,13 @@ descr_fmri <- subjs_info_clean |>
 
 -   FMRI sample: `r descr_fmri`
 
-## Missing Pattern
+<!-- ## Missing Pattern -->
 
 ```{r}
 #| label: fig-miss-pat
 #| fig-width: 8
 #| fig-height: 6
+#| eval: false
 #| fig-cap: >
 #|   **Behavior Data Missing Pattern**.
 
@@ -168,31 +170,25 @@ indices_wider_clean |>
   theme(axis.text.x = element_text(angle = 90))
 ```
 
-## Data Distribution
+<!-- ## Data Distribution -->
 
 ```{r}
 #| label: fig-dist-pat
 #| fig-width: 8
-#| fig-height: 6
+#| fig-height: 8
+#| eval: false
 #| fig-cap: >
 #|   **Behavior Performance Distribution**.
 
-indices_wider_clean |>
-  pivot_longer(-sub_id, names_to = "task_index", values_to = "score") |>
-  select(-sub_id) |>
+indices_clean |> 
+  filter(sub_id < 17000) |>
+  filter(!performance::check_outliers(score, method = "iqr"), .by = c(disp_name, index)) |> 
+  semi_join(indices_wider_clean, by = "sub_id") |> 
   ggplot(aes(score)) +
   geom_histogram(bins = 30, na.rm = TRUE) +
-  facet_wrap(~task_index, scales = "free") +
+  facet_wrap(~ disp_name + index, scales = "free") +
   theme_bw()
 ```
-
-# Task Number
-
-Basically, the direct method is to check g scores estimated from different number of tasks sampled from the test bank.
-
-::: notes
-Here we used 4 tasks at minimal, because g factor modeling from 3 tasks is a saturated model.
-:::
 
 ## Explained Variance
 
@@ -290,7 +286,89 @@ tasks_high_cor_rapm |>
   facet_grid(cols = vars(num_vars))
 ```
 
-## Neural Predictability
+## Correlation between estimated g in Pairwise Sampling {.smaller}
+
+```{r}
+#| label: fig-g-pair-cor
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   **The correlation between g scores estimated from each pair of sampling.**
+#|   For each sampling, a pair of equal-number tasks are drawed without
+#|   replacement. So the maximal number of tasks will be 10, and this figure
+#|   shows that the correlations between the paired g scores increase as the
+#|   number of tasks increase.
+
+scores_g |>
+  group_by(num_vars, idx_rsmp) |>
+  filter(n() == 2) |>
+  summarise(
+    estimate = cor(scores[[1]]$g, scores[[2]]$g, use = "pairwise"),
+    .groups = "drop"
+  ) |>
+  ggplot(aes(num_vars, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubclean() +
+  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
+```
+
+::: notes
+Seemingly the correlation reaches a plateau? But I am doubting here.
+:::
+
+# Neural Predictability
+
+## Find the best task condition to predict intelligence {.smaller}
+
+```{r}
+#| label: fig-bench-cpm
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   Using CPM method to predict Raven score by FC from different states, we found
+#|   that task-induced (i.e. n-back task) showed best performance, though combing
+#|   task and resting states using the first principal component showed comparable
+#|   performance. What's more, global signal regression will enhance the performance, 
+#|   whereas different parcellation showed comparable performance.
+
+targets::tar_load(
+  cpm_pred_reg_covars2, 
+  store = here::here("_targets/_experiment/bench_cpm")
+)
+
+cpm_pred_reg_covars2 |> 
+  filter(filt == "bandpass", thresh_method == "alpha", thresh_level == 0.01) |> 
+  pivot_longer(
+    all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |> 
+  filter(idx == "rapm") |> 
+  mutate(
+    cond = factor(cond, names(conds)),
+    parcel = factor(parcel, names(parcels)),
+    edge_type = factor(edge_type, names(edge_types)),
+    gsr = factor(gsr, names(gsrs))
+  ) |> 
+  ggplot(aes(cond, estimate, fill = parcel)) +
+  ggdist::stat_dots(position = position_dodge(width = 0.4), side = "left") +
+  ggdist::stat_slabinterval(position = position_dodge(width = 0.4)) +
+  rlang::exec(scale_x_discrete, !!!scale_conds) +
+  rlang::exec(scale_fill_brewer, !!!scale_parcels, palette = "Dark2") +
+  facet_grid(
+    cols = vars(edge_type),
+    rows = vars(gsr),
+    labeller = labeller(
+      edge_type = edge_types,
+      gsr = gsrs
+    )
+  ) +
+  ggpubr::theme_pubclean()
+```
+
+## Prediction Trending
 
 ```{r}
 #| label: fig-pred-trend
@@ -299,9 +377,17 @@ tasks_high_cor_rapm |>
 #| fig-cap: >
 #|   **Prediction Trending (based on CPM)**.
 
-targets::tar_load(c(cpm_pred, cpm_pred_main), store = store_g_invariance)
-preds_main <- cpm_pred_main |>
-  filter(gsr == "with") |>
+targets::tar_load(cpm_pred_main_reg_covars2, store = store_cpm_main)
+targets::tar_load(cpm_pred_reg_covars2, store = store_g_invariance)
+preds_main <- cpm_pred_main_reg_covars2 |>
+  filter(
+    cond == "nbackrun1",
+    parcel == "Power264",
+    filt == "bandpass",
+    gsr == "with", 
+    thresh_method == "alpha", 
+    thresh_level == 0.01
+  ) |>
   summarise(
     across(all_of(names(edge_types)), mean),
     .by = c(idx, any_of(c(names(config_neural), names(hypers_cpm))))
@@ -312,11 +398,11 @@ preds_main <- cpm_pred_main |>
     values_to = "estimate"
   ) |>
   mutate(
-    modal = factor(modal, names(modalities)),
+    cond = factor(cond, names(conds)),
     idx = factor(idx, names(meas_behav))
   )
-preds_sampled <- cpm_pred |>
-  filter(gsr == "with") |>
+preds_sampled <- cpm_pred_reg_covars2 |>
+  filter(gsr == "with", parcel == "Power264") |>
   summarise(
     across(all_of(names(edge_types)), mean),
     .by = c(
@@ -331,7 +417,7 @@ preds_sampled <- cpm_pred |>
   ) |>
   mutate(
     edge_type = factor(edge_type, names(edge_types)),
-    modal = factor(modal, names(modalities))
+    cond = factor(cond, names(conds))
   )
 preds_sampled |>
   ggplot(aes(num_vars, estimate)) +
@@ -348,11 +434,11 @@ preds_sampled |>
   # ) +
   rlang::exec(scale_color_viridis_d, !!!scale_meas_behv) +
   facet_grid(
-    rows = vars(edge_type),
-    cols = vars(modal),
+    cols = vars(edge_type),
+    # cols = vars(cond),
     labeller = labeller(
-      edge_type = edge_types,
-      modal = modalities
+      edge_type = edge_types
+      # cond = conds
     )
   ) +
   ggpubr::theme_pubclean() +
@@ -405,51 +491,19 @@ tasks_high_pred |>
 -   Here we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks.
 :::
 
-## Correlation between estimated g in Pairwise Sampling {.smaller}
-
-```{r}
-#| label: fig-g-pair-cor
-#| fig-width: 8
-#| fig-height: 6
-#| fig-cap: >
-#|   **The correlation between g scores estimated from each pair of sampling.**
-#|   For each sampling, a pair of equal-number tasks are drawed without
-#|   replacement. So the maximal number of tasks will be 10, and this figure
-#|   shows that the correlations between the paired g scores increase as the
-#|   number of tasks increase.
-
-scores_g |>
-  group_by(num_vars, idx_rsmp) |>
-  filter(n() == 2) |>
-  summarise(
-    estimate = cor(scores[[1]]$g, scores[[2]]$g, use = "pairwise"),
-    .groups = "drop"
-  ) |>
-  ggplot(aes(num_vars, estimate)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
-  ggpubr::theme_pubclean() +
-  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
-```
-
-::: notes
-Seemingly the correlation reaches a plateau? But I am doubting here.
-:::
-
 ```{r}
 #| label: load-data-dice
 
 targets::tar_load(dice_mask_pairs, store = store_g_invariance)
 dice_clean <- dice_mask_pairs |>
-  filter(gsr == "with") |>
+  filter(reg_covars == "yes") |> 
   pivot_longer(
     contains("dice"),
     names_to = c("edge_type", ".value"),
     names_pattern = "(.+)_(.+)"
   ) |>
   mutate(
-    modal = factor(modal, names(modalities)),
+    cond = factor(cond, names(conds)),
     edge_type = factor(edge_type, names(edge_types))
   )
 ```
@@ -466,16 +520,20 @@ dice_clean <- dice_mask_pairs |>
 #|   Here only the results from task state are shown.
 
 dice_clean |>
-  filter(binarize_method == "value", modal == "nbackfull") |>
+  filter(
+    parcel == "Power264",
+    thresh_method == "alpha",
+    binarize_method == "value",
+    binarize_level <= 0.95,
+    cond == "nbackrun1"
+  ) |>
   ggplot(aes(num_vars, dice)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
   ggpubr::theme_pubclean() +
   ggh4x::facet_nested(
     edge_type ~ "Minimal Proportion" + binarize_level,
-    # rows = vars(edge_type),
-    # cols = vars(binarize_level),
     labeller = labeller(
       edge_type = edge_types
     )
@@ -496,19 +554,19 @@ dice_clean |>
 
 dice_clean |>
   filter(
+    parcel == "Power264",
+    thresh_method == "alpha",
     binarize_method == "count",
     binarize_level %in% seq(200, 1000, 200),
-    modal == "nbackfull"
+    cond == "nbackrun1"
   ) |>
   ggplot(aes(num_vars, dice)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
   ggpubr::theme_pubclean() +
   ggh4x::facet_nested(
     edge_type ~ "Top N Edges" + binarize_level,
-    # rows = vars(edge_type),
-    # cols = vars(binarize_level),
     labeller = labeller(
       edge_type = edge_types
     )
@@ -516,12 +574,13 @@ dice_clean |>
   labs(x = "Number of Tasks", y = "Dice Similarity")
 ```
 
-## A Caveat
+<!-- ## A Caveat -->
 
 ```{r}
 #| label: fig-pair-flaw
 #| fig-width: 12
 #| fig-height: 6
+#| eval: false
 #| fig-cap: >
 #|   **Check if pairs are really independent.**
 
@@ -563,21 +622,161 @@ cpm_pred |>
   theme_bw()
 ```
 
-# Predictable Brain Networks Analysis
+# Model g with the Highest Loading Tasks
+
+The following is to test whether the correlation between the estimated g-factor scores and the brain functional connectivity can be improved by eliminating certain observed variables, e.g., those with the least factor loading.
+
+## Trends by Number of Kept tasks  {.smaller}
+
+```{r}
+#| label: fig-tasksel-neural-correlation
+#| fig-height: 6
+#| fig-width: 8
+#| fig-cap: >
+#|   The correlation between g factor scores and brain functional connectivity
+#|   reaches plateau after 6 variables of largest factor loading were included,
+#|   whereas that of RAPM scores reaches plateau after 13 variables. This might
+#|   indicate that more variables might not necesssarily be beneficial to
+#|   the measure of g-factor estimation, esp. when adding low g loading tasks.
+
+targets::tar_load(cpm_pred_reg_covars2, store = store_task_selection)
+targets::tar_load(scores_g, store = store_task_selection)
+targets::tar_load(behav_main, store = store_preproc_behav)
+behav_cor <- expand_grid(
+  rename(scores_g, tasksel = scores),
+  rename(behav_main, baseline = scores)
+) |>
+  mutate(
+    map2(
+      tasksel, baseline,
+      ~ .x |>
+        inner_join(.y, by = "sub_id") |>
+        summarise(estimate = cor(pick(2), pick(3), use = "pairwise"))
+    ) |>
+      list_rbind(),
+    .keep = "unused"
+  )
+cpm_pred_reg_covars2 |>
+  pivot_longer(
+    all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |>
+  mutate(
+    cond = factor(cond, names(conds)),
+    gsr = factor(gsr, names(gsrs))
+  ) |>
+  ggplot(aes(max_num_vars - n_rm, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(aes(color = parcel), side = "left") +
+  geom_point(
+    aes(max_num_vars - n_rm, estimate, color = idx),
+    behav_cor |> filter(idx == "rapm")
+  ) +
+  # facet_grid(
+  #   cols = vars(cond),
+  #   rows = vars(gsr),
+  #   labeller = labeller(
+  #     cond = conds,
+  #     gsr = gsrs
+  #   )
+  # ) +
+  scale_x_continuous(
+    breaks = scales::breaks_width(3),
+    name = "Number of Kept Variables"
+  ) +
+  scale_color_manual(
+    name = "",
+    values = c(rapm = "blue4", Power264 = "grey"),
+    labels = c(
+      rapm = "Correlation with RAPM scores",
+      Power264 = "Correlation with FC (by CPM)"
+    )
+  ) +
+  scale_y_continuous(name = "Pearson's Correlation") +
+  ggpubr::theme_pubclean()
+```
+
+## Single Task Benchmark
+
+```{r}
+#| label: fig-single-tasks
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   Correlation with brain FC for single tasks. The tasks are ordered by the
+#|   factor loading in one g factor model.
+
+targets::tar_load(
+  c(cpm_pred_single_reg_covars2, data_names_ordered),
+  store = store_task_selection
+)
+bind_rows(
+  `Single Task` = cpm_pred_single_reg_covars2,
+  `Intelligence` = cpm_pred_main_reg_covars2 |> 
+      filter(
+        parcel == "Power264",
+        cond == "nbackrun1",
+        filt == "bandpass",
+        gsr == "with",
+        thresh_method == "alpha", 
+        thresh_level == 0.01
+      ) |> 
+      rename(task = idx),
+  .id = "type"
+) |> 
+  mutate(
+    type = factor(type, c("Intelligence", "Single Task")),
+    task = factor(
+      task, 
+      c(names(meas_behav), data_names_ordered),
+      c(meas_behav, data_names_ordered)
+    )
+  ) |>
+  pivot_longer(
+    all_of(names(edge_types)),
+    names_to = "edge_type",
+    values_to = "estimate"
+  ) |>
+  mutate(
+    cond = factor(cond, names(conds)),
+    gsr = factor(gsr, names(gsrs))
+  ) |>
+  ggplot(aes(task, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  facet_grid(
+    cols = vars(type), space = "free", scales = "free_x"
+  ) +
+  ggpubr::theme_pubclean() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Task Name (Descending Loading)", y = "Correlation with FC")
+```
+
+# Model-selected Networks Analysis
 
 ```{r}
 #| label: render-brain-mask
 #| results: asis
 
-targets::tar_load(brain_mask_main, store = store_g_invariance)
-roi_labels <- here::here("config/atlas_power.rds") |> 
-  readRDS() |> 
+brain_mask_main <- targets::tar_read(
+  brain_mask_main_reg_covars2, 
+  store = store_cpm_main
+) |> 
+  filter(
+    parcel == "Power264", filt == "bandpass", gsr == "with",
+    thresh_method == "alpha", thresh_level == 0.001,
+    cond %in% c("nbackrun1", "rest")
+  )
+roi_labels <- readRDS(here::here("config/atlas_power.rds")) |>
   prepare_roi_labels()
-config <- distinct(brain_mask_main, modal)
+roi_coords <- as.matrix(select(roi_labels, contains("mni")))
+config <- distinct(brain_mask_main, cond)
+options(chord.link.val = "relative")
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
     "template/chord_network_tmpl.qmd",
-    modal = config$modal[[row]]
+    cond = config$cond[[row]]
   ) |>
     knitr::knit(text = _, quiet = TRUE) |>
     cat()

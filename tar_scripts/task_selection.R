@@ -18,7 +18,12 @@ future::plan(future.callr::callr)
 
 # prepare static branches targets ----
 config_neural <- config_neural |>
-  dplyr::filter(parcel == "Power264")
+  dplyr::filter(
+    parcel == "Power264",
+    filt == "bandpass",
+    gsr == "with",
+    cond == "nbackrun1"
+  )
 hypers_cpm <- hypers_cpm |>
   dplyr::filter(
     thresh_method == "alpha",
@@ -44,6 +49,18 @@ task_selection <- tarchetypes::tar_map(
       scores_g,
       subjs_subset = subjs_combined,
       include_file_targets = FALSE
+    ),
+    prepare_permute_cpm2(
+      config_neural,
+      hypers_cpm,
+      scores_g,
+      dir_neural = "data/reg_covars2",
+      tar_name_neural = "file_neural_reg_covars2",
+      include_file_targets = FALSE,
+      subjs_subset = subjs_combined,
+      name_suffix = "_reg_covars2",
+      subjs_info = subjs_covariates,
+      covars = c("age", "sex")
     )
   )
 )
@@ -65,6 +82,11 @@ list(
     subjs_combined,
     file_subjs_combined,
     read = as.numeric(read_lines(!!.x))
+  ),
+  tarchetypes::tar_file_read(
+    subjs_covariates,
+    fs::path(store_preproc_behav, "objects", "subjs_covariates"),
+    read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
     indices_wider_clean,
@@ -89,7 +111,26 @@ list(
     subjs_subset = subjs_combined,
     name_suffix = "_single"
   ),
+  prepare_permute_cpm2(
+    config_neural,
+    hypers_cpm,
+    scores_single,
+    dir_neural = "data/reg_covars2",
+    tar_name_neural = "file_neural_reg_covars2",
+    subjs_subset = subjs_combined,
+    name_suffix = "_single_reg_covars2",
+    subjs_info = subjs_covariates,
+    covars = c("age", "sex")
+  ),
   task_selection,
-  combine_targets(scores_g, task_selection, names(hypers_behav)),
-  combine_targets(cpm_pred, task_selection, names(hypers_behav))
+  lapply(
+    rlang::exprs(
+      scores_g,
+      cpm_pred,
+      cpm_pred_reg_covars2
+    ),
+    combine_targets,
+    targets = task_selection,
+    cols_targets = names(hypers_behav)
+  )
 )

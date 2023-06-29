@@ -33,7 +33,8 @@ data.}
 \item{behav}{The expression to get behavioral data.}
 
 \item{...}{Additional arguments passed to \code{\link[=config_file_tracking]{config_file_tracking()}}. This is
-especially useful when you specified \code{covars} to regress out covariates.}
+especially useful when covariates regression has been done on the
+behavioral data.}
 
 \item{subjs_subset}{The expression to get the subject list to include in CPM
 analysis.}
@@ -53,11 +54,8 @@ of this field, and the corresponding data will be used to do CPM
 calculations. Note this field must also be present in \code{subjs_info} and
 \code{hypers_cpm}.}
 
-\item{covars}{A character vector specifying the covariates to regress out. If
-\code{TRUE}, all covariates will be included. If \code{NULL}, no covariates will be
-included. Note for performance considerations, regression is not done for
-neural data, and you need to specify the corresponding neural data by
-adding arguments in \code{...}.}
+\item{covars}{A character vector specifying the column names of covariates
+to be included. See \code{\link[=regress_covariates]{regress_covariates()}} for more details.}
 
 \item{batches, reps}{The number of batches and repetitions passed to
 \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}.}

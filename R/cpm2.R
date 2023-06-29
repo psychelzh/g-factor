@@ -66,7 +66,6 @@ cpm2 <- function(data, behav = NULL, kfolds = NULL,
     leftout <- folds == fold
 
     # train models
-
     neural_train <- neural[!leftout, , drop = FALSE]
     if (bias_correct) {
       train_mns <- fmean(neural_train)

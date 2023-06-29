@@ -7,11 +7,13 @@ tar_option_set(
   garbage_collection = TRUE,
   error = "null",
   format = "qs",
+  controller = crew::crew_controller_local(workers = 8)
 )
 
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
+
 config_origin <- config_file_tracking(config_neural)
 config_reg_covars <- config_file_tracking(
   config_neural,
@@ -19,11 +21,24 @@ config_reg_covars <- config_file_tracking(
   tar_name_neural = "file_neural_reg_covars",
   name_suffix = "_reg_covars"
 )
-config_reg_site <- config_file_tracking(
+config_reg_no_site <- config_file_tracking(
   config_neural,
-  dir_neural = "data/reg_site",
-  tar_name_neural = "file_neural_reg_site",
-  name_suffix = "_reg_site"
+  dir_neural = "data/reg_covars2",
+  tar_name_neural = "file_neural_reg_covars2",
+  name_suffix = "_reg_covars2"
+)
+
+config_origin_raw <- config_file_tracking(
+  config_neural |> dplyr::filter(cond %in% c("nbackrun1", "rest")),
+  dir_neural = "data/fc_fisherz_raw",
+  tar_name_neural = "file_neural_raw",
+  name_suffix = "_raw"
+)
+config_reg_covars_raw <- config_file_tracking(
+  config_neural |> dplyr::filter(cond %in% c("nbackrun1", "rest")),
+  dir_neural = "data/reg_covars_raw",
+  tar_name_neural = "file_neural_reg_covars_raw",
+  name_suffix = "_reg_covars_raw"
 )
 
 list(
@@ -38,12 +53,12 @@ list(
   ),
   tarchetypes::tar_eval(
     tar_target(
-      tar_neural_reg_covars, {
-        arrow::read_feather(tar_neural) |>
-          regress_covariates(subjs_covariates, cond = cond) |>
-          arrow::write_feather(file_reg_covars, compression = FALSE)
-        file_reg_covars
-      },
+      tar_neural_reg_covars,
+      write_regressed_fc(
+        tar_neural, file_reg_covars,
+        subjs_info = subjs_covariates,
+        cond = cond
+      ),
       format = "file"
     ),
     values = dplyr::inner_join(
@@ -54,21 +69,39 @@ list(
   ),
   tarchetypes::tar_eval(
     tar_target(
-      tar_neural_reg_site, {
-        arrow::read_feather(tar_neural) |>
-          regress_covariates(
-            subjs_covariates,
-            covars = "site",
-            cond = cond
-          ) |>
-          arrow::write_feather(file_reg_site, compression = FALSE)
-        file_reg_site
-      },
+      tar_neural_reg_covars2,
+      write_regressed_fc(
+        tar_neural, file_reg_covars2,
+        subjs_info = subjs_covariates,
+        covars = c("age", "sex"),
+        cond = cond
+      ),
       format = "file"
     ),
     values = dplyr::inner_join(
       config_origin,
-      config_reg_site,
+      config_reg_no_site,
+      by = names(config_neural)
+    )
+  ),
+  tarchetypes::tar_eval(
+    tar_target(tar_neural_raw, file_raw, format = "file_fast"),
+    values = config_origin_raw
+  ),
+  tarchetypes::tar_eval(
+    tar_target(
+      tar_neural_reg_covars_raw,
+      write_regressed_fc(
+        tar_neural_raw, file_reg_covars_raw,
+        subjs_info = subjs_covariates,
+        covars = c("age", "sex"),
+        cond = cond
+      ),
+      format = "file"
+    ),
+    values = dplyr::inner_join(
+      config_origin_raw,
+      config_reg_covars_raw,
       by = names(config_neural)
     )
   )

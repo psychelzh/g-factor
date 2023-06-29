@@ -7,7 +7,7 @@ file_subjs_combined <- "data/subjs_combined"
 
 # basic configurations for CPM modeling ----
 config_neural <- tidyr::expand_grid(
-  cond = c("nbackrun1", "rest", "run1rest"),
+  cond = c("nbackrun1", "rest", "run1rest", "latent"),
   parcel = c("nn268", "Power264"),
   filt = c("bandpass", "lowpass"),
   gsr = c("with", "without")
@@ -44,9 +44,10 @@ scale_sites <- list(
 
 # scales for neural parameters
 conds <- c(
-  run1rest = "Combined",
   nbackrun1 = "Task",
-  rest = "Resting"
+  rest = "Resting",
+  run1rest = "Combined",
+  latent = "Latent"
 )
 scale_conds <- list(
   name = "Task Condition",

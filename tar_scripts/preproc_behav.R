@@ -199,5 +199,21 @@ list(
       "g_full", scores_g_full,
       "rapm", indices_rapm
     )
+  ),
+  # part IV: regress out covariates ----
+  tar_target(
+    behav_main_resid,
+    behav_main |>
+      mutate(
+        scores = map(
+          scores,
+          ~ regress_covariates(
+            data = .,
+            subjs_info = subjs_covariates,
+            # FD is not included for now
+            covars = c("age", "sex")
+          )
+        )
+      )
   )
 )
