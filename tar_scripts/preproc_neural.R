@@ -7,21 +7,12 @@ tar_option_set(
   garbage_collection = TRUE,
   error = "null",
   format = "qs",
+  controller = crew::crew_controller_local(workers = 8)
 )
 
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-write_regressed_fc <- function(origin, dest, ...) {
-  if (!fs::dir_exists(fs::path_dir(dest))) {
-    fs::dir_create(fs::path_dir(dest))
-  }
-  arrow::read_feather(origin) |>
-    regress_covariates(...) |>
-    arrow::write_feather(dest, compression = FALSE)
-  dest
-}
-
 
 config_origin <- config_file_tracking(config_neural)
 config_reg_covars <- config_file_tracking(
@@ -38,13 +29,13 @@ config_reg_no_site <- config_file_tracking(
 )
 
 config_origin_raw <- config_file_tracking(
-  config_neural |> dplyr::filter(cond != "run1rest"),
+  config_neural |> dplyr::filter(cond %in% c("nbackrun1", "rest")),
   dir_neural = "data/fc_fisherz_raw",
   tar_name_neural = "file_neural_raw",
   name_suffix = "_raw"
 )
 config_reg_covars_raw <- config_file_tracking(
-  config_neural |> dplyr::filter(cond != "run1rest"),
+  config_neural |> dplyr::filter(cond %in% c("nbackrun1", "rest")),
   dir_neural = "data/reg_covars_raw",
   tar_name_neural = "file_neural_reg_covars_raw",
   name_suffix = "_reg_covars_raw"

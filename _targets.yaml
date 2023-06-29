@@ -25,3 +25,6 @@ project_preproc_neural:
 experiment_bench_cpm:
   script: _experiment/bench_cpm.R
   store: _targets/_experiment/bench_cpm
+project_latent_neural:
+  script: tar_scripts/latent_neural.R
+  store: _targets/latent_neural
