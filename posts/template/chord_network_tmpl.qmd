@@ -15,7 +15,7 @@ adj_mats_pool <- brain_mask_main |>
     ),
     node_degree = map(
       adj_mat,
-      ~ igraph::graph_from_adjacency_matrix(.x, mode = "undirected") |> 
+      ~ igraph::graph_from_adjacency_matrix(.x, mode = "undirected") |>
         igraph::degree()
     ),
     .keep = "unused"
@@ -30,7 +30,7 @@ adj_mats_pool <- brain_mask_main |>
 #| fig-width: 3
 #| fig-height: 1.8
 #| fig-cap: Markers Plotting (top 500 edges)
-#| fig-subcap: 
+#| fig-subcap:
 #|   - G Overall, Pos-Corr Network
 #|   - G Overall, Neg-Corr Network
 #|   - RAPM, Pos-Corr Network
@@ -98,15 +98,20 @@ visualize_network(adj_mats_pool$adj_mat[[4]], roi_labels, getOption("chord.link.
 #| fig-cap: Contribution of Networks
 
 vis_cbt <- function(adj_mat, edge_type, ...) {
-  summarise_adjacency(adj_mat, roi_labels$label, "rel_adj") |> 
-    mutate(prop_adj = scales::oob_censor(prop_adj, c(0, 100))) |> 
-    pivot_wider(names_from = y, values_from = prop_adj, names_sort = TRUE) |> 
-    arrange(x) |> 
-    column_to_rownames("x") |> 
-    as.matrix() |> 
+  summarise_adjacency(adj_mat, roi_labels$label) |>
+    mutate(rel_adj = scales::oob_censor(rel_adj, c(0, 100))) |>
+    pivot_wider(
+      id_cols = x,
+      names_from = y,
+      values_from = rel_adj,
+      names_sort = TRUE
+    ) |>
+    arrange(x) |>
+    column_to_rownames("x") |>
+    as.matrix() |>
     corrplot::corrplot(
-      method = "shade", 
-      is.corr = FALSE, 
+      method = "shade",
+      is.corr = FALSE,
       col = corrplot::COL1(if (edge_type == "pos") "Reds" else "Blues")
     )
 }
@@ -135,5 +140,5 @@ mtext(
   side = 2, line = 0,
   at = grconvertY(0.5, "npc", "nic"), outer = TRUE
 )
-vis_cbt(adj_mats_pool$adj_mat[[3]], adj_mats_pool$edge_type[[4]])
+vis_cbt(adj_mats_pool$adj_mat[[4]], adj_mats_pool$edge_type[[4]])
 ```
