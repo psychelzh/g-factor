@@ -2,7 +2,7 @@
 #'
 #' @param adj_mat A matrix of adjacency.
 #' @param roi_labels A data frame contains ROI labels and colors.
-#' @param link_val A charact
+#' @param link_val A character string specifying the value of the link.
 #' @param link_color A character string of length two, specifying the color of
 #'   the lowest and highest link value.
 #' @param group_by_hemi A logical value indicating whether to group ROIs by
@@ -11,13 +11,15 @@
 #' @import circlize
 #' @export
 visualize_network <- function(adj_mat, roi_labels,
+                              link_val = c("degree", "relative", "rel_adj"),
                               link_color = c("white", "black"),
                               group_by_hemi = TRUE) {
+  link_val <- match.arg(link_val)
   col_label <- if (group_by_hemi) "label_hemi" else "label"
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
 
-  # get the degree
-  data_plot <- summarise_adjacency(adj_mat, roi_labels[[col_label]])
+  data_plot <- summarise_adjacency(adj_mat, roi_labels[[col_label]]) |>
+    select(1, 2, all_of(link_val))
 
   # setup grid colors
   grid_colors <- roi_labels |>
@@ -25,13 +27,10 @@ visualize_network <- function(adj_mat, roi_labels,
     deframe()
   if (group_by_hemi) {
     # extract hemisphere group names
-    labels_used <- data_plot |>
-      filter(val != 0) |>
-      distinct(x, y)
-    label_hemis <- factor(
-      union(labels_used$x, labels_used$y),
-      unique(roi_labels[[col_label]])
-    ) |>
+    label_hemis <- data_plot[data_plot[[3]] != 0, 1:2] |>
+      unclass() |>
+      list_c() |>
+      unique() |>
       sort()
     groups <- setNames(
       str_extract(label_hemis, "left|right"),
@@ -121,7 +120,10 @@ prepare_roi_labels <- function(atlas, ...) {
       label_hemi = str_c(hemi, label, sep = "_")
     ) |>
     arrange(hemi, network) |>
-    mutate(label_hemi = as_factor(label_hemi)) |>
+    mutate(
+      label = as_factor(label),
+      label_hemi = as_factor(label_hemi)
+    ) |>
     arrange(index)
 }
 
@@ -156,9 +158,7 @@ vec_to_mat <- function(vec, diagonal = NA) {
   mat
 }
 
-summarise_adjacency <- function(adj_mat, labels,
-                                what = c("degree", "relative")) {
-  what <- match.arg(what)
+summarise_adjacency <- function(adj_mat, labels) {
   adj_mat |>
     as.data.frame() |>
     rowid_to_column(var = "x") |>
@@ -167,10 +167,8 @@ summarise_adjacency <- function(adj_mat, labels,
       names_to = "y",
       values_to = "val"
     ) |>
-    mutate(
-      y = parse_number(y)
-    ) |>
-    filter(x > y) |>
+    mutate(y = parse_number(y)) |>
+    filter(x != y) |>
     mutate(
       across(
         c(x, y),
@@ -178,7 +176,16 @@ summarise_adjacency <- function(adj_mat, labels,
       )
     ) |>
     summarise(
-      val = sum(val),
+      degree = sum(val),
+      n = n(),
       .by = c(x, y)
+    ) |>
+    mutate(
+      across(
+        c(degree, n),
+        ~ ifelse(x == y, .x / 2, .x)
+      ),
+      relative = degree / n,
+      rel_adj = relative / (n / sum(n))
     )
 }
