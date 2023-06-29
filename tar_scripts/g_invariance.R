@@ -57,6 +57,7 @@ cfg_rsmp_vars <- dplyr::bind_rows(
 # compare two parcellations
 config_neural <- config_neural |>
   dplyr::filter(
+    cond == "nbackrun1",
     filt == "bandpass",
     gsr == "with"
   )
@@ -90,13 +91,13 @@ g_invariance <- tarchetypes::tar_map(
   ),
   prepare_permute_cpm2(
     config_neural,
-    dir_neural = "data/reg_covars",
-    tar_name_neural = "file_neural_reg_covars",
+    dir_neural = "data/reg_covars2",
+    tar_name_neural = "file_neural_reg_covars2",
     hypers_cpm, scores_g,
     subjs_subset = subjs_combined,
-    name_suffix = "_reg_covars",
+    name_suffix = "_reg_covars2",
     subjs_info = subjs_covariates,
-    covars = TRUE
+    covars = c("age", "sex")
   )
 )
 
@@ -111,7 +112,7 @@ mask_dices <- tarchetypes::tar_map(
           ifelse(
             reg_covars == "no",
             "brain_mask",
-            "brain_mask_reg_covars"
+            "brain_mask_reg_covars2"
           ),
           num_vars, id_pairs,
           sep = "_"
@@ -186,7 +187,8 @@ list(
       data_names,
       var_exp,
       scores_g,
-      cpm_pred
+      cpm_pred,
+      cpm_pred_reg_covars2
     ),
     combine_targets,
     targets = g_invariance,
@@ -196,6 +198,6 @@ list(
   combine_targets(
     dice_mask_pairs,
     targets = mask_dices,
-    cols_targets = "num_vars"
+    cols_targets = c("num_vars", "reg_covars")
   )
 )
