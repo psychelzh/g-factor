@@ -32,7 +32,7 @@ The definition was never and probably won't be consistent.
 -   Gardner: "the ability to solve problems, or to create products, that are valued within one or more cultural settings"
 -   "Ability to understand complex ideas, to adapt effectively to the environment, to learn from experience, to engage in various forms of reasoning, to overcome obstacles by taking thought." [@neisser1996]
 -   "\[A\] very general mental capability that, among other things, involves the ability to reason, plan, solve problems, think abstractly, comprehend complex ideas, learn quickly and learn from experience. It is not merely book learning, a narrow academic skill, or test-taking smarts. Rather, it reflects a broader and deeper capability for comprehending our surroundings catching on, making sense of things, or figuring out what to do." [@gottfredson1997]
--   "A general cognitive ability related to solving problems efficiently and effectively" [@thecamb2021]
+-   "A general cognitive ability related to solving problems efficiently and effectively." [@thecamb2021]
 
 ## Intelligence and g
 
@@ -104,12 +104,12 @@ Savants are those with very high specific abilities but no general intelligence 
 
 ## Number of tasks used in international projects {.smaller}
 
-| Project                   | Number of Cognitive Tasks | Ref                                   |
+| Project                   | Number of Cognitive Tasks | Ref                 |
 |---------------------|---------------------|------------------------------|
-| UK Biobank (2004)         | 4                         | Cox S. R. et al., 2019                |
-| HCP (2009)                | 12                        | Julien Dubois et al., 2018            |
-| Aging Brain Cohort (2021) | 5 (part of NIH toolbox)   | Roger D. Newman-Norlund, et al., 2021 |
-| ABCD Study (2015)         | 10 (7 from NIH toolbox)   | Wesley K. Thompson, et al., 2018      |
+| UK Biobank (2004)         | 4                         | @cox2019            |
+| HCP (2009)                | 12                        | @dubois2018         |
+| Aging Brain Cohort (2021) | 5 (part of NIH toolbox)   | @newman-norlund2021 |
+| ABCD Study (2015)         | 10 (7 from NIH toolbox)   | @thompson2019       |
 
 ## Research Questions
 
@@ -118,7 +118,7 @@ Savants are those with very high specific abilities but no general intelligence 
     -   More reliable and more valid?
 -   Can neural predictability be improved by including more tasks?
     -   More predictable and shows more reliable predicting networks?
--   What are the exact neural substrate of g based on multiple cognitive tasks.
+-   What are the exact neural substrate of g based on multiple cognitive tasks?
 :::
 
 # Our Dataset
@@ -358,8 +358,8 @@ cpm_pred_reg_covars2 |>
   rlang::exec(scale_x_discrete, !!!scale_conds) +
   rlang::exec(scale_fill_brewer, !!!scale_parcels, palette = "Dark2") +
   facet_grid(
-    cols = vars(edge_type),
-    rows = vars(gsr),
+    rows = vars(edge_type),
+    cols = vars(gsr),
     labeller = labeller(
       edge_type = edge_types,
       gsr = gsrs
@@ -434,7 +434,7 @@ preds_sampled |>
   # ) +
   rlang::exec(scale_color_viridis_d, !!!scale_meas_behv) +
   facet_grid(
-    cols = vars(edge_type),
+    rows = vars(edge_type),
     # cols = vars(cond),
     labeller = labeller(
       edge_type = edge_types
@@ -451,8 +451,8 @@ preds_sampled |>
 
 ```{r}
 #| label: fig-neural-pred-tasks
-#| fig-width: 15
-#| fig-height: 8
+#| fig-width: 10
+#| fig-height: 6
 #| fig-cap: >
 #|   **Top predictability tasks.** The tasks for each top 10 predictability samples are displayed.
 #| cache: true
@@ -512,7 +512,7 @@ dice_clean <- dice_mask_pairs |>
 
 ```{r}
 #| label: fig-dice-value
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 6
 #| fig-cap: >
 #|   **Dice coefficient between each pair of predictive network in pairwise
@@ -545,7 +545,7 @@ dice_clean |>
 
 ```{r}
 #| label: fig-dice-count
-#| fig-width: 8
+#| fig-width: 12
 #| fig-height: 6
 #| fig-cap: >
 #|   **Dice coefficient between each pair of predictive network in pairwise
@@ -626,7 +626,7 @@ cpm_pred |>
 
 The following is to test whether the correlation between the estimated g-factor scores and the brain functional connectivity can be improved by eliminating certain observed variables, e.g., those with the least factor loading.
 
-## Trends by Number of Kept tasks  {.smaller}
+## Trends by Number of Kept tasks {.smaller}
 
 ```{r}
 #| label: fig-tasksel-neural-correlation
