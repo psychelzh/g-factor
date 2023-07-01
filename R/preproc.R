@@ -446,12 +446,6 @@ summarise_ssd <- function(ssd) {
 }
 
 # for neural FC data ----
-write_regressed_fc <- function(origin, dest, ...) {
-  arrow::read_feather(origin) |>
-    regress_covariates(...) |>
-    write_feather_safely(dest)
-}
-
 write_feather_safely <- function(data, file) {
   if (!fs::dir_exists(fs::path_dir(file))) {
     fs::dir_create(fs::path_dir(file))
