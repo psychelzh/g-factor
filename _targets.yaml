@@ -28,3 +28,6 @@ experiment_bench_cpm:
 project_latent_neural:
   script: _scripts/latent_neural.R
   store: _targets/latent_neural
+project_merge_subjects:
+  script: _scripts/merge_subjects.R
+  store: _targets/merge_subjects

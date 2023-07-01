@@ -41,17 +41,6 @@ config_reg_covars_raw <- config_file_tracking(
   name_suffix = "_reg_covars_raw"
 )
 
-# prepare static branches targets ----
-data_subjs <- tarchetypes::tar_map(
-  values = config_origin |>
-    dplyr::distinct(cond, .keep_all = TRUE),
-  names = cond,
-  tar_target(
-    subjs_pattern,
-    arrow::read_feather(tar_neural)$sub_id
-  )
-)
-
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
@@ -67,38 +56,6 @@ list(
   tarchetypes::tar_eval(
     tar_target(tar_neural, file, format = "file_fast"),
     values = config_origin
-  ),
-  data_subjs,
-  tarchetypes::tar_combine(
-    subjs_neural,
-    data_subjs$subjs_pattern,
-    command = list(!!!.x) |>
-      reduce(intersect)
-  ),
-  tar_target(
-    subjs_neural_file,
-    {
-      write(subjs_neural, file_subjs_neural, ncolumns = 1)
-      file_subjs_neural
-    },
-    format = "file"
-  ),
-  tar_target(
-    subjs_combined,
-    intersect(
-      subjs_neural,
-      behav_main |>
-        filter(idx == "g_full") |>
-        pluck("scores", 1, "sub_id")
-    )
-  ),
-  tar_target(
-    subjs_combined_file,
-    {
-      write(subjs_combined, file_subjs_combined, ncolumns = 1)
-      file_subjs_combined
-    },
-    format = "file"
   ),
   tarchetypes::tar_eval(
     tar_target(
