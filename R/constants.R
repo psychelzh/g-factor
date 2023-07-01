@@ -10,7 +10,7 @@ file_subjs_neural <- "data/subjs_neural"
 config_neural <- tidyr::expand_grid(
   cond = c("nbackrun1", "rest", "run1rest", "latent"),
   parcel = c("nn268", "Power264"),
-  filt = c("bandpass", "lowpass"),
+  filt = "bandpass", # eliminate low-pass
   gsr = c("with", "without")
 )
 hypers_cpm <- tidyr::expand_grid(
