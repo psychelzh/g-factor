@@ -131,7 +131,7 @@ prepare_permute_cpm2 <- function(config_neural,
                                  batches = 4, reps = 5) {
   config_neural_files <- config_file_tracking(config_neural, ...)
   file_targets <- tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file"),
+    tar_target(tar_neural, file, format = "file_fast"),
     values = config_neural_files
   )
   if (missing(hypers_cpm) || is.null(hypers_cpm)) {
