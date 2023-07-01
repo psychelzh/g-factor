@@ -108,12 +108,12 @@ preproc_ltm <- function(data) {
 #' Complex Span
 preproc_ospan <- function(data) {
   data |>
-    filter(math_error < 18) |>
+    filter(math_error < 15) |>
     select(all_of(c(id_cols(), score = "ospan_total")))
 }
 preproc_sspan <- function(data) {
   data |>
-    filter(symm_error < 18) |>
+    filter(symm_error < 9) |>
     select(all_of(c(id_cols(), score = "sspan_total")))
 }
 
