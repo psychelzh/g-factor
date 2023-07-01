@@ -8,7 +8,7 @@ config_path_output = dictionary( ...
     "yes", fullfile('data', 'neural-gretna'), ...
     "no", fullfile('data', 'neural'));
 configs = readtable(file_config, Delimiter=',', TextType='string');
-subjs_combined = readmatrix(fullfile("data", "subjs_neural"));
+subjs_subset = readmatrix(fullfile("data", "subjs_neural"));
 
 for row = 1:height(configs)
     config = configs(row, :);
@@ -22,7 +22,7 @@ for row = 1:height(configs)
         config.filt = config.filt + "_gretna";
     end
     try
-        transform_to_fc(config_path_input, config, subjs_combined, ...
+        transform_to_fc(config_path_input, config, subjs_subset, ...
             config_path_output(config.use_gretna))
         configs.status(row) = "done";
     catch ME
