@@ -8,7 +8,7 @@ The project is pipelined with the help of R package {targets}. But a multiple-pr
 
 * The targets project is named with prefix of `project_`.
 * The targets data store is stored in different subdirectory of `_targets`.
-* The targets pipeline script is stored in `tar_scripts` subdirectory.
+* The targets pipeline script is stored in `_scripts` subdirectory.
 
 ## Deprecation
 
