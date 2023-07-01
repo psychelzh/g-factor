@@ -81,7 +81,7 @@ list(
   tarchetypes::tar_file_read(
     subjs_combined,
     file_subjs_combined,
-    read = as.numeric(read_lines(!!.x))
+    read = scan(!!.x)
   ),
   tarchetypes::tar_file_read(
     subjs_covariates,

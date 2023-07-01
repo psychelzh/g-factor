@@ -19,6 +19,11 @@ future::plan(future.callr::callr)
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
+    subjs_combined,
+    file_subjs_combined,
+    read = scan(!!.x)
+  ),
+  tarchetypes::tar_file_read(
     subjs_covariates,
     fs::path(store_preproc_behav, "objects", "subjs_covariates"),
     read = qs::qread(!!.x)

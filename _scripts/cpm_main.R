@@ -31,7 +31,7 @@ list(
   tarchetypes::tar_file_read(
     subjs_combined,
     file_subjs_combined,
-    read = as.numeric(read_lines(!!.x))
+    read = scan(!!.x)
   ),
   prepare_permute_cpm2(
     config_neural,

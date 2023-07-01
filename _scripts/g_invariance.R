@@ -176,7 +176,7 @@ list(
   tarchetypes::tar_file_read(
     subjs_combined,
     file_subjs_combined,
-    read = as.numeric(read_lines(!!.x))
+    read = scan(!!.x)
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
