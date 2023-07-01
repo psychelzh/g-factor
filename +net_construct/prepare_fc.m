@@ -1,10 +1,14 @@
-file_config = 'configs.csv';
-config_path_input = readtable('path_input.csv', Delimiter=',', TextType='string');
+import net_construct.transform_to_fc
+
+file_config = fullfile("config", "net_construction.csv");
+file_config_path = fullfile("config", "path_input.csv");
+config_path_input = readtable(file_config_path, ...
+    Delimiter=',', TextType='string');
 config_path_output = dictionary( ...
     "yes", fullfile('data', 'neural-gretna'), ...
     "no", fullfile('data', 'neural'));
 configs = readtable(file_config, Delimiter=',', TextType='string');
-subjs_combined = readmatrix('subjs_neural');
+subjs_combined = readmatrix(fullfile("data", "subjs_neural"));
 
 for row = 1:height(configs)
     config = configs(row, :);
