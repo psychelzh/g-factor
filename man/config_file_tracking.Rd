@@ -18,10 +18,11 @@ used.}
 \item{dir_neural}{A character scalar specifying the directory of neural data.}
 
 \item{tar_name_neural}{A character scalar specifying the name of the target
-tracking the neural data.}
+tracking the neural data. It is necessary to use different names for
+different neural data in one project.}
 
 \item{name_suffix}{A character scalar specifying the name suffix for the
-targets.}
+targets. This will change the column names of the returned \code{\link[=data.frame]{data.frame()}}.}
 }
 \value{
 A new \code{\link[=data.frame]{data.frame()}} with the \code{file} and \code{tar_neural} fields added.

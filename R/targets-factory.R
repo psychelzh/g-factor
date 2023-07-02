@@ -240,9 +240,10 @@ prepare_permute_cpm2 <- function(config_neural,
 #'   used.
 #' @param dir_neural A character scalar specifying the directory of neural data.
 #' @param tar_name_neural A character scalar specifying the name of the target
-#'   tracking the neural data.
+#'   tracking the neural data. It is necessary to use different names for
+#'   different neural data in one project.
 #' @param name_suffix A character scalar specifying the name suffix for the
-#'   targets.
+#'   targets. This will change the column names of the returned [data.frame()].
 #' @returns A new [data.frame()] with the `file` and `tar_neural` fields added.
 #' @export
 config_file_tracking <- function(config,
