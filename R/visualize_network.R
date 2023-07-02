@@ -10,10 +10,10 @@
 #' @returns Invisible `NULL`.
 #' @import circlize
 #' @export
-visualize_network <- function(adj_mat, roi_labels,
-                              link_val = c("degree", "relative", "rel_adj"),
-                              link_color = c("white", "black"),
-                              group_by_hemi = TRUE) {
+visualize_chord <- function(adj_mat, roi_labels,
+                            link_val = c("degree", "relative", "contrib"),
+                            link_color = c("white", "black"),
+                            group_by_hemi = TRUE) {
   link_val <- match.arg(link_val)
   col_label <- if (group_by_hemi) "label_hemi" else "label"
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
@@ -149,15 +149,15 @@ prepare_adjacency <- function(mask, ..., value = c("binary", "frac"),
   vec_to_mat(mask_out, diagonal = diagonal)
 }
 
-vec_to_mat <- function(vec, diagonal = NA) {
-  size <- (sqrt((8 * length(vec)) + 1) + 1) / 2
-  mat <- matrix(0, nrow = size, ncol = size)
-  mat[upper.tri(mat)] <- vec
-  mat <- mat + t(mat)
-  diag(mat) <- diagonal
-  mat
-}
-
+#' Summarise adjacency matrix
+#'
+#' This will add labels to the adjacency matrix and summarise the adjacency
+#' matrix to get the degree, number of links, relative degree and contribution
+#' of each ROI.
+#'
+#' @param adj_mat A matrix of adjacency.
+#' @param labels A vector of labels. Must have the same length as the number of
+#'   rows/columns of the adjacency matrix.
 summarise_adjacency <- function(adj_mat, labels) {
   adj_mat |>
     as.data.frame() |>
@@ -186,6 +186,16 @@ summarise_adjacency <- function(adj_mat, labels) {
         ~ ifelse(x == y, .x / 2, .x)
       ),
       relative = degree / n,
-      rel_adj = relative / (n / sum(n))
+      contrib = relative / (n / sum(n))
     )
+}
+
+# helper functions ----
+vec_to_mat <- function(vec, diagonal = NA) {
+  size <- (sqrt((8 * length(vec)) + 1) + 1) / 2
+  mat <- matrix(0, nrow = size, ncol = size)
+  mat[upper.tri(mat)] <- vec
+  mat <- mat + t(mat)
+  diag(mat) <- diagonal
+  mat
 }
