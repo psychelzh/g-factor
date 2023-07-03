@@ -320,6 +320,60 @@ Seemingly the correlation reaches a plateau? But I am doubting here.
 
 # Neural Predictability
 
+## CPM hyperparamters checking
+
+```{r}
+#| label: fig-bench-cpm-hypers
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: >
+#|   Compare different CPM hyper-parameters. We chose a threshhold method based
+#|   on alpha level of correlation and a threshhold level at 0.01. 
+
+targets::tar_load(
+  cpm_pred_reg_nosite, 
+  store = store_bench_cpm
+)
+
+pred_hypers <- cpm_pred_reg_nosite |> 
+  filter(
+    idx == "rapm",
+    filt == "bandpass", 
+    gsr == "with"
+  ) |> 
+  mutate(
+    cond = factor(cond, names(conds)),
+    parcel = factor(parcel, names(parcels)),
+    gsr = factor(gsr, names(gsrs))
+  )
+pred_hypers |> 
+  ggplot(aes(thresh_method, all, fill = factor(thresh_level))) +
+  ggdist::stat_dots(position = position_dodge(width = 0.5), side = "left") +
+  ggdist::stat_slabinterval(position = position_dodge(width = 0.5)) +
+  ggrepel::geom_label_repel(
+    aes(label = thresh_level), 
+    data = pred_hypers |> 
+      slice_max(
+        order_by = all,
+        by = c(cond, parcel, thresh_method, thresh_level)
+      ),
+    position = position_dodge(width = 0.5),
+    show.legend = FALSE
+  ) +
+  rlang::exec(scale_x_discrete, !!!scale_thresh_methods) +
+  scale_y_continuous(name = "Prediction (combined network)") +
+  scale_fill_brewer(type = "seq", name = "Level", guide = "none") +
+  facet_grid(
+    cols = vars(cond),
+    rows = vars(parcel),
+    labeller = labeller(
+      cond = conds, 
+      parcel = parcels
+    )
+  ) +
+  ggpubr::theme_pubclean()
+```
+
 ## Find the best task condition to predict intelligence {.smaller}
 
 ```{r}
