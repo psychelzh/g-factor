@@ -35,21 +35,11 @@ list(
   ),
   prepare_permute_cpm2(
     config_neural, hypers_cpm, behav_main,
-    subjs_subset = subjs_combined
-  ),
-  prepare_permute_cpm2(
-    config_neural,
-    tidyr::expand_grid(
-      hypers_cpm,
-      site = names(sites)
-    ),
-    behav_main,
-    dir_neural = "data/reg_covars",
-    tar_name_neural = "file_neural_reg_covars",
+    dir_neural = "data/neural-gretna-reg-nosite",
+    tar_name_neural = "file_neural_reg_nosite",
     subjs_subset = subjs_combined,
-    name_suffix = "_reg.all_split.site",
+    name_suffix = "_reg_nosite",
     subjs_info = subjs_covariates,
-    split_hyper = "site",
-    covars = TRUE
+    covars = c("age", "sex")
   )
 )

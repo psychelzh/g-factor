@@ -83,19 +83,11 @@ g_invariance <- tarchetypes::tar_map(
     data_names
   ),
   prepare_permute_cpm2(
-    config_neural,
-    hypers_cpm,
-    scores_g,
+    config_neural, hypers_cpm, scores_g,
+    dir_neural = "data/neural-gretna-reg-nosite",
+    tar_name_neural = "file_neural_reg_nosite",
     subjs_subset = subjs_combined,
-    include_file_targets = FALSE
-  ),
-  prepare_permute_cpm2(
-    config_neural,
-    dir_neural = "data/reg_covars2",
-    tar_name_neural = "file_neural_reg_covars2",
-    hypers_cpm, scores_g,
-    subjs_subset = subjs_combined,
-    name_suffix = "_reg_covars2",
+    name_suffix = "_reg_nosite",
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
   )
@@ -105,14 +97,14 @@ mask_dices <- tarchetypes::tar_map(
   values = cfg_rsmp_vars |>
     dplyr::filter(dplyr::n() == 2, .by = num_vars) |>
     dplyr::select(num_vars, id_pairs) |>
-    tidyr::expand_grid(reg_covars = c("no", "yes")) |>
+    tidyr::expand_grid(reg_covars = "yes") |>
     dplyr::mutate(
       name_brain_mask = rlang::syms(
         paste(
           ifelse(
             reg_covars == "no",
             "brain_mask",
-            "brain_mask_reg_covars2"
+            "brain_mask_reg_nosite"
           ),
           num_vars, id_pairs,
           sep = "_"
@@ -180,15 +172,13 @@ list(
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
-  prepare_permute_cpm2(config_neural),
   g_invariance,
   lapply(
     rlang::exprs(
       data_names,
       var_exp,
       scores_g,
-      cpm_pred,
-      cpm_pred_reg_covars2
+      cpm_pred_reg_nosite
     ),
     combine_targets,
     targets = g_invariance,

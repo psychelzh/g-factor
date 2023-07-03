@@ -44,21 +44,12 @@ task_selection <- tarchetypes::tar_map(
       include_var_exp = FALSE
     ),
     prepare_permute_cpm2(
-      config_neural,
-      hypers_cpm,
-      scores_g,
-      subjs_subset = subjs_combined,
-      include_file_targets = FALSE
-    ),
-    prepare_permute_cpm2(
-      config_neural,
-      hypers_cpm,
-      scores_g,
-      dir_neural = "data/reg_covars2",
-      tar_name_neural = "file_neural_reg_covars2",
+      config_neural, hypers_cpm, scores_g,
+      dir_neural = "data/neural-gretna-reg-nosite",
+      tar_name_neural = "file_neural_reg_nosite",
       include_file_targets = FALSE,
       subjs_subset = subjs_combined,
-      name_suffix = "_reg_covars2",
+      name_suffix = "_reg_nosite",
       subjs_info = subjs_covariates,
       covars = c("age", "sex")
     )
@@ -108,17 +99,10 @@ list(
     config_neural,
     hypers_cpm,
     scores_single,
+    dir_neural = "data/neural-gretna-reg-nosite",
+    tar_name_neural = "file_neural_reg_nosite",
     subjs_subset = subjs_combined,
-    name_suffix = "_single"
-  ),
-  prepare_permute_cpm2(
-    config_neural,
-    hypers_cpm,
-    scores_single,
-    dir_neural = "data/reg_covars2",
-    tar_name_neural = "file_neural_reg_covars2",
-    subjs_subset = subjs_combined,
-    name_suffix = "_single_reg_covars2",
+    name_suffix = "_single_reg_nosite",
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
   ),
@@ -126,8 +110,7 @@ list(
   lapply(
     rlang::exprs(
       scores_g,
-      cpm_pred,
-      cpm_pred_reg_covars2
+      cpm_pred_reg_nosite
     ),
     combine_targets,
     targets = task_selection,
