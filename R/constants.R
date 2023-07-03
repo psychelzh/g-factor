@@ -93,15 +93,15 @@ scale_thresh_methods <- list(
   limits = names(thresh_methods),
   labels = thresh_methods
 )
-edge_types <- c(
-  all = "Combined Networks",
-  pos = "Pos-Corr Networks",
-  neg = "Anti-Corr Networks"
+model_types <- c(
+  all = "Combined Model",
+  pos = "Pos-Cor Networks",
+  neg = "Anti-Cor Networks"
 )
-scale_edge_types <- list(
-  name = "Edge Type",
-  limits = names(edge_types),
-  labels = edge_types
+scale_model_types <- list(
+  name = "Model Type",
+  limits = names(model_types),
+  labels = model_types
 )
 
 # scales for behavioral parameters
