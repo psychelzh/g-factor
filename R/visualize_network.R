@@ -1,7 +1,7 @@
 #' Visualize brain mask as chord diagram
 #'
 #' @param adj_mat A matrix of adjacency.
-#' @param roi_labels A data frame contains ROI labels and colors.
+#' @param roi_info A data frame contains ROI labels and colors.
 #' @param link_val A character string specifying the value of the link.
 #' @param link_color A character string of length two, specifying the color of
 #'   the lowest and highest link value.
@@ -10,19 +10,19 @@
 #' @returns Invisible `NULL`.
 #' @import circlize
 #' @export
-visualize_network <- function(adj_mat, roi_labels,
-                              link_val = c("degree", "relative", "rel_adj"),
-                              link_color = c("white", "black"),
-                              group_by_hemi = TRUE) {
+visualize_chord <- function(adj_mat, roi_info,
+                            link_val = c("degree", "relative", "contrib"),
+                            link_color = c("white", "black"),
+                            group_by_hemi = TRUE) {
   link_val <- match.arg(link_val)
   col_label <- if (group_by_hemi) "label_hemi" else "label"
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
 
-  data_plot <- summarise_adjacency(adj_mat, roi_labels[[col_label]]) |>
+  data_plot <- summarise_adjacency(adj_mat, roi_info[[col_label]]) |>
     select(1, 2, all_of(link_val))
 
   # setup grid colors
-  grid_colors <- roi_labels |>
+  grid_colors <- roi_info |>
     distinct(pick(all_of(c(col_label, col_color)))) |>
     deframe()
   if (group_by_hemi) {
@@ -100,14 +100,48 @@ visualize_network <- function(adj_mat, roi_labels,
   invisible()
 }
 
-#' Prepare ROI labels
+#' Visualize network as a correlation plot
 #'
-#' @param atlas A data frame contains ROI labels and colors of a specific atlas.
+#' @param adj_mat The adjacency matrix.
+#' @param type A character string specifying the type of the edge. Can be
+#'   `"pos"` or `"neg"`.
+#' @param labels A vector of labels. Must have the same length as the number of
+#'   rows/columns of the adjacency matrix.
+#' @param which A character string specifying which value to use. Can be
+#'   `"degree"`, `"n"`, `"relative"` or `"contrib"`.
+#' @param range A numeric vector of length two specifying the range of the
+#'   values to be visualized.
+#' @returns See [corrplot::corrplot()].
+visualize_corrplot <- function(adj_mat, type, labels,
+                               which = "contrib",
+                               range = c(0, 100)) {
+  summarise_adjacency(adj_mat, labels) |>
+    mutate(val = scales::oob_squish(.data[[which]], range)) |>
+    pivot_wider(
+      id_cols = x,
+      names_from = y,
+      values_from = val,
+      names_sort = TRUE
+    ) |>
+    arrange(x) |>
+    column_to_rownames("x") |>
+    as.matrix() |>
+    corrplot::corrplot(
+      method = "shade",
+      is.corr = FALSE,
+      col = corrplot::COL1(if (type == "pos") "Reds" else "Blues")
+    )
+}
+
+#' Prepare ROI information
+#'
+#' @param atlas A [dm::dm] object contains ROI labels and colors of a specific
+#'   atlas.
 #' @param ... For future usage. Should be empty.
 #' @returns A data frame of ROI labels. Note that the `label_hemi` column is
 #'   added as a combination of `hemi` and `label` columns, separated by `"_"`.
 #' @export
-prepare_roi_labels <- function(atlas, ...) {
+prepare_roi_info <- function(atlas, ...) {
   rlang::check_dots_empty()
   dm::dm_flatten_to_tbl(atlas, "roi") |>
     mutate(
@@ -149,15 +183,15 @@ prepare_adjacency <- function(mask, ..., value = c("binary", "frac"),
   vec_to_mat(mask_out, diagonal = diagonal)
 }
 
-vec_to_mat <- function(vec, diagonal = NA) {
-  size <- (sqrt((8 * length(vec)) + 1) + 1) / 2
-  mat <- matrix(0, nrow = size, ncol = size)
-  mat[upper.tri(mat)] <- vec
-  mat <- mat + t(mat)
-  diag(mat) <- diagonal
-  mat
-}
-
+#' Summarise adjacency matrix
+#'
+#' This will add labels to the adjacency matrix and summarise the adjacency
+#' matrix to get the degree, number of links, relative degree and contribution
+#' of each ROI.
+#'
+#' @param adj_mat A matrix of adjacency.
+#' @param labels A vector of labels. Must have the same length as the number of
+#'   rows/columns of the adjacency matrix.
 summarise_adjacency <- function(adj_mat, labels) {
   adj_mat |>
     as.data.frame() |>
@@ -186,6 +220,16 @@ summarise_adjacency <- function(adj_mat, labels) {
         ~ ifelse(x == y, .x / 2, .x)
       ),
       relative = degree / n,
-      rel_adj = relative / (n / sum(n))
+      contrib = relative / (n / sum(n))
     )
+}
+
+# helper functions ----
+vec_to_mat <- function(vec, diagonal = NA) {
+  size <- (sqrt((8 * length(vec)) + 1) + 1) / 2
+  mat <- matrix(0, nrow = size, ncol = size)
+  mat[upper.tri(mat)] <- vec
+  mat <- mat + t(mat)
+  diag(mat) <- diagonal
+  mat
 }

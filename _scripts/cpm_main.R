@@ -31,23 +31,14 @@ list(
   tarchetypes::tar_file_read(
     subjs_combined,
     file_subjs_combined,
-    read = as.numeric(read_lines(!!.x))
+    read = scan(!!.x)
   ),
   prepare_permute_cpm2(
-    config_neural,
-    hypers_cpm,
-    behav_main,
+    config_neural, hypers_cpm, behav_main,
+    dir_neural = "data/neural-gretna-reg-nosite",
+    tar_name_neural = "file_neural_reg_nosite",
     subjs_subset = subjs_combined,
-    name_suffix = "_main"
-  ),
-  prepare_permute_cpm2(
-    config_neural,
-    hypers_cpm,
-    behav_main,
-    dir_neural = "data/reg_covars2",
-    tar_name_neural = "file_neural_reg_covars2",
-    subjs_subset = subjs_combined,
-    name_suffix = "_main_reg_covars2",
+    name_suffix = "_main_reg_nosite",
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
   )

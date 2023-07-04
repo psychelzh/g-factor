@@ -1,14 +1,13 @@
 ```{r}
-adj_mats_pool <- brain_mask_main |>
-  filter(cond == "{{ cond }}") |>
+adj_mats_pool <- brain_mask |>
   pivot_longer(
-    any_of(names(edge_types)),
-    names_to = "edge_type",
+    any_of(names(model_types)),
+    names_to = "model_type",
     values_to = "mask"
   ) |>
   mutate(
     idx = factor(idx, names(meas_behav)),
-    edge_type = factor(edge_type, names(edge_types)),
+    model_type = factor(model_type, names(model_types)),
     adj_mat = map(
       mask, prepare_adjacency,
       diagonal = 0
@@ -20,13 +19,13 @@ adj_mats_pool <- brain_mask_main |>
     ),
     .keep = "unused"
   ) |>
-  arrange(idx, edge_type)
+  arrange(idx, model_type)
 ```
 
-## Markers Plotting (Condition: {{ conds[cond] }}) {.smaller}
+## Node Degree ({{ parcels[parcel] }}) {.smaller}
 
 ```{python}
-#| label: fig-markers-{{ cond }}
+#| label: fig-markers-{{ parcel }}
 #| fig-width: 3
 #| fig-height: 1.8
 #| fig-cap: Markers Plotting (top 500 edges)
@@ -45,14 +44,22 @@ from matplotlib import pyplot
 
 # Compute node degree values (dummy values for demonstration)
 for row in range(r.adj_mats_pool.shape[0]):
-  p = plotting.plot_markers(r.adj_mats_pool.node_degree[row], r.roi_coords, colorbar=True)
+  if r.adj_mats_pool.model_type[row] == "pos":
+    cmap = pyplot.cm.Reds
+  else:
+    cmap = pyplot.cm.Blues
+  p = plotting.plot_markers(
+    r.adj_mats_pool.node_degree[row], 
+    r.roi_coords, 
+    node_cmap=cmap
+  )
   pyplot.show()
 ```
 
-## Chord Diagram (Condition: {{ conds[cond] }}) {.smaller}
+## Chord Diagram ({{ parcels[parcel] }}) {.smaller}
 
 ```{r}
-#| label: fig-mask-chord-{{ cond }}
+#| label: fig-mask-chord-{{ parcel }}
 #| fig-width: 10
 #| fig-height: 8
 #| fig-cap: Chord diagram of top 500 edges
@@ -63,9 +70,9 @@ for row in range(r.adj_mats_pool.shape[0]):
 # to use patchwork package, but for now it depends on this issue:
 # https://github.com/thomasp85/patchwork/issues/322
 par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
-visualize_network(adj_mats_pool$adj_mat[[1]], roi_labels, getOption("chord.link.val"))
+visualize_chord(adj_mats_pool$adj_mat[[1]], roi_info, getOption("chord.link.val"))
 mtext(
-  edge_types[[adj_mats_pool$edge_type[[1]]]],
+  model_types[[adj_mats_pool$model_type[[1]]]],
   side = 3, line = 0,
   at = grconvertX(0.5, "npc", "nic"), outer = TRUE
 )
@@ -74,52 +81,33 @@ mtext(
   side = 2, line = 0,
   at = grconvertY(0.5, "npc", "nic"), outer = TRUE
 )
-visualize_network(adj_mats_pool$adj_mat[[2]], roi_labels, getOption("chord.link.val"))
+visualize_chord(adj_mats_pool$adj_mat[[2]], roi_info, getOption("chord.link.val"))
 mtext(
-  edge_types[[adj_mats_pool$edge_type[[2]]]],
+  model_types[[adj_mats_pool$model_type[[2]]]],
   side = 3, line = 0,
   at = grconvertX(0.5, "npc", "nic"), outer = TRUE
 )
-visualize_network(adj_mats_pool$adj_mat[[3]], roi_labels, getOption("chord.link.val"))
+visualize_chord(adj_mats_pool$adj_mat[[3]], roi_info, getOption("chord.link.val"))
 mtext(
   meas_behav[[adj_mats_pool$idx[[3]]]],
   side = 2, line = 0,
   at = grconvertY(0.5, "npc", "nic"), outer = TRUE
 )
-visualize_network(adj_mats_pool$adj_mat[[4]], roi_labels, getOption("chord.link.val"))
+visualize_chord(adj_mats_pool$adj_mat[[4]], roi_info, getOption("chord.link.val"))
 ```
 
-## Contribution of Networks  (Condition: {{ conds[cond] }})  {.smaller}
+## Network Contribution  ({{ parcels[parcel] }})  {.smaller}
 
 ```{r}
-#| label: fig-ctb-{{ cond }}
+#| label: fig-ctb-{{ parcel }}
 #| fig-width: 10
 #| fig-height: 8
 #| fig-cap: Contribution of Networks
 
-vis_cbt <- function(adj_mat, edge_type, ...) {
-  summarise_adjacency(adj_mat, roi_labels$label) |>
-    mutate(rel_adj = scales::oob_censor(rel_adj, c(0, 100))) |>
-    pivot_wider(
-      id_cols = x,
-      names_from = y,
-      values_from = rel_adj,
-      names_sort = TRUE
-    ) |>
-    arrange(x) |>
-    column_to_rownames("x") |>
-    as.matrix() |>
-    corrplot::corrplot(
-      method = "shade",
-      is.corr = FALSE,
-      col = corrplot::COL1(if (edge_type == "pos") "Reds" else "Blues")
-    )
-}
-
 par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
-vis_cbt(adj_mats_pool$adj_mat[[1]], adj_mats_pool$edge_type[[1]])
+visualize_corrplot(adj_mats_pool$adj_mat[[1]], adj_mats_pool$model_type[[1]], roi_info$label)
 mtext(
-  edge_types[[adj_mats_pool$edge_type[[1]]]],
+  model_types[[adj_mats_pool$model_type[[1]]]],
   side = 3, line = 0,
   at = grconvertX(0.5, "npc", "nic"), outer = TRUE
 )
@@ -128,17 +116,17 @@ mtext(
   side = 2, line = 0,
   at = grconvertY(0.5, "npc", "nic"), outer = TRUE
 )
-vis_cbt(adj_mats_pool$adj_mat[[2]], adj_mats_pool$edge_type[[2]])
+visualize_corrplot(adj_mats_pool$adj_mat[[2]], adj_mats_pool$model_type[[2]], roi_info$label)
 mtext(
-  edge_types[[adj_mats_pool$edge_type[[2]]]],
+  model_types[[adj_mats_pool$model_type[[2]]]],
   side = 3, line = 0,
   at = grconvertX(0.5, "npc", "nic"), outer = TRUE
 )
-vis_cbt(adj_mats_pool$adj_mat[[3]], adj_mats_pool$edge_type[[3]])
+visualize_corrplot(adj_mats_pool$adj_mat[[3]], adj_mats_pool$model_type[[3]], roi_info$label)
 mtext(
   meas_behav[[adj_mats_pool$idx[[3]]]],
   side = 2, line = 0,
   at = grconvertY(0.5, "npc", "nic"), outer = TRUE
 )
-vis_cbt(adj_mats_pool$adj_mat[[4]], adj_mats_pool$edge_type[[4]])
+visualize_corrplot(adj_mats_pool$adj_mat[[4]], adj_mats_pool$model_type[[4]], roi_info$label)
 ```

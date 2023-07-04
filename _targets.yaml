@@ -1,5 +1,5 @@
 project_preproc_behav:
-  script: tar_scripts/preproc_behav.R
+  script: _scripts/preproc_behav.R
   store: _targets/preproc_behav
 project_task_fmri:
   script: deprecated/_script_task_fmri.R
@@ -8,23 +8,23 @@ project_g_stability:
   script: deprecated/_script_g_stability.R
   store: deprecated/_store_g_stability
 project_bench_cpm:
-  script: tar_scripts/bench_cpm.R
+  script: _scripts/bench_cpm.R
   store: _targets/bench_cpm
 project_g_invariance:
-  script: tar_scripts/g_invariance.R
+  script: _scripts/g_invariance.R
   store: _targets/g_invariance
 project_task_selection:
-  script: tar_scripts/task_selection.R
+  script: _scripts/task_selection.R
   store: _targets/task_selection
 project_cpm_main:
-  script: tar_scripts/cpm_main.R
+  script: _scripts/cpm_main.R
   store: _targets/cpm_main
 project_preproc_neural:
-  script: tar_scripts/preproc_neural.R
+  script: _scripts/preproc_neural.R
   store: _targets/preproc_neural
-experiment_bench_cpm:
-  script: _experiment/bench_cpm.R
-  store: _targets/_experiment/bench_cpm
 project_latent_neural:
-  script: tar_scripts/latent_neural.R
+  script: _scripts/latent_neural.R
   store: _targets/latent_neural
+project_merge_subjects:
+  script: _scripts/merge_subjects.R
+  store: _targets/merge_subjects
