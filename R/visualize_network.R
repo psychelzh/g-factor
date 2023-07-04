@@ -100,6 +100,39 @@ visualize_chord <- function(adj_mat, roi_info,
   invisible()
 }
 
+#' Visualize network as a correlation plot
+#'
+#' @param adj_mat The adjacency matrix.
+#' @param type A character string specifying the type of the edge. Can be
+#'   `"pos"` or `"neg"`.
+#' @param labels A vector of labels. Must have the same length as the number of
+#'   rows/columns of the adjacency matrix.
+#' @param which A character string specifying which value to use. Can be
+#'   `"degree"`, `"n"`, `"relative"` or `"contrib"`.
+#' @param range A numeric vector of length two specifying the range of the
+#'   values to be visualized.
+#' @returns See [corrplot::corrplot()].
+visualize_corrplot <- function(adj_mat, type, labels,
+                               which = "contrib",
+                               range = c(0, 100)) {
+  summarise_adjacency(adj_mat, labels) |>
+    mutate(val = scales::oob_squish(.data[[which]], range)) |>
+    pivot_wider(
+      id_cols = x,
+      names_from = y,
+      values_from = val,
+      names_sort = TRUE
+    ) |>
+    arrange(x) |>
+    column_to_rownames("x") |>
+    as.matrix() |>
+    corrplot::corrplot(
+      method = "shade",
+      is.corr = FALSE,
+      col = corrplot::COL1(if (type == "pos") "Reds" else "Blues")
+    )
+}
+
 #' Prepare ROI information
 #'
 #' @param atlas A [dm::dm] object contains ROI labels and colors of a specific
