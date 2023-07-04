@@ -787,118 +787,32 @@ bind_rows(
 #| label: render-brain-mask
 #| results: asis
 
-brain_mask_main <- targets::tar_read(
-  brain_mask_main_reg_covars2, 
+brain_masks <- targets::tar_read(
+  brain_mask_main_reg_nosite,
   store = store_cpm_main
-) |> 
+) |>
   filter(
-    parcel == "Power264", filt == "bandpass", gsr == "with",
-    thresh_method == "alpha", thresh_level == 0.001,
-    cond %in% c("nbackrun1", "rest")
+    cond == "nbackrun1", filt == "bandpass", gsr == "with",
+    thresh_method == "alpha", thresh_level == 0.001
   )
-roi_info <- readRDS(here::here("config/atlas_power.rds")) |>
-  prepare_roi_info()
-roi_coords <- as.matrix(select(roi_info, contains("mni")))
-config <- distinct(brain_mask_main, cond)
+files_atlas <- map_chr(
+  parcels,
+  ~ here::here("data/atlases", tolower(.x)) |> 
+    fs::path_ext_set("rds")
+)
 options(chord.link.val = "relative")
-for (row in seq_len(nrow(config))) {
+for (parcel in names(parcels)) {
+  brain_mask <- filter(brain_masks, parcel == .env$parcel)
+  roi_info <- prepare_roi_info(readRDS(files_atlas[[parcel]]))
+  roi_coords <- as.matrix(select(roi_info, contains("mni")))
   knitr::knit_expand(
     "template/vis_network_tmpl.qmd",
-    cond = config$cond[[row]]
+    parcel = parcel
   ) |>
     knitr::knit(text = _, quiet = TRUE) |>
     cat()
   cat("\n\n")
 }
-```
-
-```{r}
-#| label: fig-brainnet-pred
-#| eval: false
-#| fig-width: 16
-#| fig-height: 8
-#| fig-cap: >
-#|   **The brain networks of the most predictable sample.** Here we can find the
-#|   difference between postive correlation networks and negative correlation
-#|   networks.
-
-# network atlas
-network_labs_shen_268 <- c(
-  MFN = "Medial Frontal",
-  FPN = "Frontoparietal",
-  DMN = "Default Mode",
-  SC = "Subcortical-Cerebellum",
-  MON = "Motor",
-  VisI = "Visual I",
-  VisII = "Visual II",
-  VA = "Visual Association"
-)
-cols <- setNames(
-  ggthemes::colorblind_pal()(length(network_labs_shen_268)),
-  network_labs_shen_268
-)
-vis_mask <- function(mask, thresh_prop = 0.995) {
-  restore_mat <- function(vec) {
-    size <- (sqrt((8 * length(vec)) + 1) + 1) / 2
-    mat <- matrix(0, nrow = size, ncol = size)
-    mat[upper.tri(mat)] <- vec
-    mat + t(mat)
-  }
-  shen_268_with_labs <- shen_268 |>
-    mutate(network = factor(network, labels = network_labs_shen_268))
-  brainconn(
-    atlas = shen_268_with_labs,
-    node.size = 1,
-    conmat = restore_mat(mask) > thresh_prop,
-    view = "left", edge.alpha = 0.2
-  ) +
-    scale_color_manual(values = cols, name = "Network")
-}
-data_masks <- preds_sampled |>
-  filter(num_vars %in% c(4, 8, 12, 16), edge_type != "all") |>
-  slice_max(cor, n = 1, by = c(num_vars, edge_type)) |>
-  nest(.by = c(num_vars, id_pairs)) |>
-  mutate(
-    data = pmap(
-      list(num_vars, id_pairs, data),
-      \(num_vars, id_pairs, data, ...) {
-        targets::tar_read_raw(
-          str_c("brain_mask", num_vars, id_pairs, sep = "_")
-        ) |>
-          pivot_longer(
-            any_of(edge_types),
-            names_to = "edge_type",
-            values_to = "mask"
-          ) |>
-          semi_join(data)
-      }
-    )
-  ) |>
-  unnest(data)
-data_plots <- bind_rows(
-  sampled = data_masks,
-  "All Tasks" = targets::tar_read(mask_g_full, store = "_store_g_stability"),
-  "RAPM" = targets::tar_read(mask_rapm, store = "_store_g_stability"),
-  .id = "sample_type"
-) |>
-  arrange(edge_type, num_vars) |>
-  mutate(
-    id_task = if_else(is.na(num_vars), sample_type, sprintf("%d tasks", num_vars)),
-    edge_type = case_match(
-      edge_type,
-      "neg" ~ "Anti-Corr",
-      "pos" ~ "Pos-Corr"
-    ),
-    labels = str_glue("{id_task}, {edge_type}"),
-    plots = map(mask, vis_mask)
-  )
-ggpubr::ggarrange(
-  plotlist = data_plots$plots,
-  nrow = 2, ncol = 6,
-  labels = data_plots$labels,
-  common.legend = TRUE,
-  legend.grob = ggpubr::get_legend(data_plots$plots[[10]], position = "top")
-)
 ```
 
 # References
