@@ -22,7 +22,7 @@ adj_mats_pool <- brain_mask |>
   arrange(idx, model_type)
 ```
 
-## Markers Plotting (Pracellation: {{ parcels[parcel] }}) {.smaller}
+## Node Degree ({{ parcels[parcel] }}) {.smaller}
 
 ```{python}
 #| label: fig-markers-{{ parcel }}
@@ -44,15 +44,19 @@ from matplotlib import pyplot
 
 # Compute node degree values (dummy values for demonstration)
 for row in range(r.adj_mats_pool.shape[0]):
+  if r.adj_mats_pool.model_type[row] == "pos":
+    cmap = pyplot.cm.Reds
+  else:
+    cmap = pyplot.cm.Blues
   p = plotting.plot_markers(
     r.adj_mats_pool.node_degree[row], 
     r.roi_coords, 
-    node_cmap=pyplot.cm.viridis
+    node_cmap=cmap
   )
   pyplot.show()
 ```
 
-## Chord Diagram (Condition: {{ parcels[parcel] }}) {.smaller}
+## Chord Diagram ({{ parcels[parcel] }}) {.smaller}
 
 ```{r}
 #| label: fig-mask-chord-{{ parcel }}
@@ -92,7 +96,7 @@ mtext(
 visualize_chord(adj_mats_pool$adj_mat[[4]], roi_info, getOption("chord.link.val"))
 ```
 
-## Contribution of Networks  (Condition: {{ parcels[parcel] }})  {.smaller}
+## Network Contribution  ({{ parcels[parcel] }})  {.smaller}
 
 ```{r}
 #| label: fig-ctb-{{ parcel }}
