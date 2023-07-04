@@ -801,7 +801,7 @@ config <- distinct(brain_mask_main, cond)
 options(chord.link.val = "relative")
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
-    "template/chord_network_tmpl.qmd",
+    "template/vis_network_tmpl.qmd",
     cond = config$cond[[row]]
   ) |>
     knitr::knit(text = _, quiet = TRUE) |>
