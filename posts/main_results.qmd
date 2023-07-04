@@ -180,10 +180,10 @@ indices_wider_clean |>
 #| fig-cap: >
 #|   **Behavior Performance Distribution**.
 
-indices_clean |> 
+indices_clean |>
   filter(sub_id < 17000) |>
-  filter(!performance::check_outliers(score, method = "iqr"), .by = c(disp_name, index)) |> 
-  semi_join(indices_wider_clean, by = "sub_id") |> 
+  filter(!performance::check_outliers(score, method = "iqr"), .by = c(disp_name, index)) |>
+  semi_join(indices_wider_clean, by = "sub_id") |>
   ggplot(aes(score)) +
   geom_histogram(bins = 30, na.rm = TRUE) +
   facet_wrap(~ disp_name + index, scales = "free") +
@@ -328,31 +328,31 @@ Seemingly the correlation reaches a plateau? But I am doubting here.
 #| fig-height: 6
 #| fig-cap: >
 #|   Compare different CPM hyper-parameters. We chose a threshhold method based
-#|   on alpha level of correlation and a threshhold level at 0.01. 
+#|   on alpha level of correlation and a threshhold level at 0.01.
 
 targets::tar_load(
-  cpm_pred_reg_nosite, 
+  cpm_pred_reg_nosite,
   store = store_bench_cpm
 )
 
-pred_hypers <- cpm_pred_reg_nosite |> 
+pred_hypers <- cpm_pred_reg_nosite |>
   filter(
     idx == "rapm",
-    filt == "bandpass", 
+    filt == "bandpass",
     gsr == "with"
-  ) |> 
+  ) |>
   mutate(
     cond = factor(cond, names(conds)),
     parcel = factor(parcel, names(parcels)),
     gsr = factor(gsr, names(gsrs))
   )
-pred_hypers |> 
+pred_hypers |>
   ggplot(aes(thresh_method, all, fill = factor(thresh_level))) +
   ggdist::stat_dots(position = position_dodge(width = 0.5), side = "left") +
   ggdist::stat_slabinterval(position = position_dodge(width = 0.5)) +
   ggrepel::geom_label_repel(
-    aes(label = thresh_level), 
-    data = pred_hypers |> 
+    aes(label = thresh_level),
+    data = pred_hypers |>
       slice_max(
         order_by = all,
         by = c(cond, parcel, thresh_method, thresh_level)
@@ -367,7 +367,7 @@ pred_hypers |>
     cols = vars(cond),
     rows = vars(parcel),
     labeller = labeller(
-      cond = conds, 
+      cond = conds,
       parcel = parcels
     )
   ) +
@@ -384,27 +384,27 @@ pred_hypers |>
 #|   Using CPM method to predict Raven score by FC from different states, we found
 #|   that task-induced (i.e. n-back task) showed best performance, though combing
 #|   task and resting states using the first principal component showed comparable
-#|   performance. What's more, global signal regression will enhance the performance, 
+#|   performance. What's more, global signal regression will enhance the performance,
 #|   whereas different parcellation showed comparable performance.
 
-cpm_pred_reg_nosite |> 
+cpm_pred_reg_nosite |>
   filter(
-    idx == "rapm", 
-    filt == "bandpass", 
-    thresh_method == "alpha", 
+    idx == "rapm",
+    filt == "bandpass",
+    thresh_method == "alpha",
     thresh_level == 0.01
-  ) |> 
+  ) |>
   pivot_longer(
     all_of(names(model_types)),
     names_to = "model_type",
     values_to = "estimate"
-  ) |> 
+  ) |>
   mutate(
     cond = factor(cond, names(conds)),
     parcel = factor(parcel, names(parcels)),
     model_types = factor(model_type, names(model_types)),
     gsr = factor(gsr, names(gsrs))
-  ) |> 
+  ) |>
   ggplot(aes(cond, estimate, fill = parcel)) +
   ggdist::stat_dots(position = position_dodge(width = 0.4), side = "left") +
   ggdist::stat_slabinterval(position = position_dodge(width = 0.4)) +
@@ -438,8 +438,8 @@ preds_main <- cpm_pred_main_reg_nosite |>
     cond == "nbackrun1",
     parcel == "nn268",
     filt == "bandpass",
-    gsr == "with", 
-    thresh_method == "alpha", 
+    gsr == "with",
+    thresh_method == "alpha",
     thresh_level == 0.01
   ) |>
   summarise(
@@ -469,7 +469,7 @@ preds_sampled |>
     hjust = 0
   ) +
   rlang::exec(
-    scale_color_brewer, !!!scale_meas_behv, 
+    scale_color_brewer, !!!scale_meas_behv,
     guide = "none", palette = "Set1"
   ) +
   ggpubr::theme_pubclean() +
@@ -527,7 +527,7 @@ tasks_high_pred |>
 
 targets::tar_load(dice_mask_pairs, store = store_g_invariance)
 dice_clean <- dice_mask_pairs |>
-  filter(reg_covars == "yes") |> 
+  filter(reg_covars == "yes") |>
   pivot_longer(
     contains("dice"),
     names_to = c("model_type", ".value"),
@@ -744,22 +744,22 @@ targets::tar_load(
 )
 bind_rows(
   `Single Task` = cpm_pred_single_reg_nosite,
-  `Intelligence` = cpm_pred_main_reg_nosite |> 
+  `Intelligence` = cpm_pred_main_reg_nosite |>
       filter(
         parcel == "Power264",
         cond == "nbackrun1",
         filt == "bandpass",
         gsr == "with",
-        thresh_method == "alpha", 
+        thresh_method == "alpha",
         thresh_level == 0.01
-      ) |> 
+      ) |>
       rename(task = idx),
   .id = "type"
-) |> 
+) |>
   mutate(
     type = factor(type, c("Intelligence", "Single Task")),
     task = factor(
-      task, 
+      task,
       c(names(meas_behav), data_names_ordered),
       c(meas_behav, data_names_ordered)
     )
