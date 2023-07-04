@@ -135,6 +135,8 @@ Savants are those with very high specific abilities but no general intelligence 
 ## Sample Size
 
 ```{r}
+#| label: describe-sample
+
 targets::tar_load(
   c(subjs_info_clean, indices_wider_clean, indices_clean),
   store = store_preproc_behav
