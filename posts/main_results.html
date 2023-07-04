@@ -556,8 +556,8 @@ Liang Zhang
 <section id="sample-size" class="slide level2">
 <h2>Sample Size</h2>
 <ul>
-<li><p>Behavior sample: 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)</p></li>
-<li><p>FMRI sample: 745 participants (Mean age = 20.9, SD = 2.2, range: [17, 29]; Sex: 63.0% females, 37.0% males, 0.0% other)</p></li>
+<li><p>Behavior sample: 1730 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)</p></li>
+<li><p>FMRI sample: 731 participants (Mean age = 20.9, SD = 2.2, range: [17, 29]; Sex: 62.5% females, 37.5% males, 0.0% other)</p></li>
 </ul>
 <!-- ## Missing Pattern -->
 <!-- ## Data Distribution -->
@@ -593,16 +593,20 @@ Liang Zhang
 <h1>Neural Predictability</h1>
 
 </section>
+<section id="cpm-hyperparamters-checking" class="slide level2">
+<h2>CPM hyperparamters checking</h2>
+
+<img data-src="main_results_files/figure-revealjs/fig-bench-cpm-hypers-1.png" width="1536" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;4: Compare different CPM hyper-parameters. We chose a threshhold method based on alpha level of correlation and a threshhold level at 0.01.</p></section>
 <section id="find-the-best-task-condition-to-predict-intelligence" class="slide level2 smaller">
 <h2>Find the best task condition to predict intelligence</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-bench-cpm-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;4: Using CPM method to predict Raven score by FC from different states, we found that task-induced (i.e.&nbsp;n-back task) showed best performance, though combing task and resting states using the first principal component showed comparable performance. What’s more, global signal regression will enhance the performance, whereas different parcellation showed comparable performance.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-bench-cpm-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;5: Using CPM method to predict Raven score by FC from different states, we found that task-induced (i.e.&nbsp;n-back task) showed best performance, though combing task and resting states using the first principal component showed comparable performance. What’s more, global signal regression will enhance the performance, whereas different parcellation showed comparable performance.</p></section>
 <section id="prediction-trending" class="slide level2">
 <h2>Prediction Trending</h2>
 
 <!-- ## High Neural Correlation Tasks {.smaller} -->
 <!-- TODO: this is not the best method for domain checking -->
-<img data-src="main_results_files/figure-revealjs/fig-pred-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;5: <strong>Prediction Trending (based on CPM)</strong>.</p><aside class="notes">
+<img data-src="main_results_files/figure-revealjs/fig-pred-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Prediction Trending (based on CPM)</strong>.</p><aside class="notes">
 <ul>
 <li>Reaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.</li>
 <li>Here we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks.</li>
@@ -622,12 +626,12 @@ Liang Zhang
 <section id="similarity-between-predictive-network-of-pairs" class="slide level2">
 <h2>Similarity Between Predictive Network of Pairs</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-dice-value-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> The edges are kept when given proportion of resamples selected. Here only the results from task state are shown.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-dice-value-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;7: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> The edges are kept when given proportion of resamples selected. Here only the results from task state are shown.</p></section>
 <section id="similarity-between-predictive-network-of-pairs-1" class="slide level2">
 <h2>Similarity Between Predictive Network of Pairs</h2>
 
 <!-- ## A Caveat -->
-<img data-src="main_results_files/figure-revealjs/fig-dice-count-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;7: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> Only the most selected of given number of edges are kept. Here only the results from task state are shown.</p></section></section>
+<img data-src="main_results_files/figure-revealjs/fig-dice-count-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;8: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> Only the most selected of given number of edges are kept. Here only the results from task state are shown.</p></section></section>
 <section>
 <section id="model-g-with-the-highest-loading-tasks" class="title-slide slide level1 center">
 <h1>Model g with the Highest Loading Tasks</h1>
@@ -636,33 +640,33 @@ Liang Zhang
 <section id="trends-by-number-of-kept-tasks" class="slide level2 smaller">
 <h2>Trends by Number of Kept tasks</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-tasksel-neural-correlation-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;8: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp.&nbsp;when adding low g loading tasks.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-tasksel-neural-correlation-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;9: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp.&nbsp;when adding low g loading tasks.</p></section>
 <section id="single-task-benchmark" class="slide level2">
 <h2>Single Task Benchmark</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-single-tasks-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;9: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model.</p></section></section>
+<img data-src="main_results_files/figure-revealjs/fig-single-tasks-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;10: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model.</p></section></section>
 <section>
 <section id="model-selected-networks-analysis" class="title-slide slide level1 center">
 <h1>Model-selected Networks Analysis</h1>
 
 </section>
-<section id="markers-plotting-condition-task" class="slide level2 smaller">
-<h2>Markers Plotting (Condition: Task)</h2>
-<div id="fig-markers-nbackrun1" class="cell quarto-layout-panel">
+<section id="node-degree-shen268" class="slide level2 smaller">
+<h2>Node Degree (Shen268)</h2>
+<div id="fig-markers-nn268" class="cell quarto-layout-panel">
 <figure>
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nbackrun1-1" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-nn268-1" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nbackrun1-1.png" data-ref-parent="fig-markers-nbackrun1" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-1.png" data-ref-parent="fig-markers-nn268" width="634"></p>
 <figcaption>(a) G Overall, Pos-Corr Network</figcaption>
 </figure>
 </div>
 </div>
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nbackrun1-2" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-nn268-2" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nbackrun1-2.png" data-ref-parent="fig-markers-nbackrun1" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-2.png" data-ref-parent="fig-markers-nn268" width="634"></p>
 <figcaption>(b) G Overall, Neg-Corr Network</figcaption>
 </figure>
 </div>
@@ -670,51 +674,51 @@ Liang Zhang
 </div>
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nbackrun1-3" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-nn268-3" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nbackrun1-3.png" data-ref-parent="fig-markers-nbackrun1" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-3.png" data-ref-parent="fig-markers-nn268" width="634"></p>
 <figcaption>(c) RAPM, Pos-Corr Network</figcaption>
 </figure>
 </div>
 </div>
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nbackrun1-4" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-nn268-4" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nbackrun1-4.png" data-ref-parent="fig-markers-nbackrun1" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-4.png" data-ref-parent="fig-markers-nn268" width="634"></p>
 <figcaption>(d) RAPM, Neg-Corr Network</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p></p><figcaption>Figure&nbsp;10: Markers Plotting (top 500 edges)</figcaption><p></p>
+<p></p><figcaption>Figure&nbsp;11: Markers Plotting (top 500 edges)</figcaption><p></p>
 </figure>
 </div>
 </section>
-<section id="chord-diagram-condition-task" class="slide level2 smaller">
-<h2>Chord Diagram (Condition: Task)</h2>
+<section id="chord-diagram-shen268" class="slide level2 smaller">
+<h2>Chord Diagram (Shen268)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-mask-chord-nbackrun1-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;11: Chord diagram of top 500 edges</p></section>
-<section id="contribution-of-networks-condition-task" class="slide level2 smaller">
-<h2>Contribution of Networks (Condition: Task)</h2>
+<img data-src="main_results_files/figure-revealjs/fig-mask-chord-nn268-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;12: Chord diagram of top 500 edges</p></section>
+<section id="network-contribution-shen268" class="slide level2 smaller">
+<h2>Network Contribution (Shen268)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-ctb-nbackrun1-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;12: Contribution of Networks</p></section>
-<section id="markers-plotting-condition-resting" class="slide level2 smaller">
-<h2>Markers Plotting (Condition: Resting)</h2>
-<div id="fig-markers-rest" class="cell quarto-layout-panel">
+<img data-src="main_results_files/figure-revealjs/fig-ctb-nn268-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;13: Contribution of Networks</p></section>
+<section id="node-degree-power264" class="slide level2 smaller">
+<h2>Node Degree (Power264)</h2>
+<div id="fig-markers-Power264" class="cell quarto-layout-panel">
 <figure>
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-rest-1" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-Power264-1" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-rest-1.png" data-ref-parent="fig-markers-rest" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-1.png" data-ref-parent="fig-markers-Power264" width="634"></p>
 <figcaption>(a) G Overall, Pos-Corr Network</figcaption>
 </figure>
 </div>
 </div>
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-rest-2" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-Power264-2" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-rest-2.png" data-ref-parent="fig-markers-rest" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-2.png" data-ref-parent="fig-markers-Power264" width="634"></p>
 <figcaption>(b) G Overall, Neg-Corr Network</figcaption>
 </figure>
 </div>
@@ -722,34 +726,34 @@ Liang Zhang
 </div>
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-rest-3" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-Power264-3" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-rest-3.png" data-ref-parent="fig-markers-rest" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-3.png" data-ref-parent="fig-markers-Power264" width="634"></p>
 <figcaption>(c) RAPM, Pos-Corr Network</figcaption>
 </figure>
 </div>
 </div>
 <div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-rest-4" class="quarto-figure quarto-figure-center">
+<div id="fig-markers-Power264-4" class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-rest-4.png" data-ref-parent="fig-markers-rest" width="634"></p>
+<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-4.png" data-ref-parent="fig-markers-Power264" width="634"></p>
 <figcaption>(d) RAPM, Neg-Corr Network</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p></p><figcaption>Figure&nbsp;13: Markers Plotting (top 500 edges)</figcaption><p></p>
+<p></p><figcaption>Figure&nbsp;14: Markers Plotting (top 500 edges)</figcaption><p></p>
 </figure>
 </div>
 </section>
-<section id="chord-diagram-condition-resting" class="slide level2 smaller">
-<h2>Chord Diagram (Condition: Resting)</h2>
+<section id="chord-diagram-power264" class="slide level2 smaller">
+<h2>Chord Diagram (Power264)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-mask-chord-rest-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;14: Chord diagram of top 500 edges</p></section>
-<section id="contribution-of-networks-condition-resting" class="slide level2 smaller">
-<h2>Contribution of Networks (Condition: Resting)</h2>
+<img data-src="main_results_files/figure-revealjs/fig-mask-chord-Power264-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;15: Chord diagram of top 500 edges</p></section>
+<section id="network-contribution-power264" class="slide level2 smaller">
+<h2>Network Contribution (Power264)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-ctb-rest-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;15: Contribution of Networks</p></section></section>
+<img data-src="main_results_files/figure-revealjs/fig-ctb-Power264-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;16: Contribution of Networks</p></section></section>
 <section id="references" class="title-slide slide level1 smaller scrollable">
 <h1>References</h1>
 

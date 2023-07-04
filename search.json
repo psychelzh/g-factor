@@ -74,7 +74,7 @@
     "href": "posts/main_results.html#sample-size",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Sample Size",
-    "text": "Sample Size\n\nBehavior sample: 1760 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)\nFMRI sample: 745 participants (Mean age = 20.9, SD = 2.2, range: [17, 29]; Sex: 63.0% females, 37.0% males, 0.0% other)"
+    "text": "Sample Size\n\nBehavior sample: 1730 participants (Mean age = 20.8, SD = 2.1, range: [16.8, 30.83]; Sex: 58.9% females, 41.1% males, 0.0% other)\nFMRI sample: 731 participants (Mean age = 20.9, SD = 2.2, range: [17, 29]; Sex: 62.5% females, 37.5% males, 0.0% other)"
   },
   {
     "objectID": "posts/main_results.html#explained-variance",
@@ -98,88 +98,95 @@
     "text": "Correlation between estimated g in Pairwise Sampling\n\nFigure 3: The correlation between g scores estimated from each pair of sampling. For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.\nSeemingly the correlation reaches a plateau? But I am doubting here."
   },
   {
+    "objectID": "posts/main_results.html#cpm-hyperparamters-checking",
+    "href": "posts/main_results.html#cpm-hyperparamters-checking",
+    "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
+    "section": "CPM hyperparamters checking",
+    "text": "CPM hyperparamters checking\n\nFigure 4: Compare different CPM hyper-parameters. We chose a threshhold method based on alpha level of correlation and a threshhold level at 0.01."
+  },
+  {
     "objectID": "posts/main_results.html#find-the-best-task-condition-to-predict-intelligence",
     "href": "posts/main_results.html#find-the-best-task-condition-to-predict-intelligence",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Find the best task condition to predict intelligence",
-    "text": "Find the best task condition to predict intelligence\n\nFigure 4: Using CPM method to predict Raven score by FC from different states, we found that task-induced (i.e. n-back task) showed best performance, though combing task and resting states using the first principal component showed comparable performance. What’s more, global signal regression will enhance the performance, whereas different parcellation showed comparable performance."
+    "text": "Find the best task condition to predict intelligence\n\nFigure 5: Using CPM method to predict Raven score by FC from different states, we found that task-induced (i.e. n-back task) showed best performance, though combing task and resting states using the first principal component showed comparable performance. What’s more, global signal regression will enhance the performance, whereas different parcellation showed comparable performance."
   },
   {
     "objectID": "posts/main_results.html#prediction-trending",
     "href": "posts/main_results.html#prediction-trending",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Prediction Trending",
-    "text": "Prediction Trending\n\n\n\nFigure 5: Prediction Trending (based on CPM).\n\nReaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.\nHere we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks."
+    "text": "Prediction Trending\n\n\n\nFigure 6: Prediction Trending (based on CPM).\n\nReaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.\nHere we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks."
   },
   {
     "objectID": "posts/main_results.html#similarity-between-predictive-network-of-pairs",
     "href": "posts/main_results.html#similarity-between-predictive-network-of-pairs",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Similarity Between Predictive Network of Pairs",
-    "text": "Similarity Between Predictive Network of Pairs\n\nFigure 6: Dice coefficient between each pair of predictive network in pairwise sampling. The edges are kept when given proportion of resamples selected. Here only the results from task state are shown."
+    "text": "Similarity Between Predictive Network of Pairs\n\nFigure 7: Dice coefficient between each pair of predictive network in pairwise sampling. The edges are kept when given proportion of resamples selected. Here only the results from task state are shown."
   },
   {
     "objectID": "posts/main_results.html#similarity-between-predictive-network-of-pairs-1",
     "href": "posts/main_results.html#similarity-between-predictive-network-of-pairs-1",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Similarity Between Predictive Network of Pairs",
-    "text": "Similarity Between Predictive Network of Pairs\n\n\nFigure 7: Dice coefficient between each pair of predictive network in pairwise sampling. Only the most selected of given number of edges are kept. Here only the results from task state are shown."
+    "text": "Similarity Between Predictive Network of Pairs\n\n\nFigure 8: Dice coefficient between each pair of predictive network in pairwise sampling. Only the most selected of given number of edges are kept. Here only the results from task state are shown."
   },
   {
     "objectID": "posts/main_results.html#trends-by-number-of-kept-tasks",
     "href": "posts/main_results.html#trends-by-number-of-kept-tasks",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Trends by Number of Kept tasks",
-    "text": "Trends by Number of Kept tasks\n\nFigure 8: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp. when adding low g loading tasks."
+    "text": "Trends by Number of Kept tasks\n\nFigure 9: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp. when adding low g loading tasks."
   },
   {
     "objectID": "posts/main_results.html#single-task-benchmark",
     "href": "posts/main_results.html#single-task-benchmark",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Single Task Benchmark",
-    "text": "Single Task Benchmark\n\nFigure 9: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model."
+    "text": "Single Task Benchmark\n\nFigure 10: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model."
   },
   {
-    "objectID": "posts/main_results.html#markers-plotting-condition-task",
-    "href": "posts/main_results.html#markers-plotting-condition-task",
+    "objectID": "posts/main_results.html#node-degree-shen268",
+    "href": "posts/main_results.html#node-degree-shen268",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
-    "section": "Markers Plotting (Condition: Task)",
-    "text": "Markers Plotting (Condition: Task)\n\n\n\n\n\n\n\n(a) G Overall, Pos-Corr Network\n\n\n\n\n\n\n\n(b) G Overall, Neg-Corr Network\n\n\n\n\n\n\n\n\n\n(c) RAPM, Pos-Corr Network\n\n\n\n\n\n\n\n(d) RAPM, Neg-Corr Network\n\n\n\n\nFigure 10: Markers Plotting (top 500 edges)"
+    "section": "Node Degree (Shen268)",
+    "text": "Node Degree (Shen268)\n\n\n\n\n\n\n\n(a) G Overall, Pos-Corr Network\n\n\n\n\n\n\n\n(b) G Overall, Neg-Corr Network\n\n\n\n\n\n\n\n\n\n(c) RAPM, Pos-Corr Network\n\n\n\n\n\n\n\n(d) RAPM, Neg-Corr Network\n\n\n\n\nFigure 11: Markers Plotting (top 500 edges)"
   },
   {
-    "objectID": "posts/main_results.html#chord-diagram-condition-task",
-    "href": "posts/main_results.html#chord-diagram-condition-task",
+    "objectID": "posts/main_results.html#chord-diagram-shen268",
+    "href": "posts/main_results.html#chord-diagram-shen268",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
-    "section": "Chord Diagram (Condition: Task)",
-    "text": "Chord Diagram (Condition: Task)\n\nFigure 11: Chord diagram of top 500 edges"
+    "section": "Chord Diagram (Shen268)",
+    "text": "Chord Diagram (Shen268)\n\nFigure 12: Chord diagram of top 500 edges"
   },
   {
-    "objectID": "posts/main_results.html#contribution-of-networks-condition-task",
-    "href": "posts/main_results.html#contribution-of-networks-condition-task",
+    "objectID": "posts/main_results.html#network-contribution-shen268",
+    "href": "posts/main_results.html#network-contribution-shen268",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
-    "section": "Contribution of Networks (Condition: Task)",
-    "text": "Contribution of Networks (Condition: Task)\n\nFigure 12: Contribution of Networks"
+    "section": "Network Contribution (Shen268)",
+    "text": "Network Contribution (Shen268)\n\nFigure 13: Contribution of Networks"
   },
   {
-    "objectID": "posts/main_results.html#markers-plotting-condition-resting",
-    "href": "posts/main_results.html#markers-plotting-condition-resting",
+    "objectID": "posts/main_results.html#node-degree-power264",
+    "href": "posts/main_results.html#node-degree-power264",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
-    "section": "Markers Plotting (Condition: Resting)",
-    "text": "Markers Plotting (Condition: Resting)\n\n\n\n\n\n\n\n(a) G Overall, Pos-Corr Network\n\n\n\n\n\n\n\n(b) G Overall, Neg-Corr Network\n\n\n\n\n\n\n\n\n\n(c) RAPM, Pos-Corr Network\n\n\n\n\n\n\n\n(d) RAPM, Neg-Corr Network\n\n\n\n\nFigure 13: Markers Plotting (top 500 edges)"
+    "section": "Node Degree (Power264)",
+    "text": "Node Degree (Power264)\n\n\n\n\n\n\n\n(a) G Overall, Pos-Corr Network\n\n\n\n\n\n\n\n(b) G Overall, Neg-Corr Network\n\n\n\n\n\n\n\n\n\n(c) RAPM, Pos-Corr Network\n\n\n\n\n\n\n\n(d) RAPM, Neg-Corr Network\n\n\n\n\nFigure 14: Markers Plotting (top 500 edges)"
   },
   {
-    "objectID": "posts/main_results.html#chord-diagram-condition-resting",
-    "href": "posts/main_results.html#chord-diagram-condition-resting",
+    "objectID": "posts/main_results.html#chord-diagram-power264",
+    "href": "posts/main_results.html#chord-diagram-power264",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
-    "section": "Chord Diagram (Condition: Resting)",
-    "text": "Chord Diagram (Condition: Resting)\n\nFigure 14: Chord diagram of top 500 edges"
+    "section": "Chord Diagram (Power264)",
+    "text": "Chord Diagram (Power264)\n\nFigure 15: Chord diagram of top 500 edges"
   },
   {
-    "objectID": "posts/main_results.html#contribution-of-networks-condition-resting",
-    "href": "posts/main_results.html#contribution-of-networks-condition-resting",
+    "objectID": "posts/main_results.html#network-contribution-power264",
+    "href": "posts/main_results.html#network-contribution-power264",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
-    "section": "Contribution of Networks (Condition: Resting)",
-    "text": "Contribution of Networks (Condition: Resting)\n\nFigure 15: Contribution of Networks"
+    "section": "Network Contribution (Power264)",
+    "text": "Network Contribution (Power264)\n\nFigure 16: Contribution of Networks"
   },
   {
     "objectID": "index.html",
