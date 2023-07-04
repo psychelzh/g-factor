@@ -63,7 +63,7 @@ for row in range(r.adj_mats_pool.shape[0]):
 # to use patchwork package, but for now it depends on this issue:
 # https://github.com/thomasp85/patchwork/issues/322
 par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
-visualize_network(adj_mats_pool$adj_mat[[1]], roi_labels, getOption("chord.link.val"))
+visualize_network(adj_mats_pool$adj_mat[[1]], roi_info, getOption("chord.link.val"))
 mtext(
   edge_types[[adj_mats_pool$edge_type[[1]]]],
   side = 3, line = 0,
@@ -74,19 +74,19 @@ mtext(
   side = 2, line = 0,
   at = grconvertY(0.5, "npc", "nic"), outer = TRUE
 )
-visualize_network(adj_mats_pool$adj_mat[[2]], roi_labels, getOption("chord.link.val"))
+visualize_network(adj_mats_pool$adj_mat[[2]], roi_info, getOption("chord.link.val"))
 mtext(
   edge_types[[adj_mats_pool$edge_type[[2]]]],
   side = 3, line = 0,
   at = grconvertX(0.5, "npc", "nic"), outer = TRUE
 )
-visualize_network(adj_mats_pool$adj_mat[[3]], roi_labels, getOption("chord.link.val"))
+visualize_network(adj_mats_pool$adj_mat[[3]], roi_info, getOption("chord.link.val"))
 mtext(
   meas_behav[[adj_mats_pool$idx[[3]]]],
   side = 2, line = 0,
   at = grconvertY(0.5, "npc", "nic"), outer = TRUE
 )
-visualize_network(adj_mats_pool$adj_mat[[4]], roi_labels, getOption("chord.link.val"))
+visualize_network(adj_mats_pool$adj_mat[[4]], roi_info, getOption("chord.link.val"))
 ```
 
 ## Contribution of Networks  (Condition: {{ conds[cond] }})  {.smaller}

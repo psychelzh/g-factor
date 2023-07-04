@@ -6,7 +6,7 @@
 \usage{
 visualize_chord(
   adj_mat,
-  roi_labels,
+  roi_info,
   link_val = c("degree", "relative", "contrib"),
   link_color = c("white", "black"),
   group_by_hemi = TRUE
@@ -15,7 +15,7 @@ visualize_chord(
 \arguments{
 \item{adj_mat}{A matrix of adjacency.}
 
-\item{roi_labels}{A data frame contains ROI labels and colors.}
+\item{roi_info}{A data frame contains ROI labels and colors.}
 
 \item{link_val}{A character string specifying the value of the link.}
 

@@ -1,7 +1,7 @@
 #' Visualize brain mask as chord diagram
 #'
 #' @param adj_mat A matrix of adjacency.
-#' @param roi_labels A data frame contains ROI labels and colors.
+#' @param roi_info A data frame contains ROI labels and colors.
 #' @param link_val A character string specifying the value of the link.
 #' @param link_color A character string of length two, specifying the color of
 #'   the lowest and highest link value.
@@ -10,7 +10,7 @@
 #' @returns Invisible `NULL`.
 #' @import circlize
 #' @export
-visualize_chord <- function(adj_mat, roi_labels,
+visualize_chord <- function(adj_mat, roi_info,
                             link_val = c("degree", "relative", "contrib"),
                             link_color = c("white", "black"),
                             group_by_hemi = TRUE) {
@@ -18,11 +18,11 @@ visualize_chord <- function(adj_mat, roi_labels,
   col_label <- if (group_by_hemi) "label_hemi" else "label"
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
 
-  data_plot <- summarise_adjacency(adj_mat, roi_labels[[col_label]]) |>
+  data_plot <- summarise_adjacency(adj_mat, roi_info[[col_label]]) |>
     select(1, 2, all_of(link_val))
 
   # setup grid colors
-  grid_colors <- roi_labels |>
+  grid_colors <- roi_info |>
     distinct(pick(all_of(c(col_label, col_color)))) |>
     deframe()
   if (group_by_hemi) {
@@ -100,14 +100,15 @@ visualize_chord <- function(adj_mat, roi_labels,
   invisible()
 }
 
-#' Prepare ROI labels
+#' Prepare ROI information
 #'
-#' @param atlas A data frame contains ROI labels and colors of a specific atlas.
+#' @param atlas A [dm::dm] object contains ROI labels and colors of a specific
+#'   atlas.
 #' @param ... For future usage. Should be empty.
 #' @returns A data frame of ROI labels. Note that the `label_hemi` column is
 #'   added as a combination of `hemi` and `label` columns, separated by `"_"`.
 #' @export
-prepare_roi_labels <- function(atlas, ...) {
+prepare_roi_info <- function(atlas, ...) {
   rlang::check_dots_empty()
   dm::dm_flatten_to_tbl(atlas, "roi") |>
     mutate(

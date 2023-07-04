@@ -794,9 +794,9 @@ brain_mask_main <- targets::tar_read(
     thresh_method == "alpha", thresh_level == 0.001,
     cond %in% c("nbackrun1", "rest")
   )
-roi_labels <- readRDS(here::here("config/atlas_power.rds")) |>
-  prepare_roi_labels()
-roi_coords <- as.matrix(select(roi_labels, contains("mni")))
+roi_info <- readRDS(here::here("config/atlas_power.rds")) |>
+  prepare_roi_info()
+roi_coords <- as.matrix(select(roi_info, contains("mni")))
 config <- distinct(brain_mask_main, cond)
 options(chord.link.val = "relative")
 for (row in seq_len(nrow(config))) {
