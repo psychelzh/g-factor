@@ -1,7 +1,7 @@
 function transform_to_fc(config_path_input, config_proc, subset, path_out)
-% path: base path
-% subset: subject subset
-% config: required fields: cond, parcel, filt, gsr
+% config_path_input: path for each condition, required fields: path, cond
+% config_proc: process status, required fields: cond, parcel, filt, gsr
+% subset: subset of subjects
 % path_out: output path
 
 if config_proc.cond ~= "run1rest"
@@ -40,7 +40,9 @@ tbl_fc_vecs = addvars( ...
     NewVariableNames="sub_id", Before=1);
 out_name = fullfile(path_out, ...
     sprintf('cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow', ...
-    config_proc.cond, config_proc.parcel, extract(config_proc.filt, regexpPattern(".+pass")), erase(config_proc.gsr, "GSR")));
+    config_proc.cond, config_proc.parcel, ...
+    extract(config_proc.filt, regexpPattern(".+pass")), ...
+    erase(config_proc.gsr, "GSR")));
 featherwrite(out_name, tbl_fc_vecs)
 end
 
