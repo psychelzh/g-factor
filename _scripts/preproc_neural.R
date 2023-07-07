@@ -7,7 +7,11 @@ tar_option_set(
   garbage_collection = TRUE,
   error = "abridge",
   format = "qs",
-  controller = crew::crew_controller_local(workers = 8)
+  controller = crew::crew_controller_local(
+    name = "local",
+    workers = 8,
+    seconds_idle = 60
+  )
 )
 
 # targets globals ----
