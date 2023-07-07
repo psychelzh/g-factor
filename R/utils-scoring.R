@@ -52,8 +52,8 @@ predict_g_score <- function(data, mdl, id_cols = 1) {
 #'   out (not including FD values, those are treated in `cond`). If set as
 #'   `NULL`, no covariates will be regressed out.
 #' @param cond A character string specifying which FD values to be regressed
-#'   out. It can be either `nbackrun1`, `rest`, or `run1rest`. If set as `NULL`
-#'   (default), no FD values will be regressed out.
+#'   out. It can be either `nbackrun1`, `rest`, `run1rest` or `latent`. If set
+#'   as `NULL` (default), no FD values will be regressed out.
 #' @returns A data frame with residuals.
 #' @export
 regress_covariates <- function(data, subjs_info, covars = TRUE, cond = NULL) {
@@ -72,7 +72,9 @@ regress_covariates <- function(data, subjs_info, covars = TRUE, cond = NULL) {
       switch(cond,
         nbackrun1 = names_mean_fd[[1]],
         rest = names_mean_fd[[2]],
-        run1rest = names_mean_fd
+        run1rest = ,
+        latent = names_mean_fd,
+        stop("Not supported condition!")
       )
     )
   }
