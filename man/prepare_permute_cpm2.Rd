@@ -5,7 +5,7 @@
 \title{Target factory for CPM permutation}
 \usage{
 prepare_permute_cpm2(
-  config_neural,
+  config,
   hypers_cpm = NULL,
   behav = NULL,
   ...,
@@ -20,9 +20,7 @@ prepare_permute_cpm2(
 )
 }
 \arguments{
-\item{config_neural}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of neural
-data used. The \code{tar_neural} and \code{file} fields must be present to specify
-which neural data to use.}
+\item{config}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of analysis.}
 
 \item{hypers_cpm}{A \code{\link[=data.frame]{data.frame()}} storing the CPM hyper parameters passed to
 the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. Note the names must

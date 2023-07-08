@@ -85,9 +85,7 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'
 #' This will generate batches of CPM permutation for targets to use.
 #'
-#' @param config_neural A [data.frame()] storing the specifications of neural
-#'   data used. The `tar_neural` and `file` fields must be present to specify
-#'   which neural data to use.
+#' @param config A [data.frame()] storing the specifications of analysis.
 #' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
 #'   the `values` argument of [tarchetypes::tar_map_rep()]. Note the names must
 #'   be consistent with the argument names of [do_cpm2()]. If this argument is
@@ -118,7 +116,7 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   If `hypers_cpm` is the not specified or is `NULL`, a list of targets
 #'   tracking neural data will be returned.
 #' @export
-prepare_permute_cpm2 <- function(config_neural,
+prepare_permute_cpm2 <- function(config,
                                  hypers_cpm = NULL,
                                  behav = NULL,
                                  ...,
@@ -129,15 +127,15 @@ prepare_permute_cpm2 <- function(config_neural,
                                  split_hyper = NULL,
                                  covars = NULL,
                                  batches = 4, reps = 5) {
-  config_neural_files <- config_file_tracking(config_neural, ...)
+  config_neural_files <- config_file_tracking(config, ...)
   file_targets <- tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file_fast"),
+    tar_target(name, file, format = "file_fast"),
     values = config_neural_files
   )
   if (missing(hypers_cpm) || is.null(hypers_cpm)) {
     return(file_targets)
   }
-  neural_parsed <- rlang::expr(arrow::read_feather(tar_neural))
+  neural_parsed <- rlang::expr(arrow::read_feather(name))
   if (!missing(subjs_subset)) {
     subjs_subset <- rlang::enexpr(subjs_subset)
     if (!is.null(subjs_subset)) {
@@ -203,7 +201,7 @@ prepare_permute_cpm2 <- function(config_neural,
       ),
       values = tidyr::expand_grid(config_neural_files, hypers_cpm),
       # `tar_neural` and `file` are constructed from other core elements
-      columns = rlang::expr(-c(tar_neural, file)),
+      columns = rlang::expr(-c(name, file)),
       batches = batches,
       reps = reps
     ),
@@ -221,7 +219,7 @@ prepare_permute_cpm2 <- function(config_neural,
             c(
               names(!!rlang::enexpr(behav)),
               # maybe see https://github.com/r-lib/rlang/issues/1629
-              names(!!substitute(config_neural)),
+              names(!!substitute(config)),
               names(!!substitute(hypers_cpm))
             )
           )
