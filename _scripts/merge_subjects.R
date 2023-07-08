@@ -10,16 +10,18 @@ tar_option_set(
 # targets globals ----
 tar_source()
 future::plan(future.callr::callr)
-config_origin <- config_file_tracking(config_neural) |>
+config_files_all_cond <- config |>
+  dplyr::filter(acq == "orig") |>
+  config_file_tracking() |>
   dplyr::distinct(cond, .keep_all = TRUE)
 
 # prepare static branches targets ----
 data_subjs <- tarchetypes::tar_map(
-  values = config_origin,
+  values = config_files_all_cond,
   names = cond,
   tar_target(
     subjs_pattern,
-    arrow::read_feather(tar_neural)$sub_id
+    arrow::read_feather(name)$sub_id
   )
 )
 
@@ -31,14 +33,14 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file_fast"),
-    values = config_origin
+    tar_target(name, file, format = "file_fast"),
+    values = config_files_all_cond
   ),
   data_subjs,
   tarchetypes::tar_combine(
     subjs_neural,
     data_subjs$subjs_pattern,
-    command = Reduce(intersect, list(!!!.x))
+    command = sort(Reduce(intersect, list(!!!.x)))
   ),
   tar_target(
     subjs_neural_file,
@@ -53,7 +55,8 @@ list(
     intersect(
       subjs_neural,
       with(behav_main, scores[idx == "g_full"])[[1]]$sub_id
-    )
+    ) |>
+      sort()
   ),
   tar_target(
     subjs_combined_file,
