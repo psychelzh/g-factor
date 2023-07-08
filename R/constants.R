@@ -105,14 +105,14 @@ scale_model_types <- list(
 )
 
 # scales for behavioral parameters
-meas_behav <- c(
-  g_full = "G Overall",
+meas_trait <- c(
+  g_full = "G (all)",
   rapm = "RAPM"
 )
-scale_meas_behv <- list(
-  name = "Behavioral Measure",
-  limits = names(meas_behav),
-  labels = meas_behav
+scale_meas_trait <- list(
+  name = "Trait Measure",
+  limits = names(meas_trait),
+  labels = meas_trait
 )
 
 # scales for binarize parameters
