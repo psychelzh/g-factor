@@ -38,67 +38,34 @@ output_latent_fc <- function(files_in, file_out) {
     write_feather_safely(file_out)
 }
 
-config_origin <- config_neural |>
-  dplyr::filter(cond %in% c("nbackrun1", "rest")) |>
+config_files <- config |>
+  dplyr::filter(
+    cond %in% c("nbackrun1", "rest", "latent"),
+    acq == "orig"
+  ) |>
   config_file_tracking()
 
-config_latent <- config_neural |>
-  dplyr::filter(cond == "latent") |>
-  config_file_tracking(name_suffix = "_latent") |>
-  dplyr::select(-cond, -tar_neural_latent) |>
-  dplyr::inner_join(
-    dplyr::select(config_origin, -cond, -file),
-    by = c("parcel", "filt", "gsr")
+config_latent <- config_files |>
+  dplyr::mutate(latent = ifelse(cond == "latent", "latent", "manifest")) |>
+  tidyr::pivot_wider(
+    id_cols = c(parcel, gsr),
+    names_from = latent,
+    values_from = c(name, file),
+    values_fn = list
   ) |>
-  tidyr::chop(tar_neural)
-
-dir_gretna <- "data/neural-gretna"
-config_gretna <- config_neural |>
-  dplyr::filter(
-    cond %in% c("nbackrun1", "rest"),
-    filt == "bandpass"
-  ) |>
-  config_file_tracking(
-    dir_neural = dir_gretna,
-    tar_name_neural = "file_neural_gretna"
-  )
-config_latent_gretna <- config_neural |>
-  dplyr::filter(cond == "latent") |>
-  config_file_tracking(
-    dir_neural = dir_gretna,
-    name_suffix = "_latent"
-  ) |>
-  dplyr::select(-cond, -tar_neural_latent) |>
-  dplyr::inner_join(
-    dplyr::select(config_gretna, -cond, -file),
-    by = c("parcel", "filt", "gsr")
-  ) |>
-  tidyr::chop(tar_neural)
+  tidyr::unnest(contains("latent"))
 
 list(
   tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file_fast"),
-    values = config_origin
+    tar_target(name, file, format = "file_fast"),
+    values = config_files |> dplyr::filter(cond != "latent")
   ),
   tarchetypes::tar_map(
     values = config_latent,
-    names = c(parcel, filt, gsr),
+    names = c(parcel, gsr),
     tar_target(
       tar_latent,
-      output_latent_fc(tar_neural, file_latent),
-      format = "file_fast"
-    )
-  ),
-  tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file_fast"),
-    values = config_gretna
-  ),
-  tarchetypes::tar_map(
-    values = config_latent_gretna,
-    names = c(parcel, filt, gsr),
-    tar_target(
-      tar_latent_gretna,
-      output_latent_fc(tar_neural, file_latent),
+      output_latent_fc(name_manifest, file_latent),
       format = "file_fast"
     )
   )
