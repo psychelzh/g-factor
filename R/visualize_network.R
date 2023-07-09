@@ -2,6 +2,8 @@
 #'
 #' @param adj_mat A matrix of adjacency.
 #' @param roi_info A data frame contains ROI labels and colors.
+#' @param ... Further arguments passed to [visualize_chord()]. Currently not
+#'   used.
 #' @param link_val A character string specifying the value of the link.
 #' @param link_color A character string of length two, specifying the color of
 #'   the lowest and highest link value.
@@ -10,7 +12,7 @@
 #' @returns Invisible `NULL`.
 #' @import circlize
 #' @export
-visualize_chord <- function(adj_mat, roi_info,
+visualize_chord <- function(adj_mat, roi_info, ...,
                             link_val = c("degree", "relative", "contrib"),
                             link_color = c("white", "black"),
                             group_by_hemi = TRUE) {
@@ -103,8 +105,12 @@ visualize_chord <- function(adj_mat, roi_info,
 #' Visualize network as a correlation plot
 #'
 #' @param adj_mat The adjacency matrix.
-#' @param type A character string specifying the type of the edge. Can be
+#' @param model_type A character string specifying the type of the edge. Can be
 #'   `"pos"` or `"neg"`.
+#' @param ... Further arguments passed to [corrplot::corrplot()]. There are 3
+#'   arguments that are not allowed to be changed: `method`, `is.corr` and
+#'   `col`. These are set to `"shade"`, `FALSE` and `"Reds"` or `"Blues"`
+#'   depending on the `model_type`.
 #' @param labels A vector of labels. Must have the same length as the number of
 #'   rows/columns of the adjacency matrix.
 #' @param which A character string specifying which value to use. Can be
@@ -112,7 +118,7 @@ visualize_chord <- function(adj_mat, roi_info,
 #' @param range A numeric vector of length two specifying the range of the
 #'   values to be visualized.
 #' @returns See [corrplot::corrplot()].
-visualize_corrplot <- function(adj_mat, type, labels,
+visualize_corrplot <- function(adj_mat, model_type, labels, ...,
                                which = "contrib",
                                range = c(0, 100)) {
   summarise_adjacency(adj_mat, labels) |>
@@ -129,7 +135,8 @@ visualize_corrplot <- function(adj_mat, type, labels,
     corrplot::corrplot(
       method = "shade",
       is.corr = FALSE,
-      col = corrplot::COL1(if (type == "pos") "Reds" else "Blues")
+      col = corrplot::COL1(if (model_type == "pos") "Reds" else "Blues"),
+      ...
     )
 }
 
