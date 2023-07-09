@@ -268,7 +268,7 @@ config_file_tracking <- function(config,
     behav = "{label}_behav_{cond}_{acq}"
   )
   col_file <- paste0('file', name_suffix)
-  col_name <- {paste0('name', name_suffix)}
+  col_name <- paste0('name', name_suffix)
   out <- config |>
     dplyr::mutate(
       "{col_file}" := stringr::str_glue(file_templates[type]),
