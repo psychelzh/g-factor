@@ -21,7 +21,8 @@ visualize_chord <- function(adj_mat, roi_info, ...,
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
 
   data_plot <- summarise_adjacency(adj_mat, roi_info[[col_label]]) |>
-    select(1, 2, all_of(link_val))
+    select(x, y, all_of(link_val)) |>
+    filter(as.integer(x) >= as.integer(y))
 
   # setup grid colors
   grid_colors <- roi_info |>
