@@ -159,7 +159,8 @@ prepare_roi_info <- function(atlas, ...) {
         hemi == "left" ~ colorspace::lighten(color_hex),
         hemi == "right" ~ colorspace::darken(color_hex)
       ),
-      label_hemi = str_c(hemi, label, sep = "_")
+      label_hemi = str_c(hemi, label, sep = "_"),
+      index_homolog = match_homolog(index, x.mni, y.mni, z.mni)
     ) |>
     arrange(hemi, network) |>
     mutate(
@@ -240,4 +241,22 @@ vec_to_mat <- function(vec, diagonal = NA) {
   mat <- mat + t(mat)
   diag(mat) <- diagonal
   mat
+}
+
+match_homolog <- function(index, x.mni, y.mni, z.mni) {
+  index_homolog <- integer(length(index))
+  for (i in index) {
+    pool <- if (x.mni[i] > 0) {
+      index[x.mni < 0]
+    } else {
+      index[x.mni > 0]
+    }
+    row_matched <- proxy::dist(
+      as.matrix(cbind(y.mni[i], z.mni[i])),
+      as.matrix(cbind(y.mni[pool], z.mni[pool]))
+    ) |>
+      which.min()
+    index_homolog[i] <- index[pool[row_matched]]
+  }
+  index_homolog
 }
