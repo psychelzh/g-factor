@@ -8,6 +8,7 @@ visualize_chord(
   adj_mat,
   roi_info,
   ...,
+  model_type = NULL,
   link_val = c("degree", "relative", "contrib"),
   link_color = c("white", "black"),
   group_by_hemi = TRUE
@@ -21,10 +22,14 @@ visualize_chord(
 \item{...}{Further arguments passed to \code{\link[=visualize_chord]{visualize_chord()}}. Currently not
 used.}
 
+\item{model_type}{A character string specifying the type of the edge. Can be
+\code{"pos"} or \code{"neg"}. Note that this argument is exclusive with \code{link_color}.}
+
 \item{link_val}{A character string specifying the value of the link.}
 
 \item{link_color}{A character string of length two, specifying the color of
-the lowest and highest link value.}
+the lowest and highest link value. If \code{model_type} is specified, this
+argument should not be used, and the color will be set automatically.}
 
 \item{group_by_hemi}{A logical value indicating whether to group ROIs by
 hemisphere.}

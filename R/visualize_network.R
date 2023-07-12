@@ -4,18 +4,29 @@
 #' @param roi_info A data frame contains ROI labels and colors.
 #' @param ... Further arguments passed to [visualize_chord()]. Currently not
 #'   used.
+#' @param model_type A character string specifying the type of the edge. Can be
+#'   `"pos"` or `"neg"`. Note that this argument is exclusive with `link_color`.
 #' @param link_val A character string specifying the value of the link.
 #' @param link_color A character string of length two, specifying the color of
-#'   the lowest and highest link value.
+#'   the lowest and highest link value. If `model_type` is specified, this
+#'   argument should not be used, and the color will be set automatically.
 #' @param group_by_hemi A logical value indicating whether to group ROIs by
 #'   hemisphere.
 #' @returns Invisible `NULL`.
 #' @import circlize
 #' @export
-visualize_chord <- function(adj_mat, roi_info, ...,
+visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
                             link_val = c("degree", "relative", "contrib"),
                             link_color = c("white", "black"),
                             group_by_hemi = TRUE) {
+  rlang::check_exclusive(model_type, link_color)
+  if (!is.null(model_type)) {
+    link_color <- if (model_type == "pos") {
+      c("white", "red")
+    } else {
+      c("white", "blue")
+    }
+  }
   link_val <- match.arg(link_val)
   col_label <- if (group_by_hemi) "label_hemi" else "label"
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
