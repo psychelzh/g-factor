@@ -50,17 +50,22 @@ config_files <- config_file_tracking(config)
 # latent construct
 config_latent <- config_files |>
   dplyr::filter(
-    cond %in% c("nbackrun1", "rest", "latent"),
+    cond %in% c("nbackrun1", "rest"),
     acq == "orig"
   ) |>
-  dplyr::mutate(latent = ifelse(cond == "latent", "latent", "manifest")) |>
   tidyr::pivot_wider(
     id_cols = c(parcel, gsr, acq),
-    names_from = latent,
-    values_from = c(name, file),
-    values_fn = list
+    names_from = cond,
+    values_from = name
   ) |>
-  tidyr::unnest(contains("latent"))
+  dplyr::left_join(
+    config_files |>
+      dplyr::filter(
+        cond == "latent",
+        acq == "orig"
+      ),
+    by = c("parcel", "gsr", "acq")
+  )
 
 # regress covariates
 config_regress <- config_files |>
@@ -81,15 +86,13 @@ list(
     values = config_files |>
       dplyr::filter(cond != "latent", acq != "reg")
   ),
-  # TODO: https://github.com/ropensci/tarchetypes/discussions/153
-  tarchetypes::tar_map(
-    values = config_latent,
-    names = c(parcel, gsr, acq),
+  tarchetypes::tar_eval(
     tar_target(
-      file_neural_latent,
-      output_latent_fc(name_manifest, file_latent),
+      name,
+      output_latent_fc(list(nbackrun1, rest), file),
       format = "file_fast"
-    )
+    ),
+    values = config_latent
   ),
   tarchetypes::tar_eval(
     tar_target(
