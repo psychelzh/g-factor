@@ -22,9 +22,9 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
   rlang::check_exclusive(model_type, link_color)
   if (!is.null(model_type)) {
     link_color <- if (model_type == "pos") {
-      c("white", "red")
+      c("white", "#99000D")
     } else {
-      c("white", "blue")
+      c("white", "#084594")
     }
   }
   link_val <- match.arg(link_val)
