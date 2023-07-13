@@ -106,7 +106,7 @@ scale_model_types <- list(
 
 # scales for behavioral parameters
 meas_trait <- c(
-  g_full = "G (all)",
+  g_full = "GCA",
   rapm = "RAPM"
 )
 scale_meas_trait <- list(
