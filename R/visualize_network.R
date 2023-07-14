@@ -32,8 +32,7 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
 
   data_plot <- summarise_adjacency(adj_mat, roi_info[[col_label]]) |>
-    select(x, y, all_of(link_val)) |>
-    filter(as.integer(x) >= as.integer(y))
+    select(x, y, all_of(link_val))
 
   # setup grid colors
   grid_colors <- roi_info |>
@@ -119,10 +118,10 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
 #' @param adj_mat The adjacency matrix.
 #' @param model_type A character string specifying the type of the edge. Can be
 #'   `"pos"` or `"neg"`.
-#' @param ... Further arguments passed to [corrplot::corrplot()]. There are 3
-#'   arguments that are not allowed to be changed: `method`, `is.corr` and
-#'   `col`. These are set to `"shade"`, `FALSE` and `"Reds"` or `"Blues"`
-#'   depending on the `model_type`.
+#' @param ... Further arguments passed to [corrplot::corrplot()]. These
+#'   arguments are not allowed to be changed: `method`, `type`, `is.corr` and
+#'   `col` which are set to `"shade"`, `"upper"`, `FALSE` and `"Reds"` or
+#'   `"Blues"` depending on the `model_type`.
 #' @param labels A vector of labels. Must have the same length as the number of
 #'   rows/columns of the adjacency matrix.
 #' @param which A character string specifying which value to use. Can be
@@ -146,6 +145,7 @@ visualize_corrplot <- function(adj_mat, model_type, labels, ...,
     as.matrix() |>
     corrplot::corrplot(
       method = "shade",
+      type = "upper",
       is.corr = FALSE,
       col = corrplot::COL1(if (model_type == "pos") "Reds" else "Blues"),
       ...
@@ -175,8 +175,8 @@ prepare_roi_info <- function(atlas, ...) {
     ) |>
     arrange(hemi, network) |>
     mutate(
-      label = as_factor(label),
-      label_hemi = as_factor(label_hemi)
+      label = fct_inorder(label, ordered = TRUE),
+      label_hemi = fct_inorder(label_hemi, ordered = TRUE)
     ) |>
     arrange(index)
 }
@@ -212,22 +212,24 @@ prepare_adjacency <- function(mask, ..., value = c("binary", "frac"),
 #' @param adj_mat A matrix of adjacency.
 #' @param labels A vector of labels. Must have the same length as the number of
 #'   rows/columns of the adjacency matrix.
+#' @returns A data frame of summarised adjacency matrix. It could be converted
+#'   as a matrix of upper triangle if `x` and `y` are used as row and column
+#'   respectively.
 summarise_adjacency <- function(adj_mat, labels) {
   adj_mat |>
     as.data.frame() |>
-    rowid_to_column(var = "x") |>
+    rowid_to_column(var = "x_id") |>
     pivot_longer(
-      -x,
-      names_to = "y",
+      -x_id,
+      names_to = "y_id",
+      names_transform = parse_number,
       values_to = "val"
     ) |>
-    mutate(y = parse_number(y)) |>
-    filter(x != y) |>
+    filter(x_id < y_id) |>
     mutate(
-      across(
-        c(x, y),
-        ~ labels[.x]
-      )
+      x = pmin(labels[x_id], labels[y_id]),
+      y = pmax(labels[x_id], labels[y_id]),
+      .keep = "unused"
     ) |>
     summarise(
       degree = sum(val),
@@ -235,10 +237,6 @@ summarise_adjacency <- function(adj_mat, labels) {
       .by = c(x, y)
     ) |>
     mutate(
-      across(
-        c(degree, n),
-        ~ ifelse(x == y, .x / 2, .x)
-      ),
       relative = degree / n,
       contrib = relative / (n / sum(n))
     )

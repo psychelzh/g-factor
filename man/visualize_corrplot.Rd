@@ -22,10 +22,10 @@ visualize_corrplot(
 \item{labels}{A vector of labels. Must have the same length as the number of
 rows/columns of the adjacency matrix.}
 
-\item{...}{Further arguments passed to \code{\link[corrplot:corrplot]{corrplot::corrplot()}}. There are 3
-arguments that are not allowed to be changed: \code{method}, \code{is.corr} and
-\code{col}. These are set to \code{"shade"}, \code{FALSE} and \code{"Reds"} or \code{"Blues"}
-depending on the \code{model_type}.}
+\item{...}{Further arguments passed to \code{\link[corrplot:corrplot]{corrplot::corrplot()}}. These
+arguments are not allowed to be changed: \code{method}, \code{type}, \code{is.corr} and
+\code{col} which are set to \code{"shade"}, \code{"upper"}, \code{FALSE} and \code{"Reds"} or
+\code{"Blues"} depending on the \code{model_type}.}
 
 \item{which}{A character string specifying which value to use. Can be
 \code{"degree"}, \code{"n"}, \code{"relative"} or \code{"contrib"}.}
