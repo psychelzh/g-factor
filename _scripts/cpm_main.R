@@ -9,7 +9,11 @@ tar_option_set(
   retrieval = "worker",
   error = "null",
   format = "qs",
-  controller = crew::crew_controller_local(workers = 8)
+  controller = crew::crew_controller_local(
+    name = "local",
+    workers = 8,
+    seconds_idle = 60
+  )
 )
 
 # targets globals ----
@@ -34,11 +38,9 @@ list(
     read = scan(!!.x)
   ),
   prepare_permute_cpm2(
-    config_neural, hypers_cpm, behav_main,
-    dir_neural = "data/neural-gretna-reg-nosite",
-    tar_name_neural = "file_neural_reg_nosite",
+    dplyr::filter(config, acq == "reg"),
+    hypers_cpm, behav_main,
     subjs_subset = subjs_combined,
-    name_suffix = "_main_reg_nosite",
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
   )

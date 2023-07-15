@@ -4,16 +4,28 @@
 \alias{visualize_corrplot}
 \title{Visualize network as a correlation plot}
 \usage{
-visualize_corrplot(adj_mat, type, labels, which = "contrib", range = c(0, 100))
+visualize_corrplot(
+  adj_mat,
+  model_type,
+  labels,
+  ...,
+  which = "contrib",
+  range = c(0, 100)
+)
 }
 \arguments{
 \item{adj_mat}{The adjacency matrix.}
 
-\item{type}{A character string specifying the type of the edge. Can be
+\item{model_type}{A character string specifying the type of the edge. Can be
 \code{"pos"} or \code{"neg"}.}
 
 \item{labels}{A vector of labels. Must have the same length as the number of
 rows/columns of the adjacency matrix.}
+
+\item{...}{Further arguments passed to \code{\link[corrplot:corrplot]{corrplot::corrplot()}}. These
+arguments are not allowed to be changed: \code{method}, \code{type}, \code{is.corr} and
+\code{col} which are set to \code{"shade"}, \code{"upper"}, \code{FALSE} and \code{"Reds"} or
+\code{"Blues"} depending on the \code{model_type}.}
 
 \item{which}{A character string specifying which value to use. Can be
 \code{"degree"}, \code{"n"}, \code{"relative"} or \code{"contrib"}.}

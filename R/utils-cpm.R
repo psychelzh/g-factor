@@ -30,9 +30,13 @@ do_cpm2 <- function(neural, behav, kfolds, thresh_method, thresh_level,
 #' @returns A data frame with CPM prediction results.
 #' @export
 extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
-  extract_cors <- function(cpm, edge_types = c("pos", "neg", "all")) {
-    map_dbl(edge_types, ~ cpm[[str_c("cor_", .)]]$estimate) |>
-      as_tibble_row(.name_repair = ~edge_types)
+  extract_cors <- function(cpm) {
+    cor_prefix <- "cor_"
+    cpm |>
+      select_list(starts_with(cor_prefix)) |>
+      map_dbl("estimate") |>
+      as_tibble_row() |>
+      rename_with(~ str_remove(.x, cor_prefix))
   }
   result_cpm |>
     mutate(
@@ -52,17 +56,28 @@ extract_cpm_pred <- function(result_cpm, col_cpm = cpm) {
 #' @returns A data frame with CPM mask results.
 #' @export
 extract_brain_mask <- function(result_cpm, by, col_cpm = cpm) {
-  aggregate_masks <- function(cpm, edge_types = c("pos", "neg")) {
-    map(
-      edge_types,
-      ~ list(rowMeans(do.call(cbind, map(cpm, str_c("mask_prop_", .)))))
-    ) |>
-      set_names(edge_types) |>
-      as_tibble_row()
+  aggregate_masks <- function(cpm) {
+    mask_prefix <- "mask_prop_"
+    cpm |>
+      map(~ select_list(.x, starts_with(mask_prefix))) |>
+      transpose() |>
+      as_tibble() |>
+      summarise(
+        across(
+          everything(),
+          ~ list(rowMeans(do.call(cbind, .x)))
+        )
+      ) |>
+      rename_with(~ str_remove(.x, mask_prefix))
   }
   result_cpm |>
     summarise(
       aggregate_masks({{ col_cpm }}),
       .by = {{ by }}
     )
+}
+
+# helper functions ----
+select_list <- function(.l, ...) {
+  .l[tidyselect::eval_select(rlang::expr(c(...)), .l)]
 }

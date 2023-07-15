@@ -2,31 +2,35 @@
 % Please edit documentation in R/targets-factory.R
 \name{config_file_tracking}
 \alias{config_file_tracking}
-\title{Configure file tracking for neural data}
+\title{Configure file tracking for data}
 \usage{
 config_file_tracking(
   config,
-  dir_neural = "data/neural",
-  tar_name_neural = "file_neural",
+  type = c("neural", "behav"),
+  label = "file",
+  return_symbol = TRUE,
   name_suffix = ""
 )
 }
 \arguments{
-\item{config}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of neural data
-used.}
+\item{config}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of data used.}
 
-\item{dir_neural}{A character scalar specifying the directory of neural data.}
+\item{type}{A character scalar specifying the type of data. It can be either
+\code{neural} or \code{behav}.}
 
-\item{tar_name_neural}{A character scalar specifying the name of the target
-tracking the neural data. It is necessary to use different names for
-different neural data in one project.}
+\item{label}{A character scalar specifying the label for the target tracking
+data.}
+
+\item{return_symbol}{A logical value indicating if the returned target name
+should a symbol or not.}
 
 \item{name_suffix}{A character scalar specifying the name suffix for the
 targets. This will change the column names of the returned \code{\link[=data.frame]{data.frame()}}.}
 }
 \value{
-A new \code{\link[=data.frame]{data.frame()}} with the \code{file} and \code{tar_neural} fields added.
+Add two columns to \code{config} specifying the file name and the target
+name for the data.
 }
 \description{
-Configure file tracking for neural data
+Configure file tracking for data
 }

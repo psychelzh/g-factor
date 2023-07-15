@@ -17,6 +17,7 @@ Imports:
     ggh4x,
     here,
     lavaan,
+    proxy,
     qs,
     tarchetypes,
     targets

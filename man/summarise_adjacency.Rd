@@ -12,6 +12,11 @@ summarise_adjacency(adj_mat, labels)
 \item{labels}{A vector of labels. Must have the same length as the number of
 rows/columns of the adjacency matrix.}
 }
+\value{
+A data frame of summarised adjacency matrix. It could be converted
+as a matrix of upper triangle if \code{x} and \code{y} are used as row and column
+respectively.
+}
 \description{
 This will add labels to the adjacency matrix and summarise the adjacency
 matrix to get the degree, number of links, relative degree and contribution

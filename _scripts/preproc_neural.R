@@ -7,7 +7,11 @@ tar_option_set(
   garbage_collection = TRUE,
   error = "abridge",
   format = "qs",
-  controller = crew::crew_controller_local(workers = 8)
+  controller = crew::crew_controller_local(
+    name = "local",
+    workers = 8,
+    seconds_idle = 60
+  )
 )
 
 # targets globals ----
@@ -19,49 +23,55 @@ write_regressed_fc <- function(origin, dest, ...) {
     regress_covariates(...) |>
     write_feather_safely(dest)
 }
-partial_file_tracking <- purrr::partial(
-  config_file_tracking,
-  config = config_neural
-)
 
-config_neural_dir <- tibble::tribble(
-  ~type, ~dir_neural, ~tar_name_neural, ~name_suffix,
-  "legacy", "data/neural", "file", "",
-  "gretna", "data/neural-gretna", "file_gretna", ""
-)
-hypers_covars <- tibble::tribble(
-  ~reg_site, ~dir_name_suffix, ~covars,
-  "yes", "-reg-covars", c("age", "sex", "site"),
-  "no", "-reg-nosite", c("age", "sex")
-)
-config_neural_files_origin <- config_neural_dir |>
-  dplyr::mutate(
-    values = purrr::pmap(
-      list(dir_neural, tar_name_neural, name_suffix),
-      partial_file_tracking
+output_latent_fc <- function(files_in, file_out) {
+  data <- files_in |>
+    map(arrow::read_feather) |>
+    bind_rows(.id = "src")
+  reframe(
+    data,
+    across(
+      starts_with("Var"),
+      ~ cbind(.[src == 1], .[src == 2]) |>
+        princomp() |>
+        pluck("scores") |>
+        _[, 1]
     )
   ) |>
-  tidyr::unnest(values) |>
-  dplyr::select(type, all_of(names(config_neural)), file, tar_neural)
-config_neural_files_regcov <- tidyr::expand_grid(
-  config_neural_dir, hypers_covars
-) |>
-  dplyr::mutate(
-    dir_neural = paste0(dir_neural, dir_name_suffix),
-    tar_name_neural = paste0(
-      tar_name_neural,
-      gsub("-", "_", dir_name_suffix)
-    ),
-    values = purrr::pmap(
-      list(dir_neural, tar_name_neural, name_suffix = "_regcov"),
-      partial_file_tracking
-    ),
-    .keep = "unused"
+    add_column(
+      sub_id = data$sub_id[data$src == 1],
+      .before = 1L
+    ) |>
+    write_feather_safely(file_out)
+}
+
+config_files <- config_file_tracking(config)
+
+# latent construct
+config_latent <- config_files |>
+  dplyr::filter(
+    cond %in% c("nbackrun1", "rest"),
+    acq == "orig"
   ) |>
-  tidyr::unnest(values) |>
-  dplyr::select(
-    type, reg_site, covars, all_of(names(config_neural)),
-    file_regcov, tar_neural_regcov
+  tidyr::pivot_wider(
+    id_cols = c(parcel, gsr, acq),
+    names_from = cond,
+    values_from = name
+  ) |>
+  dplyr::left_join(
+    config_files |>
+      dplyr::filter(
+        cond == "latent",
+        acq == "orig"
+      ),
+    by = c("parcel", "gsr", "acq")
+  )
+
+# regress covariates
+config_regress <- config_files |>
+  tidyr::pivot_wider(
+    names_from = acq,
+    values_from = c(file, name)
   )
 
 # targets pipeline ----
@@ -72,27 +82,29 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file_fast"),
-    values = config_neural_files_origin
+    tar_target(name, file, format = "file_fast"),
+    values = config_files |>
+      dplyr::filter(cond != "latent", acq != "reg")
   ),
-  tarchetypes::tar_map(
-    values = config_neural_files_regcov |>
-      dplyr::inner_join(
-        config_neural_files_origin,
-        by = c("type", "cond", "parcel", "filt", "gsr")
+  tarchetypes::tar_eval(
+    tar_target(
+      name,
+      output_latent_fc(list(nbackrun1, rest), file),
+      format = "file_fast"
+    ),
+    values = config_latent
+  ),
+  tarchetypes::tar_eval(
+    tar_target(
+      name_reg,
+      write_regressed_fc(
+        name_orig, file_reg,
+        subjs_info = subjs_covariates,
+        covars = c("age", "sex"),
+        cond = cond
       ),
-    names = c(type, reg_site, all_of(names(config_neural))),
-    list(
-      tar_target(
-        file_reg,
-        write_regressed_fc(
-          tar_neural, file_regcov,
-          subjs_info = subjs_covariates,
-          covars = covars,
-          cond = cond
-        ),
-        format = "file_fast"
-      )
-    )
+      format = "file_fast"
+    ),
+    values = config_regress
   )
 )

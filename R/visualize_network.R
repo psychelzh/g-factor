@@ -2,24 +2,37 @@
 #'
 #' @param adj_mat A matrix of adjacency.
 #' @param roi_info A data frame contains ROI labels and colors.
+#' @param ... Further arguments passed to [visualize_chord()]. Currently not
+#'   used.
+#' @param model_type A character string specifying the type of the edge. Can be
+#'   `"pos"` or `"neg"`. Note that this argument is exclusive with `link_color`.
 #' @param link_val A character string specifying the value of the link.
 #' @param link_color A character string of length two, specifying the color of
-#'   the lowest and highest link value.
+#'   the lowest and highest link value. If `model_type` is specified, this
+#'   argument should not be used, and the color will be set automatically.
 #' @param group_by_hemi A logical value indicating whether to group ROIs by
 #'   hemisphere.
 #' @returns Invisible `NULL`.
 #' @import circlize
 #' @export
-visualize_chord <- function(adj_mat, roi_info,
+visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
                             link_val = c("degree", "relative", "contrib"),
                             link_color = c("white", "black"),
                             group_by_hemi = TRUE) {
+  rlang::check_exclusive(model_type, link_color)
+  if (!is.null(model_type)) {
+    link_color <- if (model_type == "pos") {
+      c("white", "#99000D")
+    } else {
+      c("white", "#084594")
+    }
+  }
   link_val <- match.arg(link_val)
   col_label <- if (group_by_hemi) "label_hemi" else "label"
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
 
   data_plot <- summarise_adjacency(adj_mat, roi_info[[col_label]]) |>
-    select(1, 2, all_of(link_val))
+    select(x, y, all_of(link_val))
 
   # setup grid colors
   grid_colors <- roi_info |>
@@ -103,8 +116,12 @@ visualize_chord <- function(adj_mat, roi_info,
 #' Visualize network as a correlation plot
 #'
 #' @param adj_mat The adjacency matrix.
-#' @param type A character string specifying the type of the edge. Can be
+#' @param model_type A character string specifying the type of the edge. Can be
 #'   `"pos"` or `"neg"`.
+#' @param ... Further arguments passed to [corrplot::corrplot()]. These
+#'   arguments are not allowed to be changed: `method`, `type`, `is.corr` and
+#'   `col` which are set to `"shade"`, `"upper"`, `FALSE` and `"Reds"` or
+#'   `"Blues"` depending on the `model_type`.
 #' @param labels A vector of labels. Must have the same length as the number of
 #'   rows/columns of the adjacency matrix.
 #' @param which A character string specifying which value to use. Can be
@@ -112,7 +129,7 @@ visualize_chord <- function(adj_mat, roi_info,
 #' @param range A numeric vector of length two specifying the range of the
 #'   values to be visualized.
 #' @returns See [corrplot::corrplot()].
-visualize_corrplot <- function(adj_mat, type, labels,
+visualize_corrplot <- function(adj_mat, model_type, labels, ...,
                                which = "contrib",
                                range = c(0, 100)) {
   summarise_adjacency(adj_mat, labels) |>
@@ -128,8 +145,10 @@ visualize_corrplot <- function(adj_mat, type, labels,
     as.matrix() |>
     corrplot::corrplot(
       method = "shade",
+      type = "upper",
       is.corr = FALSE,
-      col = corrplot::COL1(if (type == "pos") "Reds" else "Blues")
+      col = corrplot::COL1(if (model_type == "pos") "Reds" else "Blues"),
+      ...
     )
 }
 
@@ -151,12 +170,13 @@ prepare_roi_info <- function(atlas, ...) {
         hemi == "left" ~ colorspace::lighten(color_hex),
         hemi == "right" ~ colorspace::darken(color_hex)
       ),
-      label_hemi = str_c(hemi, label, sep = "_")
+      label_hemi = str_c(hemi, label, sep = "_"),
+      index_homolog = match_homolog(index, x.mni, y.mni, z.mni)
     ) |>
     arrange(hemi, network) |>
     mutate(
-      label = as_factor(label),
-      label_hemi = as_factor(label_hemi)
+      label = fct_inorder(label, ordered = TRUE),
+      label_hemi = fct_inorder(label_hemi, ordered = TRUE)
     ) |>
     arrange(index)
 }
@@ -192,22 +212,24 @@ prepare_adjacency <- function(mask, ..., value = c("binary", "frac"),
 #' @param adj_mat A matrix of adjacency.
 #' @param labels A vector of labels. Must have the same length as the number of
 #'   rows/columns of the adjacency matrix.
+#' @returns A data frame of summarised adjacency matrix. It could be converted
+#'   as a matrix of upper triangle if `x` and `y` are used as row and column
+#'   respectively.
 summarise_adjacency <- function(adj_mat, labels) {
   adj_mat |>
     as.data.frame() |>
-    rowid_to_column(var = "x") |>
+    rowid_to_column(var = "x_id") |>
     pivot_longer(
-      -x,
-      names_to = "y",
+      -x_id,
+      names_to = "y_id",
+      names_transform = parse_number,
       values_to = "val"
     ) |>
-    mutate(y = parse_number(y)) |>
-    filter(x != y) |>
+    filter(x_id < y_id) |>
     mutate(
-      across(
-        c(x, y),
-        ~ labels[.x]
-      )
+      x = pmin(labels[x_id], labels[y_id]),
+      y = pmax(labels[x_id], labels[y_id]),
+      .keep = "unused"
     ) |>
     summarise(
       degree = sum(val),
@@ -215,10 +237,6 @@ summarise_adjacency <- function(adj_mat, labels) {
       .by = c(x, y)
     ) |>
     mutate(
-      across(
-        c(degree, n),
-        ~ ifelse(x == y, .x / 2, .x)
-      ),
       relative = degree / n,
       contrib = relative / (n / sum(n))
     )
@@ -232,4 +250,22 @@ vec_to_mat <- function(vec, diagonal = NA) {
   mat <- mat + t(mat)
   diag(mat) <- diagonal
   mat
+}
+
+match_homolog <- function(index, x.mni, y.mni, z.mni) {
+  index_homolog <- integer(length(index))
+  for (i in index) {
+    pool <- if (x.mni[i] > 0) {
+      index[x.mni < 0]
+    } else {
+      index[x.mni > 0]
+    }
+    row_matched <- proxy::dist(
+      as.matrix(cbind(y.mni[i], z.mni[i])),
+      as.matrix(cbind(y.mni[pool], z.mni[pool]))
+    ) |>
+      which.min()
+    index_homolog[i] <- index[pool[row_matched]]
+  }
+  index_homolog
 }

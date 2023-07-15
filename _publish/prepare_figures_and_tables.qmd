@@ -1,0 +1,681 @@
+---
+title: "Prepare figures and tables for the manuscript"
+author: "Liang Zhang"
+---
+
+```{r}
+#| label: setup
+
+devtools::load_all()
+library(modelsummary)
+library(patchwork)
+
+path_ms <- normalizePath(
+  fs::path(
+    Sys.getenv("OneDriveConsumer"),
+    "Documents/Research/brain-intelligence/g-factor/manuscripts"
+  )
+)
+path_ms_fig <- fs::path(path_ms, "figures")
+path_ms_tbl <- fs::path(path_ms, "tables")
+
+# helper functions
+arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
+  add_custom_title <- function(text, where = c("row", "column")) {
+    where <- match.arg(where)
+    if (where == "row") {
+      side <- 2
+      at <- grconvertY(0.5, "npc", "nic")
+    } else {
+      side <- 3
+      at <- grconvertX(0.5, "npc", "nic")
+    }
+    mtext(text, side = side, line = 0, at = at, outer = TRUE)
+  }
+  par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
+  for (idx_row in 1:2) {
+    for (idx_col in 1:2) {
+      cur_adj_mat <- adj_mat_pool |>
+        filter(row == idx_row, col == idx_col)
+      plot_fun(
+        cur_adj_mat$adj_mat[[1]], ...,
+        model_type = cur_adj_mat$model_type
+      )
+      # add column and row annotations
+      text_model_type <- model_types[[cur_adj_mat$model_type]]
+      text_meas_trait <- meas_trait[[cur_adj_mat$idx]]
+      if (idx_row == 1) {
+        add_custom_title(text_model_type, "column")
+        if (idx_col == 1) {
+          add_custom_title(text_meas_trait, "row")
+        }
+      } else {
+        if (idx_col == 1) {
+          add_custom_title(text_meas_trait, "row")
+        }
+      }
+    }
+  }
+}
+average_correlation <- function(x) {
+  tanh(mean(atanh(x)))
+}
+```
+
+```{r}
+#| label: descriptive-statistics
+
+targets::tar_load(indices_wider_clean, store = store_preproc_behav)
+targets::tar_load(indices_clean, store = store_preproc_behav)
+dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
+
+p <- indices_wider_clean |>
+  select(-sub_id) |>
+  ggstatsplot::ggcorrmat(
+    cor.vars = all_of(dims$task_index),
+    # package = "viridisLite", palette = "turbo", colors = NULL,
+    colors = c("#084594", "white", "#99000D"),
+    pch = "",
+    ggcorrplot.args = list(pch.cex = 2, lab_size = 2)
+  ) +
+  scale_x_discrete(position = "top") +
+  # scale_y_discrete(limits = rev) +
+  theme(axis.text.x.top = element_text(hjust = 0), aspect.ratio = 1)
+ggsave(fs::path(path_ms_fig, "task_corrs_new.png"), p, width = 8, height = 6)
+
+# get the original scores
+# ragg::agg_png(fs::path(path_ms_fig, "task_corrs.png"), width = 960, height = 960, res = 90)
+# indices_wider_clean |>
+#   select(-sub_id) |>
+#   cor(use = "pairwise") |>
+#   corrplot::corrplot(
+#     method = "shade",
+#     order = "hclust",
+#     col = colorRampPalette(c("blue", "white", "red"))(200)
+#   )
+# dev.off()
+```
+
+```{r}
+#| label: estimation-results
+
+targets::tar_load(var_exp, store = store_g_invariance)
+targets::tar_load(var_exp_full, store = store_preproc_behav)
+targets::tar_load(scores_g, store = store_g_invariance)
+targets::tar_load(
+  c(scores_g_full, indices_rapm),
+  store = store_preproc_behav
+)
+cor_rapm_full <- scores_g_full |>
+  inner_join(indices_rapm, by = "sub_id") |>
+  summarise(cor = cor(g, RAPM, use = "pairwise"))
+cor_rapm_sampled <- scores_g |>
+  unnest(scores) |>
+  inner_join(indices_rapm, by = "sub_id") |>
+  summarise(
+    cor = cor(g, RAPM, use = "pairwise"),
+    .by = c(num_vars, id_pairs, idx_rsmp)
+  )
+
+p_var_exp <- var_exp |>
+  ggplot(aes(num_vars, prop, group = factor(num_vars))) +
+  # geom_violin() +
+  geom_boxplot() +
+  geomtextpath::geom_texthline(
+    yintercept = var_exp_full,
+    linetype = "dotted",
+    hjust = 0,
+    color = "black",
+    label = "All"
+  ) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  ggpubr::theme_pubr() +
+  labs(x = "Number of Tasks", y = "Variance Explained")
+ggsave(fs::path(path_ms_fig, "var_exp.png"), p_var_exp, width = 8, height = 6)
+
+datasummary(
+  Factor(num_vars) ~ prop * (Mean + SD + Min + Max),
+  var_exp,
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "var_exp.xlsx")
+)
+
+p_cor_ramp <- cor_rapm_sampled |>
+  ggplot(aes(num_vars, cor)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  geomtextpath::geom_texthline(
+    yintercept = cor_rapm_full$cor,
+    hjust = 0,
+    linetype = "dashed",
+    color = "black",
+    label = "All"
+  ) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  ggpubr::theme_pubr() +
+  labs(x = "Number of Tasks", y = "Correlation with RAPM")
+p_rel <- scores_g |>
+  group_by(num_vars, idx_rsmp) |>
+  filter(n() == 2) |>
+  summarise(
+    estimate = cor(scores[[1]]$g, scores[[2]]$g, use = "pairwise"),
+    .groups = "drop"
+  ) |>
+  ggplot(aes(num_vars, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  ggpubr::theme_pubr() +
+  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
+p <- p_rel + p_cor_ramp +
+  plot_layout(widths = c(1, 2)) +
+  plot_annotation(tag_levels = "A")
+ggsave(fs::path(path_ms_fig, "task_influence_behav_only.png"), p, width = 8, height = 4)
+```
+
+```{r}
+#| label: benchmark-cpm
+
+targets::tar_load(
+  cpm_pred,
+  store = store_bench_cpm
+)
+
+pred_hypers <- cpm_pred |>
+  filter(
+    idx == "rapm",
+    cond == "nbackrun1",
+    gsr == "with"
+  ) |>
+  mutate(
+    cond = factor(cond, names(conds)),
+    parcel = factor(parcel, names(parcels)),
+    gsr = factor(gsr, names(gsrs))
+  )
+pred_cond <- cpm_pred |>
+  filter(
+    idx == "rapm",
+    thresh_method == "alpha",
+    thresh_level == 0.01
+  ) |>
+  # pivot_longer(
+  #   all_of(names(model_types)),
+  #   names_to = "model_type",
+  #   values_to = "estimate"
+  # ) |>
+  mutate(
+    cond = factor(cond, names(conds)),
+    parcel = factor(parcel, names(parcels)),
+    # model_types = factor(model_type, names(model_types)),
+    gsr = factor(gsr, names(gsrs))
+  )
+
+p_hypers_cpm <- pred_hypers |>
+  ggplot(aes(factor(thresh_level), all, fill = parcel)) +
+  geom_boxplot() +
+  # stat_summary(size = 0.2) +
+  # stat_summary(aes(group = parcel), geom = "line") +
+  scale_x_discrete(name = "Threshold Level") +
+  rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
+  scale_y_continuous(name = "CPM Performance", breaks = scales::breaks_width(0.02)) +
+  # guides(fill = guide_legend(nrow = 1)) +
+  facet_grid(
+    cols = vars(thresh_method),
+    labeller = labeller(
+      thresh_method = thresh_methods
+    ),
+    scales = "free_x"
+  ) +
+  # guide_common +
+  ggpubr::theme_pubr()
+p_cond <- pred_cond |>
+  # filter(model_type == "all") |>
+  ggplot(aes(cond, all, fill = parcel)) +
+  # stat_summary(size = 0.2) +
+  # stat_summary(aes(group = parcel), geom = "line") +
+  geom_boxplot() +
+  # ggdist::stat_dots(position = position_dodge(width = 0.4), side = "left") +
+  # ggdist::stat_slabinterval(position = position_dodge(width = 0.4)) +
+  rlang::exec(scale_x_discrete, !!!scale_conds) +
+  scale_y_continuous(name = "CPM Performance") +
+  # rlang::exec(scale_color_brewer, !!!scale_parcels, palette = "Dark2", aesthetics = "fill") +
+  rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
+  facet_grid(
+    # rows = vars(model_type),
+    cols = vars(gsr),
+    labeller = labeller(
+      # model_type = model_types,
+      gsr = gsrs
+    )
+  ) +
+  ggpubr::theme_pubr()
+p <- p_hypers_cpm / p_cond +
+  plot_layout(heights = c(1, 2), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "bottom")
+ggsave(fs::path(path_ms_fig, "bench_cpm_with_parcels.png"), p, width = 8, height = 6)
+
+p_hypers_cpm <- pred_hypers |>
+  filter(parcel == "nn268") |>
+  ggplot(aes(factor(thresh_level), all)) +
+  geom_boxplot() +
+  # stat_summary(size = 0.2) +
+  # stat_summary(aes(group = parcel), geom = "line") +
+  scale_x_discrete(name = "Threshold Level") +
+  # rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
+  scale_y_continuous(
+    name = "CPM Performance",
+    breaks = scales::breaks_width(0.02)
+  ) +
+  # guides(fill = guide_legend(nrow = 1)) +
+  facet_grid(
+    cols = vars(thresh_method),
+    labeller = labeller(
+      thresh_method = thresh_methods
+    ),
+    scales = "free_x"
+  ) +
+  # guide_common +
+  ggpubr::theme_pubr()
+p_cond <- pred_cond |>
+  filter(parcel == "nn268") |>
+  # filter(model_type == "all") |>
+  ggplot(aes(cond, all)) +
+  # stat_summary(size = 0.2) +
+  # stat_summary(aes(group = parcel), geom = "line") +
+  geom_boxplot() +
+  # ggdist::stat_dots(position = position_dodge(width = 0.4), side = "left") +
+  # ggdist::stat_slabinterval(position = position_dodge(width = 0.4)) +
+  rlang::exec(scale_x_discrete, !!!scale_conds) +
+  scale_y_continuous(name = "CPM Performance") +
+  # rlang::exec(scale_color_brewer, !!!scale_parcels, palette = "Dark2", aesthetics = "fill") +
+  # rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
+  facet_grid(
+    # rows = vars(model_type),
+    cols = vars(gsr),
+    labeller = labeller(
+      # model_type = model_types,
+      gsr = gsrs
+    )
+  ) +
+  ggpubr::theme_pubr()
+p <- p_hypers_cpm / p_cond +
+  plot_layout(heights = c(1, 2)) +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "bottom")
+ggsave(fs::path(path_ms_fig, "bench_cpm.png"), p, width = 8, height = 6)
+```
+
+```{r}
+#| label: neural-prediction
+
+preds_main <- targets::tar_read(
+  cpm_pred,
+  store = store_cpm_main
+) |>
+  filter(
+    cond == "nbackrun1",
+    parcel == "nn268",
+    gsr == "with",
+    thresh_method == "alpha",
+    thresh_level == 0.01
+  ) |>
+  summarise(
+    estimate = average_correlation(all),
+    .by = any_of(
+      c("idx", names(config), names(hypers_cpm))
+    )
+  )
+preds_sampled <- targets::tar_read(
+  cpm_pred,
+  store = store_g_invariance
+) |>
+  filter(gsr == "with", parcel == "nn268") |>
+  summarise(
+    estimate = average_correlation(all),
+    .by = c(
+      num_vars, id_pairs, idx_rsmp,
+      any_of(c(names(config), names(hypers_cpm)))
+    )
+  )
+
+p_pred_trend <- preds_sampled |>
+  ggplot(aes(num_vars, estimate)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  geom_hline(
+    aes(color = idx, yintercept = estimate),
+    linetype = "dashed",
+    preds_main
+  ) +
+  # geomtextpath::geom_texthline(
+  #   aes(label = meas_trait[idx], yintercept = estimate, color = idx),
+  #   preds_main,
+  #   size = 2,
+  #   linetype = "dotted",
+  #   hjust = 0
+  # ) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  rlang::exec(
+    scale_color_viridis_d, !!!scale_meas_trait,
+    option = "H"
+  ) +
+  ggpubr::theme_pubr() +
+  theme(legend.position = c(0.8, 0.2)) +
+  labs(x = "Number of Tasks", y = "CPM Performance")
+
+dice_clean <- targets::tar_read(
+  dice_mask_pairs,
+  store = store_g_invariance
+) |>
+  mutate(dice_avg = (pos_dice + neg_dice) / 2) |>
+  filter(
+    parcel == "nn268",
+    binarize_method == "value",
+    binarize_level == 0.95,
+    cond == "nbackrun1"
+  )
+p_dice_avg <- dice_clean |>
+  ggplot(aes(num_vars, dice_avg)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  ggpubr::theme_pubr() +
+  labs(x = "Number of Tasks", y = "Dice Similarity")
+
+p <- p_pred_trend + p_dice_avg +
+  plot_layout(widths = c(2, 1)) +
+  plot_annotation(tag_levels = "A")
+ggsave(fs::path(path_ms_fig, "pred_cpm_dice_avg.png"), p, width = 8, height = 4)
+
+datasummary(
+  Factor(num_vars) ~ estimate * (Mean + SD + Max + Min),
+  preds_sampled,
+  fs::path(path_ms_tbl, "preds_sampled_cpm.xlsx")
+)
+datasummary(
+  Factor(num_vars) ~
+    dice_avg * (Mean + SD + Max + Min),
+  dice_clean,
+  fs::path(path_ms_tbl, "dice_clean.xlsx")
+)
+
+# supplementary
+dice_clean <- targets::tar_read(
+  dice_mask_pairs,
+  store = store_g_invariance
+) |>
+  pivot_longer(
+    contains("dice"),
+    names_to = c("model_type", ".value"),
+    names_pattern = "(.+)_(.+)"
+  ) |>
+  filter(
+    parcel == "nn268",
+    binarize_method == "count",
+    binarize_level == 500,
+    cond == "nbackrun1"
+  ) |>
+  mutate(
+    model_type = factor(model_type, names(model_types)) |>
+      droplevels()
+  )
+
+p_dice <- dice_clean |>
+  ggplot(aes(num_vars, dice)) +
+  ggdist::stat_slabinterval(aes(fill = model_type), show.legend = FALSE) +
+  ggdist::stat_dots(side = "left", show.legend = FALSE) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  scale_fill_brewer(palette = "Set1") +
+  ggpubr::theme_pubr() +
+  facet_grid(
+    cols = vars(model_type),
+    labeller = labeller(model_type = model_types)
+  ) +
+  labs(x = "Number of Tasks", y = "Dice Similarity")
+```
+
+```{r}
+#| label: benchmark-single-task
+
+bench_single <- bind_rows(
+  `Single Task` = targets::tar_read(
+    cpm_pred_single,
+    store = store_task_selection
+  ),
+  `Intelligence` = targets::tar_read(
+    cpm_pred,
+    store = store_cpm_main
+  ) |>
+    filter(
+      cond == "nbackrun1",
+      parcel == "nn268",
+      gsr == "with",
+      thresh_method == "alpha",
+      thresh_level == 0.01
+    ) |>
+    mutate(task = meas_trait[idx]),
+  .id = "type"
+) |>
+  mutate(
+    type = factor(type, c("Intelligence", "Single Task")),
+    cond = factor(cond, names(conds)),
+    gsr = factor(gsr, names(gsrs))
+  )
+p <- bench_single |>
+  ggplot(aes(fct_reorder(task, desc(all)), all)) +
+  geom_boxplot() +
+  facet_grid(cols = vars(type), space = "free", scales = "free_x") +
+  ggpubr::theme_pubr() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "Task Indicator", y = "CPM Performance")
+ggsave(fs::path(path_ms_fig, "bench_single.png"), p, width = 8, height = 6)
+```
+
+```{r}
+#| label: prepare-brain-mask-data
+
+brain_masks <- targets::tar_read(
+  brain_mask,
+  store = store_cpm_main
+) |>
+  filter(
+    cond == "nbackrun1", gsr == "with", acq == "reg",
+    thresh_method == "alpha", thresh_level == 0.01,
+    parcel == "nn268"
+  )
+dice_simil <- brain_masks |>
+  summarise(
+    across(
+      any_of(names(model_types)), 
+      \(mask) calc_mask_dice(
+        mask,
+        binarize_method = "value",
+        binarize_level = 0.95
+      )
+    )
+  )
+roi_info <- prepare_roi_info(readRDS(here::here("data/atlases/Shen268.rds")))
+roi_coords <- as.matrix(select(roi_info, contains("mni")))
+adj_mat_pool <- brain_masks |>
+  pivot_longer(
+    any_of(names(model_types)),
+    names_to = "model_type",
+    values_to = "mask"
+  ) |>
+  mutate(
+    adj_mat = map(
+      mask,
+      prepare_adjacency,
+      binarize_method = "value",
+      binarize_level = 0.95,
+      diagonal = 0
+    ),
+    node_degree = map(
+      adj_mat,
+      ~ igraph::graph_from_adjacency_matrix(
+        .x,
+        mode = "undirected"
+      ) |>
+        igraph::degree()
+    ),
+    .keep = "unused"
+  ) |>
+  mutate(
+    row = as.integer(factor(idx, names(meas_trait))),
+    col = as.integer(droplevels(factor(model_type, names(model_types))))
+  )
+```
+
+```{python}
+#| label: plot-markers
+
+import os
+import numpy as np
+import pandas as pd
+from nilearn import plotting
+import matplotlib.pyplot as plt
+import matplotlib
+
+vmax = np.amax(np.concatenate(r.adj_mat_pool.node_degree))
+fig = plt.figure()
+gs = fig.add_gridspec(nrows=2, ncols=2, wspace=0, hspace=0)
+axes = gs.subplots()
+# fig, axes = plt.subplots(nrows=2, ncols=2)
+
+# Compute node degree values (dummy values for demonstration)
+for col in range(2):
+  adj_mat_cur_col = r.adj_mat_pool.query(f'col == {col + 1}')
+  model_type = np.unique(adj_mat_cur_col.model_type)
+  for row in range(2):
+    ax = axes[row, col]
+    node_degree = adj_mat_cur_col.query(f'row == {row + 1}').node_degree.to_list()[0]
+    if model_type == "pos":
+      cmap = plt.cm.Reds
+    else:
+      cmap = plt.cm.Blues
+    pmk = plotting.plot_markers(
+      node_degree,
+      r.roi_coords,
+      node_cmap=cmap,
+      node_vmax=vmax,
+      display_mode='lzry',
+      colorbar=False,
+      axes=ax
+    )
+  # https://github.com/nilearn/nilearn/issues/3830
+  cmap = plt.get_cmap(cmap)
+  norm = matplotlib.colors.Normalize(vmin=0, vmax=vmax)
+  cb = fig.colorbar(
+    matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axes[:, col], 
+    orientation='horizontal', anchor=(0.5, 4),
+    aspect=25, shrink=0.4, use_gridspec=True, pad=0
+  )
+  # https://stackoverflow.com/a/15305969/5996475
+  cb.ax.tick_params(labelsize='xx-small')
+
+# set column and row titles
+title_cols = r.model_types[1:]
+title_rows = r.meas_trait
+pad = 10
+for ax, title_col in zip(axes[0], title_cols):
+  ax.set_title(title_col)
+
+y_frac = [0.4, 0.25]
+for i, ax, title_row in zip(range(2), axes[:,0], title_rows):
+  ax.annotate(
+    title_row,
+    xy=(0, y_frac[i]),
+    xytext=(-ax.yaxis.labelpad - pad, 0),
+    textcoords='offset points',
+    size='large', rotation=90,
+    ha='center', va='center'
+  )
+
+fig.set_size_inches(15, 6)
+fig.savefig(
+  os.path.join(r.path_ms_fig, "network-node-markers-cmbcb-prob.pdf"), 
+  dpi=100, bbox_inches='tight'
+)
+fig.clear
+```
+
+```{r}
+#| label: plot-chord
+
+cairo_pdf(fs::path(path_ms_fig, "network-chord-rel-prob.pdf"), width = 8, height = 8)
+# ragg::agg_png("network-chord.png", width = 1280, height = 1280, res = 180)
+arrange_plots(visualize_chord, adj_mat_pool, roi_info = roi_info, link_val = "relative")
+dev.off()
+```
+
+```{r}
+#| label: plot-chord-ctb
+
+cairo_pdf(fs::path(path_ms_fig, "network-chord-ctb-prob.pdf"), width = 8, height = 8)
+# ragg::agg_png("network-chord.png", width = 1280, height = 1280, res = 180)
+arrange_plots(visualize_chord, adj_mat_pool, roi_info = roi_info, link_val = "contrib")
+dev.off()
+```
+
+```{r}
+#| label: plot-contribution
+
+cairo_pdf(fs::path(path_ms_fig, "network-corrplot-ctb-prob.pdf"), width = 8, height = 8)
+# ragg::agg_png("network-ctb.png", width = 1440, height = 1440, res = 180)
+par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
+arrange_plots(
+  visualize_corrplot,
+  adj_mat_pool,
+  labels = roi_info$label
+)
+dev.off()
+```
+
+```{r}
+adj_mat_pool |>
+  summarise(
+    cor.test(node_degree[[1]], node_degree[[2]], method = "spearman", exact = FALSE) |>
+      broom::tidy(),
+    .by = model_type
+  )
+adj_mat_pool |>
+  summarise(
+    cor.test(node_degree[[1]], node_degree[[2]], method = "spearman", exact = FALSE) |>
+      broom::tidy(),
+    .by = idx
+  )
+
+# adj_mat_pool |>
+#   select(idx, model_type, node_degree) |>
+#   unchop(node_degree) |>
+#   mutate(index = row_number(), .by = c(idx, model_type)) |>
+#   left_join(select(roi_info, index, hemi), by = "index") |>
+#   summarise(
+#     cor.test(node_degree[hemi == "left"], node_degree[hemi == "right"])
+#   )
+
+node_degrees <- adj_mat_pool |>
+  select(idx, model_type, node_degree) |>
+  unchop(node_degree) |>
+  mutate(index = row_number(), .by = c(idx, model_type)) |>
+  left_join(select(roi_info, index, hemi, index_homolog), by = "index")
+cor_homologs <- node_degrees |>
+  left_join(
+    select(node_degrees, idx, model_type, node_degree_homolog = node_degree, index),
+    by = join_by(idx, model_type, index_homolog == index)
+  ) |>
+  summarise(
+    cor.test(node_degree, node_degree_homolog, method = "spearman", exact = FALSE) |>
+      broom::tidy(),
+    .by = c(idx, model_type, hemi)
+  )
+cor_homologs |>
+  mutate(stat_str = sprintf("%.2f (%.2e)", estimate, p.value)) |>
+  pivot_wider(
+    id_cols = c(idx),
+    names_from = c(hemi, model_type),
+    values_from = stat_str
+  ) |>
+  writexl::write_xlsx(fs::path(path_ms_tbl, "stats_homolog.xlsx"))
+```

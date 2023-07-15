@@ -20,8 +20,8 @@ out (not including FD values, those are treated in \code{cond}). If set as
 \code{NULL}, no covariates will be regressed out.}
 
 \item{cond}{A character string specifying which FD values to be regressed
-out. It can be either \code{nbackrun1}, \code{rest}, or \code{run1rest}. If set as \code{NULL}
-(default), no FD values will be regressed out.}
+out. It can be either \code{nbackrun1}, \code{rest}, \code{run1rest} or \code{latent}. If set
+as \code{NULL} (default), no FD values will be regressed out.}
 }
 \value{
 A data frame with residuals.

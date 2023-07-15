@@ -7,11 +7,11 @@ file_subjs_combined <- "data/subjs_combined"
 file_subjs_neural <- "data/subjs_neural"
 
 # basic configurations for CPM modeling ----
-config_neural <- tidyr::expand_grid(
+config <- tidyr::expand_grid(
   cond = c("nbackrun1", "rest", "run1rest", "latent"),
   parcel = c("nn268", "Power264"),
-  filt = "bandpass", # eliminate low-pass
-  gsr = c("with", "without")
+  gsr = c("with", "without"),
+  acq = c("orig", "reg")
 )
 hypers_cpm <- tidyr::expand_grid(
   tibble::tibble(kfolds = 10),
@@ -105,14 +105,14 @@ scale_model_types <- list(
 )
 
 # scales for behavioral parameters
-meas_behav <- c(
-  g_full = "G Overall",
+meas_trait <- c(
+  g_full = "GCA",
   rapm = "RAPM"
 )
-scale_meas_behv <- list(
-  name = "Behavioral Measure",
-  limits = names(meas_behav),
-  labels = meas_behav
+scale_meas_trait <- list(
+  name = "Trait Measure",
+  limits = names(meas_trait),
+  labels = meas_trait
 )
 
 # scales for binarize parameters

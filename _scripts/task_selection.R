@@ -9,7 +9,11 @@ tar_option_set(
   retrieval = "worker",
   error = "null",
   format = "qs",
-  controller = crew::crew_controller_local(workers = 8)
+  controller = crew::crew_controller_local(
+    name = "local",
+    workers = 8,
+    seconds_idle = 60
+  )
 )
 
 # targets globals ----
@@ -17,12 +21,12 @@ tar_source()
 future::plan(future.callr::callr)
 
 # prepare static branches targets ----
-config_neural <- config_neural |>
+config <- config |>
   dplyr::filter(
     parcel == "Power264",
-    filt == "bandpass",
     gsr == "with",
-    cond == "nbackrun1"
+    cond == "nbackrun1",
+    acq == "reg"
   )
 hypers_cpm <- hypers_cpm |>
   dplyr::filter(
@@ -44,12 +48,9 @@ task_selection <- tarchetypes::tar_map(
       include_var_exp = FALSE
     ),
     prepare_permute_cpm2(
-      config_neural, hypers_cpm, scores_g,
-      dir_neural = "data/neural-gretna-reg-nosite",
-      tar_name_neural = "file_neural_reg_nosite",
+      config, hypers_cpm, scores_g,
       include_file_targets = FALSE,
       subjs_subset = subjs_combined,
-      name_suffix = "_reg_nosite",
       subjs_info = subjs_covariates,
       covars = c("age", "sex")
     )
@@ -96,13 +97,11 @@ list(
       )
   ),
   prepare_permute_cpm2(
-    config_neural,
+    config,
     hypers_cpm,
     scores_single,
-    dir_neural = "data/neural-gretna-reg-nosite",
-    tar_name_neural = "file_neural_reg_nosite",
     subjs_subset = subjs_combined,
-    name_suffix = "_single_reg_nosite",
+    name_suffix = "_single",
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
   ),
@@ -110,7 +109,7 @@ list(
   lapply(
     rlang::exprs(
       scores_g,
-      cpm_pred_reg_nosite
+      cpm_pred
     ),
     combine_targets,
     targets = task_selection,

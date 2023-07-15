@@ -9,7 +9,11 @@ tar_option_set(
   retrieval = "worker",
   error = "null",
   format = "qs",
-  controller = crew::crew_controller_local(workers = 8)
+  controller = crew::crew_controller_local(
+    name = "local",
+    workers = 8,
+    seconds_idle = 60
+  )
 )
 
 # targets globals ----
@@ -55,11 +59,11 @@ cfg_rsmp_vars <- dplyr::bind_rows(
   tidyr::chop(c(idx_rsmp, idx_vars))
 
 # compare two parcellations
-config_neural <- config_neural |>
+config <- config |>
   dplyr::filter(
     cond == "nbackrun1",
-    filt == "bandpass",
-    gsr == "with"
+    gsr == "with",
+    acq == "reg"
   )
 hypers_cpm <- hypers_cpm |>
   dplyr::filter(
@@ -83,11 +87,8 @@ g_invariance <- tarchetypes::tar_map(
     data_names
   ),
   prepare_permute_cpm2(
-    config_neural, hypers_cpm, scores_g,
-    dir_neural = "data/neural-gretna-reg-nosite",
-    tar_name_neural = "file_neural_reg_nosite",
+    config, hypers_cpm, scores_g,
     subjs_subset = subjs_combined,
-    name_suffix = "_reg_nosite",
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
   )
@@ -97,15 +98,10 @@ mask_dices <- tarchetypes::tar_map(
   values = cfg_rsmp_vars |>
     dplyr::filter(dplyr::n() == 2, .by = num_vars) |>
     dplyr::select(num_vars, id_pairs) |>
-    tidyr::expand_grid(reg_covars = "yes") |>
     dplyr::mutate(
       name_brain_mask = rlang::syms(
         paste(
-          ifelse(
-            reg_covars == "no",
-            "brain_mask",
-            "brain_mask_reg_nosite"
-          ),
+          "brain_mask",
           num_vars, id_pairs,
           sep = "_"
         )
@@ -121,14 +117,9 @@ mask_dices <- tarchetypes::tar_map(
     tarchetypes::tar_map_rep(
       dice_mask_pairs,
       bind_rows(pair_1, pair_2) |>
-        group_by(
-          pick(
-            c(idx_rsmp, any_of(c(names(config_neural), names(hypers_cpm))))
-          )
-        ) |>
         summarise(
           across(
-            any_of(names(edge_types)),
+            any_of(names(model_types)),
             list(
               dice = ~ calc_mask_dice(
                 .x,
@@ -137,7 +128,9 @@ mask_dices <- tarchetypes::tar_map(
               )
             )
           ),
-          .groups = "drop"
+          .by = any_of(
+            c("idx_rsmp", names(config), names(hypers_cpm))
+          )
         ),
       values = dplyr::bind_rows(
         data.frame(
@@ -178,7 +171,7 @@ list(
       data_names,
       var_exp,
       scores_g,
-      cpm_pred_reg_nosite
+      cpm_pred
     ),
     combine_targets,
     targets = g_invariance,
@@ -188,6 +181,6 @@ list(
   combine_targets(
     dice_mask_pairs,
     targets = mask_dices,
-    cols_targets = c("num_vars", "reg_covars")
+    cols_targets = "num_vars"
   )
 )

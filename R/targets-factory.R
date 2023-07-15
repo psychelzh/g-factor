@@ -85,9 +85,7 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'
 #' This will generate batches of CPM permutation for targets to use.
 #'
-#' @param config_neural A [data.frame()] storing the specifications of neural
-#'   data used. The `tar_neural` and `file` fields must be present to specify
-#'   which neural data to use.
+#' @param config A [data.frame()] storing the specifications of analysis.
 #' @param hypers_cpm A [data.frame()] storing the CPM hyper parameters passed to
 #'   the `values` argument of [tarchetypes::tar_map_rep()]. Note the names must
 #'   be consistent with the argument names of [do_cpm2()]. If this argument is
@@ -118,7 +116,7 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
 #'   If `hypers_cpm` is the not specified or is `NULL`, a list of targets
 #'   tracking neural data will be returned.
 #' @export
-prepare_permute_cpm2 <- function(config_neural,
+prepare_permute_cpm2 <- function(config,
                                  hypers_cpm = NULL,
                                  behav = NULL,
                                  ...,
@@ -129,15 +127,15 @@ prepare_permute_cpm2 <- function(config_neural,
                                  split_hyper = NULL,
                                  covars = NULL,
                                  batches = 4, reps = 5) {
-  config_neural_files <- config_file_tracking(config_neural, ...)
+  config_neural_files <- config_file_tracking(config, ...)
   file_targets <- tarchetypes::tar_eval(
-    tar_target(tar_neural, file, format = "file_fast"),
+    tar_target(name, file, format = "file_fast"),
     values = config_neural_files
   )
   if (missing(hypers_cpm) || is.null(hypers_cpm)) {
     return(file_targets)
   }
-  neural_parsed <- rlang::expr(arrow::read_feather(tar_neural))
+  neural_parsed <- rlang::expr(arrow::read_feather(name))
   if (!missing(subjs_subset)) {
     subjs_subset <- rlang::enexpr(subjs_subset)
     if (!is.null(subjs_subset)) {
@@ -203,7 +201,7 @@ prepare_permute_cpm2 <- function(config_neural,
       ),
       values = tidyr::expand_grid(config_neural_files, hypers_cpm),
       # `tar_neural` and `file` are constructed from other core elements
-      columns = rlang::expr(-c(tar_neural, file)),
+      columns = rlang::expr(-c(name, file)),
       batches = batches,
       reps = reps
     ),
@@ -221,7 +219,7 @@ prepare_permute_cpm2 <- function(config_neural,
             c(
               names(!!rlang::enexpr(behav)),
               # maybe see https://github.com/r-lib/rlang/issues/1629
-              names(!!substitute(config_neural)),
+              names(!!substitute(config)),
               names(!!substitute(hypers_cpm))
             )
           )
@@ -234,35 +232,50 @@ prepare_permute_cpm2 <- function(config_neural,
 
 # helper functions ----
 
-#' Configure file tracking for neural data
+#' Configure file tracking for data
 #'
-#' @param config A [data.frame()] storing the specifications of neural data
-#'   used.
-#' @param dir_neural A character scalar specifying the directory of neural data.
-#' @param tar_name_neural A character scalar specifying the name of the target
-#'   tracking the neural data. It is necessary to use different names for
-#'   different neural data in one project.
+#' @param config A [data.frame()] storing the specifications of data used.
+#' @param type A character scalar specifying the type of data. It can be either
+#'   `neural` or `behav`.
+#' @param label A character scalar specifying the label for the target tracking
+#'   data.
+#' @param return_symbol A logical value indicating if the returned target name
+#'   should a symbol or not.
 #' @param name_suffix A character scalar specifying the name suffix for the
 #'   targets. This will change the column names of the returned [data.frame()].
-#' @returns A new [data.frame()] with the `file` and `tar_neural` fields added.
+#' @returns Add two columns to `config` specifying the file name and the target
+#'   name for the data.
 #' @export
 config_file_tracking <- function(config,
-                                 dir_neural = "data/neural",
-                                 tar_name_neural = "file_neural",
+                                 type = c("neural", "behav"),
+                                 label = "file",
+                                 return_symbol = TRUE,
                                  name_suffix = "") {
-  config |>
-    dplyr::mutate(
-      "{paste0('file', name_suffix)}" := fs::path(
-        dir_neural,
-        sprintf(
-          "cond-%s_parcel-%s_filt-%s_gsr-%s_fc.arrow",
-          cond, parcel, filt, gsr
-        )
-      ),
-      "{paste0('tar_neural', name_suffix)}" := paste(
-        tar_name_neural, cond, parcel, filt, gsr,
-        sep = "_"
-      ) |>
-        rlang::syms()
+  type <- match.arg(type)
+  file_templates <- c(
+    neural = fs::path(
+      "data", "neural",
+      "cond-{cond}_parcel-{parcel}_gsr-{gsr}_acq-{acq}_fc.arrow"
+    ),
+    # TODO: not well suited for now
+    behav = fs::path(
+      "data", "behav",
+      "cond-{cond}_acq-{acq}_behav.arrow"
     )
+  )
+  tar_name_templates <- c(
+    neural = "{label}_neural_{cond}_{parcel}_{gsr}_{acq}",
+    behav = "{label}_behav_{cond}_{acq}"
+  )
+  col_file <- paste0('file', name_suffix)
+  col_name <- paste0('name', name_suffix)
+  out <- config |>
+    dplyr::mutate(
+      "{col_file}" := stringr::str_glue(file_templates[type]),
+      "{col_name}" := stringr::str_glue(tar_name_templates[type])
+    )
+  if (return_symbol) {
+    out[[col_name]] <- rlang::syms(out[[col_name]])
+  }
+  out
 }
