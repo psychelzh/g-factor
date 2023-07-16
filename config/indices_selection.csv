@@ -1,7 +1,7 @@
 ﻿task,index,selected,reversed
-AntiSac,pe,t,t
-AntiSac,mrt,t,t
-AntiSac,ies,f,t
+AntiSac,pe,f,t
+AntiSac,mrt,f,t
+AntiSac,ies,t,t
 CateSwitch,switch_cost_pe,f,t
 CateSwitch,switch_cost_mrt,f,t
 CateSwitch,switch_cost_ies,t,t
@@ -48,5 +48,5 @@ FM,fmt,f,t
 FM,crt,f,t
 Raven,score,f,f
 NUM6CPT,mrt,t,t
-NUM6CPT,dprime,f,f
+NUM6CPT,dprime,t,f
 VSPLOT24,nc,t,f
