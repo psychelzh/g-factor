@@ -132,16 +132,7 @@ mask_dices <- tarchetypes::tar_map(
             c("idx_rsmp", names(config), names(hypers_cpm))
           )
         ),
-      values = dplyr::bind_rows(
-        data.frame(
-          binarize_method = "value",
-          binarize_level = c(0.5, 0.8, 0.9, 0.95, 0.99, 0.995)
-        ),
-        data.frame(
-          binarize_method = "count",
-          binarize_level = seq(100, 1000, 100)
-        )
-      )
+      values = hypers_binarize
     )
   )
 )

@@ -25,6 +25,16 @@ hypers_cpm <- tidyr::expand_grid(
     )
   )
 )
+hypers_binarize <- dplyr::bind_rows(
+  data.frame(
+    binarize_method = "prob",
+    binarize_level = c(0.5, 0.8, 0.9, 0.95, 0.99, 0.995)
+  ),
+  data.frame(
+    binarize_method = "count",
+    binarize_level = seq(100, 1000, 100)
+  )
+)
 
 # scales for parameters ----
 # scales for demographic variables
