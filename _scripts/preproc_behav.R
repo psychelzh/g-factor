@@ -171,7 +171,13 @@ list(
   ),
   tar_target(
     mdl_fitted,
-    cfa(mdl_spec, indices_wider_clean, std.ov = TRUE, missing = "fiml")
+    cfa(
+      mdl_spec, indices_wider_clean,
+      missing = "ml",
+      orthogonal = TRUE,
+      std.ov = TRUE,
+      std.lv = TRUE
+    )
   ),
   tar_target(
     scores_latent,
