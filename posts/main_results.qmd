@@ -141,7 +141,7 @@ targets::tar_load(
   c(subjs_info_clean, indices_wider_clean, indices_clean),
   store = store_preproc_behav
 )
-targets::tar_load(subjs_combined, store = store_bench_cpm)
+subjs_combined <- scan(here::here(file_subjs_combined))
 descr_behav <- subjs_info_clean |>
   semi_join(indices_wider_clean, by = "sub_id") |>
   select(sub_id, age, sex) |>
