@@ -1,6 +1,9 @@
 #' Perform Connectome-based Predictive Modeling
 #'
 #' This is just a single run of the whole protocol (not including permutation).
+#' The number `2` in the function name is initially used to distinguish from the
+#' `cpm()` which is now removed, but the name will be kept for historical
+#' reasons.
 #'
 #' @param data A matrix contains connectome data. Observations in row, edges in
 #'   column (stretch upper triangular matrix).

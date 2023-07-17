@@ -45,6 +45,9 @@ behavior.
 }
 \description{
 This is just a single run of the whole protocol (not including permutation).
+The number \code{2} in the function name is initially used to distinguish from the
+\code{cpm()} which is now removed, but the name will be kept for historical
+reasons.
 }
 \author{
 Liang Zhang \href{mailto:psychelzh@outlook.com}{psychelzh@outlook.com}

@@ -144,6 +144,8 @@ get_store_path <- function(project) {
     here::here()
 }
 store_preproc_behav <- get_store_path("project_preproc_behav")
+store_preproc_neural <- get_store_path("project_preproc_neural")
+store_merge_subjects <- get_store_path("project_merge_subjects")
 store_bench_cpm <- get_store_path("project_bench_cpm")
 store_cpm_main <- get_store_path("project_cpm_main")
 store_task_selection <- get_store_path("project_task_selection")
