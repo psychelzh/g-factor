@@ -144,13 +144,6 @@ list(
   ),
   tar_target(indices_clean, clean_indices(indices, indices_selection)),
   tar_target(
-    indices_rapm,
-    indices |>
-      filter(task == "Raven", index == "score") |>
-      filter(!performance::check_outliers(score, method = "iqr")) |>
-      reshape_data_wider()
-  ),
-  tar_target(
     indices_wider,
     reshape_data_wider(indices_clean, name_score = "score_norm")
   ),
@@ -185,13 +178,6 @@ list(
     calc_comp_rel(fit_bifac)
   ),
   tar_target(
-    scores_bifac,
-    bind_cols(
-      select(indices_wider_clean, sub_id),
-      as_tibble(unclass(lavPredict(fit_bifac)))
-    )
-  ),
-  tar_target(
     fit_spearman,
     fit_g(indices_wider_clean, names(indices_wider_clean)[-1])
   ),
@@ -199,8 +185,23 @@ list(
     comp_rel_spearman,
     calc_comp_rel(fit_spearman)
   ),
+  # part IV: prepare all the scores ----
+  tar_target(
+    scores_bifac,
+    bind_cols(
+      select(indices_wider_clean, sub_id),
+      as_tibble(unclass(lavPredict(fit_bifac)))
+    )
+  ),
   tar_target(
     scores_spearman,
     predict_g_score(indices_wider_clean, fit_spearman)
+  ),
+  tar_target(
+    scores_rapm,
+    indices |>
+      filter(task == "Raven", index == "score") |>
+      filter(!performance::check_outliers(score, method = "iqr")) |>
+      reshape_data_wider()
   )
 )
