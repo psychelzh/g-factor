@@ -160,7 +160,7 @@ list(
   lapply(
     rlang::exprs(
       data_names,
-      var_exp,
+      comp_rel,
       scores_g,
       cpm_pred
     ),

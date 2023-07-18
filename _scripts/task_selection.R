@@ -45,7 +45,7 @@ task_selection <- tarchetypes::tar_map(
     include_g_fitting(
       indices_wider_clean,
       data_names,
-      include_var_exp = FALSE
+      include_comp_rel = FALSE
     ),
     prepare_permute_cpm2(
       config, hypers_cpm, scores_g,

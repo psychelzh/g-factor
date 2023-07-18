@@ -32,12 +32,11 @@ combine_targets <- function(name, targets, cols_targets) {
 #' @param indices Raw behavior data.
 #' @param df_ov A [data.frame()] specifying observed variables in the field
 #'   `tasks`.
-#' @param include_var_exp A logical value indicating if `var_exp` should be
-#'   included. `var_exp` means the variance explained targets calculating the
-#'   variance explained by g factor.
+#' @param include_comp_rel A logical value indicating if `comp_rel` should be
+#'   included. `comp_rel` means the composite reliability of latent factors.
 #' @returns A list of new target objects to fit and extract g factor scores.
 #' @export
-include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
+include_g_fitting <- function(indices, df_ov, include_comp_rel = TRUE) {
   list(
     tar_target_raw(
       "mdl_fitted",
@@ -52,13 +51,13 @@ include_g_fitting <- function(indices, df_ov, include_var_exp = TRUE) {
         )
       )
     ),
-    if (include_var_exp) {
+    if (include_comp_rel) {
       tar_target_raw(
-        "var_exp",
+        "comp_rel",
         rlang::expr(
           mutate(
             mdl_fitted,
-            prop = map_dbl(mdl, calc_var_exp),
+            prop = map_dbl(mdl, calc_comp_rel),
             .keep = "unused"
           )
         ),

@@ -9,13 +9,20 @@ fit_g <- function(data, vars) {
   efa(data, ov.names = vars, std.ov = TRUE, missing = "ml")
 }
 
-#' Calculate the variance explained by g factor
+#' Calculate the composite reliability
 #'
-#' @param fit A fitted one-g factor model.
-#' @returns A numeric value indicating the variance explained by g factor.
+#' Note based on Flora (2020), we calculated omega reliability as the variance
+#' explained by g factor.
+#'
+#' @param fit A fitted factor model.
+#' @returns A numeric vector indicating the omega reliability of all the latent
+#'   factors.
 #' @export
-calc_var_exp <- function(fit) {
-  mean(loadings(fit)^2)
+calc_comp_rel <- function(fit) {
+  if (inherits(fit, "efaList")) {
+    fit <- fit$nf1
+  }
+  semTools::compRelSEM(fit)
 }
 
 #' Predict g factor scores

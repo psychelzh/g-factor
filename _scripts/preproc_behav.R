@@ -5,7 +5,6 @@ tar_option_set(
   packages = c("tidyverse", "lavaan"),
   memory = "transient",
   garbage_collection = TRUE,
-  error = "null",
   format = "qs",
 )
 
@@ -165,14 +164,15 @@ list(
   ),
   # part III: factor analysis ----
   tarchetypes::tar_file_read(
-    mdl_spec,
-    "config/behav.lavaan",
+    mdl_bifac,
+    "config/bifac.lavaan",
     read = readLines(!!.x)
   ),
   tar_target(
-    mdl_fitted,
+    fit_bifac,
     cfa(
-      mdl_spec, indices_wider_clean,
+      mdl_bifac,
+      indices_wider_clean,
       missing = "ml",
       orthogonal = TRUE,
       std.ov = TRUE,
@@ -180,46 +180,26 @@ list(
     )
   ),
   tar_target(
-    scores_latent,
+    comp_rel_bifac,
+    calc_comp_rel(fit_bifac)
+  ),
+  tar_target(
+    scores_bifac,
     bind_cols(
       select(indices_wider_clean, sub_id),
-      as_tibble(unclass(lavPredict(mdl_fitted)))
+      as_tibble(unclass(lavPredict(fit_bifac)))
     )
   ),
   tar_target(
-    var_exp_full,
-    calc_var_exp(mdl_fitted_full)
-  ),
-  tar_target(
-    mdl_fitted_full,
+    fit_spearman,
     fit_g(indices_wider_clean, names(indices_wider_clean)[-1])
   ),
   tar_target(
-    scores_g_full,
-    predict_g_score(indices_wider_clean, mdl_fitted_full)
+    comp_rel_spearman,
+    calc_comp_rel(fit_spearman)
   ),
   tar_target(
-    behav_main,
-    tribble(
-      ~idx, ~scores,
-      "g_full", scores_g_full,
-      "rapm", indices_rapm
-    )
-  ),
-  # part IV: regress out covariates ----
-  tar_target(
-    behav_main_resid,
-    behav_main |>
-      mutate(
-        scores = map(
-          scores,
-          ~ regress_covariates(
-            data = .,
-            subjs_info = subjs_covariates,
-            # FD is not included for now
-            covars = c("age", "sex")
-          )
-        )
-      )
+    scores_spearman,
+    predict_g_score(indices_wider_clean, fit_spearman)
   )
 )

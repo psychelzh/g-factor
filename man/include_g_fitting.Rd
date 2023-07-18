@@ -4,7 +4,7 @@
 \alias{include_g_fitting}
 \title{Fit and extract g factor scores}
 \usage{
-include_g_fitting(indices, df_ov, include_var_exp = TRUE)
+include_g_fitting(indices, df_ov, include_comp_rel = TRUE)
 }
 \arguments{
 \item{indices}{Raw behavior data.}
@@ -12,9 +12,8 @@ include_g_fitting(indices, df_ov, include_var_exp = TRUE)
 \item{df_ov}{A \code{\link[=data.frame]{data.frame()}} specifying observed variables in the field
 \code{tasks}.}
 
-\item{include_var_exp}{A logical value indicating if \code{var_exp} should be
-included. \code{var_exp} means the variance explained targets calculating the
-variance explained by g factor.}
+\item{include_comp_rel}{A logical value indicating if \code{comp_rel} should be
+included. \code{comp_rel} means the composite reliability of latent factors.}
 }
 \value{
 A list of new target objects to fit and extract g factor scores.
