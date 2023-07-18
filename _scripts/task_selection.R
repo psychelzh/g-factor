@@ -7,7 +7,7 @@ tar_option_set(
   garbage_collection = TRUE,
   storage = "worker",
   retrieval = "worker",
-  error = "null",
+  error = "abridge",
   format = "qs",
   controller = crew::crew_controller_local(
     name = "local",

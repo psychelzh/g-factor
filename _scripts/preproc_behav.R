@@ -5,7 +5,8 @@ tar_option_set(
   packages = c("tidyverse", "lavaan"),
   memory = "transient",
   garbage_collection = TRUE,
-  format = "qs",
+  error = "abridge",
+  format = "qs"
 )
 
 # targets globals ----
