@@ -120,7 +120,7 @@ prepare_permute_cpm2 <- function(config,
                                  behav = NULL,
                                  ...,
                                  subjs_subset = NULL,
-                                 name_suffix = "",
+                                 name_suffix = NULL,
                                  include_file_targets = TRUE,
                                  subjs_info = NULL,
                                  split_hyper = NULL,
@@ -181,9 +181,9 @@ prepare_permute_cpm2 <- function(config,
   # prepare additional arguments for `do_cpm2()` based on `hypers_cpm`
   name_args <- intersect(names(formals(do_cpm2)), names(hypers_cpm))
   args_cpm <- setNames(rlang::syms(name_args), name_args)
-  name_result_cpm <- paste0("result_cpm", name_suffix)
-  name_cpm_pred <- paste0("cpm_pred", name_suffix)
-  name_brain_mask <- paste0("brain_mask", name_suffix)
+  name_result_cpm <- paste(c("result_cpm", name_suffix), collapse = "_")
+  name_cpm_pred <- paste(c("cpm_pred", name_suffix), collapse = "_")
+  name_brain_mask <- paste(c("brain_mask", name_suffix), collapse = "_")
   list(
     if (include_file_targets) file_targets,
     tarchetypes::tar_map_rep_raw(

@@ -10,7 +10,7 @@ prepare_permute_cpm2(
   behav = NULL,
   ...,
   subjs_subset = NULL,
-  name_suffix = "",
+  name_suffix = NULL,
   include_file_targets = TRUE,
   subjs_info = NULL,
   split_hyper = NULL,
