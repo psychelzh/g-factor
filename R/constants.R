@@ -126,7 +126,7 @@ scale_meas_trait <- list(
 
 # scales for binarize parameters
 binarize_methods <- c(
-  value = "Minimal Proportion",
+  prob = "Minimal Proportion",
   count = "Top N Edges"
 )
 scale_binarize_methods <- list(
