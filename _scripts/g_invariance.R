@@ -88,6 +88,7 @@ g_invariance <- tarchetypes::tar_map(
   ),
   prepare_permute_cpm2(
     config, hypers_cpm, scores_g,
+    include_file_targets = FALSE,
     subjs_subset = subjs_combined,
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
@@ -156,6 +157,7 @@ list(
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
+  prepare_permute_cpm2(config),
   g_invariance,
   lapply(
     rlang::exprs(
