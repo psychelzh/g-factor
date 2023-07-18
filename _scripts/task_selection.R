@@ -60,13 +60,13 @@ task_selection <- tarchetypes::tar_map(
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
-    mdl_fitted_full,
-    fs::path(store_preproc_behav, "objects", "mdl_fitted_full"),
+    fit_spearman,
+    fs::path(store_preproc_behav, "objects", "fit_spearman"),
     read = qs::qread(!!.x)
   ),
   tar_target(
     data_names_ordered, {
-      loadings_mdl <- loadings(mdl_fitted_full)
+      loadings_mdl <- loadings(fit_spearman)
       rownames(loadings_mdl)[order(loadings_mdl, decreasing = TRUE)]
     }
   ),
@@ -101,7 +101,7 @@ list(
     hypers_cpm,
     scores_single,
     subjs_subset = subjs_combined,
-    name_suffix = "_single",
+    name_suffix = "single",
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
   ),
