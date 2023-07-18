@@ -28,8 +28,8 @@ data_subjs <- tarchetypes::tar_map(
 # targets pipeline ----
 list(
   tarchetypes::tar_file_read(
-    behav_main,
-    fs::path(store_preproc_behav, "objects", "behav_main"),
+    indices_wider_clean,
+    fs::path(store_preproc_behav, "objects", "indices_wider_clean"),
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_eval(
@@ -52,11 +52,7 @@ list(
   ),
   tar_target(
     subjs_combined,
-    intersect(
-      subjs_neural,
-      with(behav_main, scores[idx == "g_full"])[[1]]$sub_id
-    ) |>
-      sort()
+    sort(intersect(subjs_neural, indices_wider_clean$sub_id))
   ),
   tar_target(
     subjs_combined_file,
