@@ -20,6 +20,19 @@ tar_option_set(
 tar_source()
 future::plan(future.callr::callr)
 
+config <- config |>
+  dplyr::filter(
+    acq == "reg",
+    cond == "nbackrun1",
+    parcel == "nn268",
+    gsr == "with"
+  )
+hypers_cpm <- hypers_cpm |>
+  dplyr::filter(
+    thresh_method == "alpha",
+    thresh_level == 0.01
+  )
+
 cpm_main <- tarchetypes::tar_map(
   values = list(trait = names(meas_trait)),
   list(
@@ -29,7 +42,7 @@ cpm_main <- tarchetypes::tar_map(
       read = qs::qread(!!.x)
     ),
     prepare_permute_cpm2(
-      dplyr::filter(config, acq == "reg"),
+      config,
       hypers_cpm,
       # bifactor model gives more than 1 score, keep the first only
       tibble::tibble(scores = list(behav[, 1:2])),
@@ -53,7 +66,7 @@ list(
     file_subjs_combined,
     read = scan(!!.x)
   ),
-  prepare_permute_cpm2(dplyr::filter(config, acq == "reg")),
+  prepare_permute_cpm2(config),
   cpm_main,
   lapply(
     rlang::exprs(
