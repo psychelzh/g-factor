@@ -115,9 +115,9 @@ scale_model_types <- list(
 
 # scales for behavioral parameters
 meas_trait <- c(
-  scores_bifac = "GCA",
-  scores_spearman = "GCA (Spearman)",
-  scores_rapm = "RAPM"
+  bifac = "GCA",
+  spearman = "GCA (Spearman)",
+  rapm = "RAPM"
 )
 scale_meas_trait <- list(
   name = "Trait Measure",

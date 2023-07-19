@@ -34,11 +34,15 @@ hypers_cpm <- hypers_cpm |>
   )
 
 cpm_main <- tarchetypes::tar_map(
-  values = list(trait = names(meas_trait)),
+  values = tibble::tibble(
+    trait = names(meas_trait),
+    name_scores = paste0("scores_", trait),
+  ),
+  names = trait,
   list(
     tarchetypes::tar_file_read(
       behav,
-      fs::path(store_preproc_behav, "objects", trait),
+      fs::path(store_preproc_behav, "objects", name_scores),
       read = qs::qread(!!.x)
     ),
     prepare_permute_cpm2(
