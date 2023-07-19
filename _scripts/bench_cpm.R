@@ -40,7 +40,7 @@ list(
   prepare_permute_cpm2(
     dplyr::filter(config, acq == "reg"),
     hypers_cpm,
-    tibble::tibble(scores = scores_rapm),
+    tibble::tibble(scores = list(scores_rapm)),
     subjs_subset = subjs_combined,
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
