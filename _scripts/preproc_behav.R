@@ -6,7 +6,12 @@ tar_option_set(
   memory = "transient",
   garbage_collection = TRUE,
   error = "abridge",
-  format = "qs"
+  format = "qs",
+  controller = crew::crew_controller_local(
+    name = "local",
+    workers = 8,
+    seconds_idle = 60
+  )
 )
 
 # targets globals ----
@@ -174,12 +179,23 @@ list(
     )
   ),
   tar_target(
+    fit_meas_bifac,
+    fitMeasures(fit_bifac) |>
+      unclass() |>
+      as_tibble_row()
+  ),
+  tar_target(
     comp_rel_bifac,
     calc_comp_rel(fit_bifac)
   ),
   tar_target(
     fit_spearman,
     fit_g(indices_wider_clean, names(indices_wider_clean)[-1])
+  ),
+  tar_target(
+    fit_meas_spearman,
+    fitMeasures(fit_spearman)[, 1] |>
+      as_tibble_row()
   ),
   tar_target(
     comp_rel_spearman,
