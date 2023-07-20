@@ -35,14 +35,10 @@ calc_comp_rel <- function(fit) {
 #' @export
 predict_g_score <- function(data, mdl, id_cols = 1) {
   g <- lavPredict(mdl)[, 1]
-  data_names <- rownames(loadings(mdl))
-  for (data_name in data_names) {
-    test <- cor.test(g, data[[data_name]], use = "pairwise")
-    # if g is anti-correlated significantly with any ov, inverse it
-    if (test$estimate < 0 && test$p.value < 0.05) {
-      g <- -g
-      break
-    }
+  # inverse g if anti-correlated with the largest loading variable
+  name_max_loading <- rownames(loadings(mdl))[which.max(abs(loadings(mdl)))]
+  if (cor(g, data[[name_max_loading]], use = "pairwise") < 0) {
+    g <- -g
   }
   add_column(data[, id_cols], g = g)
 }
