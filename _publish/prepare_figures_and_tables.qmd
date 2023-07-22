@@ -173,26 +173,9 @@ bind_rows(
 ```
 
 ```{r}
-#| label: estimation-results
+#| label: influence-on-reliabilty-validity
 
-cor_rapm_gca <- tar_read(scores_bifac, store = store_preproc_behav) |>
-  inner_join(
-    tar_read(scores_rapm, store = store_preproc_behav),
-    by = "sub_id"
-  ) |>
-  summarise(r = cor(g, RAPM, use = "pairwise"), r_fisher = atanh(r))
-cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
-  unnest(scores) |>
-  inner_join(
-    tar_read(scores_rapm, store = store_preproc_behav),
-    by = "sub_id"
-  ) |>
-  summarise(
-    r = cor(g, RAPM, use = "pairwise"),
-    r_fisher = atanh(r),
-    .by = c(num_vars, id_pairs, idx_rsmp)
-  )
-
+# composite reliability
 p_comp_rel <- tar_read(comp_rel, store = store_g_invariance) |>
   ggplot(aes(num_vars, prop, group = factor(num_vars))) +
   # geom_violin() +
@@ -216,6 +199,31 @@ datasummary(
   output = fs::path(path_ms_tbl, "com_rel.xlsx")
 )
 
+cor_rapm_gca <- tar_read(scores_bifac, store = store_preproc_behav) |>
+  inner_join(
+    tar_read(scores_rapm, store = store_preproc_behav),
+    by = "sub_id"
+  ) |>
+  summarise(r = cor(g, RAPM, use = "pairwise"), r_fisher = atanh(r))
+cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
+  unnest(scores) |>
+  inner_join(
+    tar_read(scores_rapm, store = store_preproc_behav),
+    by = "sub_id"
+  ) |>
+  summarise(
+    r = cor(g, RAPM, use = "pairwise"),
+    r_fisher = atanh(r),
+    .by = c(num_vars, id_pairs, idx_rsmp)
+  )
+datasummary(
+  Factor(num_vars) ~ r * (Mean + SD + Min + Max),
+  cor_rapm_sampled,
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "cor_rapm_sampled.xlsx")
+)
+
+# pairwise correlation and correlation with RAPM
 p_cor_ramp <- cor_rapm_sampled |>
   ggplot(aes(num_vars, r)) +
   ggdist::stat_slabinterval() +
