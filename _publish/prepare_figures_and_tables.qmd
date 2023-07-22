@@ -69,60 +69,135 @@ targets::tar_load(indices_wider_clean, store = store_preproc_behav)
 targets::tar_load(indices_clean, store = store_preproc_behav)
 dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
 
-p <- indices_wider_clean |>
+indices <- dims |> 
+  left_join(
+    indices_clean |> 
+      semi_join(indices_wider_clean, by = "sub_id") |> 
+      mutate(n_indices = n_distinct(index), .by = disp_name) |> 
+      mutate(
+        task_index = if_else(
+          n_indices == 2, 
+          str_c(disp_name, ".", index),
+          disp_name
+        )
+      ),
+    by = "task_index"
+  ) 
+indices |> 
+  reframe(
+    psych::describe(score),
+    .by = c(disp_name, index, dim)
+  ) |> 
+  select(
+    dim, disp_name, index, 
+    n, mean, sd, min, max,
+    skew, kurtosis
+  ) |> 
+  mutate(across(where(is.numeric), ~ round(., 2))) |> 
+  writexl::write_xlsx(fs::path(path_ms_tbl, "stats_desc.xlsx"))
+p_hist <- indices |> 
+  ggplot(aes(score)) +
+  geom_histogram() +
+  facet_wrap(~ task_index, scales = "free_x") +
+  ggpubr::theme_pubr()
+ggsave(fs::path(path_ms_fig, "hist_all_tasks.png"), p_hist, width = 10, height = 8)
+```
+
+```{r}
+#| label: cfa-statistics
+
+targets::tar_load(indices_wider_clean, store = store_preproc_behav)
+dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
+
+p_miss <- indices_wider_clean |> 
+  select(-sub_id) |> 
+  naniar::vis_miss() +
+  theme(axis.text.x = element_text(angle = 90))
+ggsave(fs::path(path_ms_fig, "missing_pattern.png"), p_miss, width = 8, height = 6)
+
+p_corrmat <- indices_wider_clean |>
   select(-sub_id) |>
   ggstatsplot::ggcorrmat(
     cor.vars = all_of(dims$task_index),
-    # package = "viridisLite", palette = "turbo", colors = NULL,
     colors = c("#084594", "white", "#99000D"),
     pch = "",
     ggcorrplot.args = list(pch.cex = 2, lab_size = 2)
   ) +
   scale_x_discrete(position = "top") +
-  # scale_y_discrete(limits = rev) +
   theme(axis.text.x.top = element_text(hjust = 0), aspect.ratio = 1)
-ggsave(fs::path(path_ms_fig, "task_corrs_new.png"), p, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "cfa_task_corrs.pdf"), p_corrmat, width = 8, height = 6)
 
-# get the original scores
-# ragg::agg_png(fs::path(path_ms_fig, "task_corrs.png"), width = 960, height = 960, res = 90)
-# indices_wider_clean |>
-#   select(-sub_id) |>
-#   cor(use = "pairwise") |>
-#   corrplot::corrplot(
-#     method = "shade",
-#     order = "hclust",
-#     col = colorRampPalette(c("blue", "white", "red"))(200)
-#   )
-# dev.off()
+vss_stats <- psych::vss(indices_wider_clean, n = 10, plot = FALSE)
+p_nfact <- vss_stats$vss.stats |> 
+  as_tibble(rownames = "n_fact") |> 
+  mutate(n_fact = as.integer(n_fact)) |> 
+  ggplot(aes(n_fact, eBIC)) + 
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(
+    name = "Number of factors", 
+    breaks = scales::breaks_width(2)
+  ) +
+  scale_y_continuous(
+    name = "Empirical BIC"
+  ) +
+  ggpubr::theme_pubr()
+ggsave(fs::path(path_ms_fig, "cfa_nfact.pdf"), p_nfact, width = 8, height = 6)
+
+tar_load(fit_bifac, store = store_preproc_behav)
+cairo_pdf(
+  filename = fs::path(path_ms_fig, "cfa_struct_bifac.pdf"), 
+  width = 16, height = 6
+)
+semPlot::semPaths(
+  fit_bifac,
+  whatLabels = "std",
+  layout = "tree2",
+  intercepts = FALSE,
+  bifactor = "g",
+  nCharNodes = 0,
+  sizeMan = 3.5,
+  edge.label.cex = 0.4,
+  exoCov = FALSE,
+  residuals = FALSE
+)
+dev.off()
+
+bind_rows(
+  spearman = tar_read(fit_meas_spearman, store = store_preproc_behav),
+  bifactor = tar_read(fit_meas_bifac, store = store_preproc_behav),
+  .id = "model"
+) |>
+  select(model, CFI = cfi, RMSEA = rmsea, SRMR = srmr, BIC = bic) |>
+  writexl::write_xlsx(fs::path(path_ms_tbl, "fit_meas.xlsx"))
 ```
 
 ```{r}
 #| label: estimation-results
 
-targets::tar_load(var_exp, store = store_g_invariance)
-targets::tar_load(var_exp_full, store = store_preproc_behav)
-targets::tar_load(scores_g, store = store_g_invariance)
-targets::tar_load(
-  c(scores_g_full, indices_rapm),
-  store = store_preproc_behav
-)
-cor_rapm_full <- scores_g_full |>
-  inner_join(indices_rapm, by = "sub_id") |>
+cor_rapm_gca <- tar_read(scores_bifac, store = store_preproc_behav) |>
+  inner_join(
+    tar_read(scores_rapm, store = store_preproc_behav),
+    by = "sub_id"
+  ) |>
   summarise(cor = cor(g, RAPM, use = "pairwise"))
-cor_rapm_sampled <- scores_g |>
+cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
   unnest(scores) |>
-  inner_join(indices_rapm, by = "sub_id") |>
+  inner_join(
+    tar_read(scores_rapm, store = store_preproc_behav),
+    by = "sub_id"
+  ) |>
   summarise(
     cor = cor(g, RAPM, use = "pairwise"),
     .by = c(num_vars, id_pairs, idx_rsmp)
   )
 
-p_var_exp <- var_exp |>
+p_comp_rel <- tar_read(comp_rel, store = store_g_invariance) |>
   ggplot(aes(num_vars, prop, group = factor(num_vars))) +
   # geom_violin() +
   geom_boxplot() +
   geomtextpath::geom_texthline(
-    yintercept = var_exp_full,
+    yintercept = tar_read(comp_rel_bifac, store = store_preproc_behav)[[1]],
     linetype = "dotted",
     hjust = 0,
     color = "black",
@@ -131,13 +206,13 @@ p_var_exp <- var_exp |>
   scale_x_continuous(breaks = scales::breaks_width(3)) +
   ggpubr::theme_pubr() +
   labs(x = "Number of Tasks", y = "Variance Explained")
-ggsave(fs::path(path_ms_fig, "var_exp.png"), p_var_exp, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "com_rel.png"), p_comp_rel, width = 8, height = 6)
 
 datasummary(
   Factor(num_vars) ~ prop * (Mean + SD + Min + Max),
-  var_exp,
+  tar_read(comp_rel, store = store_g_invariance),
   fmt = 3,
-  output = fs::path(path_ms_tbl, "var_exp.xlsx")
+  output = fs::path(path_ms_tbl, "com_rel.xlsx")
 )
 
 p_cor_ramp <- cor_rapm_sampled |>
@@ -145,7 +220,7 @@ p_cor_ramp <- cor_rapm_sampled |>
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
   geomtextpath::geom_texthline(
-    yintercept = cor_rapm_full$cor,
+    yintercept = cor_rapm_gca$cor,
     hjust = 0,
     linetype = "dashed",
     color = "black",
@@ -154,7 +229,7 @@ p_cor_ramp <- cor_rapm_sampled |>
   scale_x_continuous(breaks = scales::breaks_width(3)) +
   ggpubr::theme_pubr() +
   labs(x = "Number of Tasks", y = "Correlation with RAPM")
-p_rel <- scores_g |>
+p_rel <- tar_read(scores_g, store = store_g_invariance) |>
   group_by(num_vars, idx_rsmp) |>
   filter(n() == 2) |>
   summarise(
@@ -183,7 +258,6 @@ targets::tar_load(
 
 pred_hypers <- cpm_pred |>
   filter(
-    idx == "rapm",
     cond == "nbackrun1",
     gsr == "with"
   ) |>
@@ -194,31 +268,24 @@ pred_hypers <- cpm_pred |>
   )
 pred_cond <- cpm_pred |>
   filter(
-    idx == "rapm",
     thresh_method == "alpha",
     thresh_level == 0.01
   ) |>
-  # pivot_longer(
-  #   all_of(names(model_types)),
-  #   names_to = "model_type",
-  #   values_to = "estimate"
-  # ) |>
   mutate(
     cond = factor(cond, names(conds)),
     parcel = factor(parcel, names(parcels)),
-    # model_types = factor(model_type, names(model_types)),
     gsr = factor(gsr, names(gsrs))
   )
 
 p_hypers_cpm <- pred_hypers |>
   ggplot(aes(factor(thresh_level), all, fill = parcel)) +
   geom_boxplot() +
-  # stat_summary(size = 0.2) +
-  # stat_summary(aes(group = parcel), geom = "line") +
   scale_x_discrete(name = "Threshold Level") +
   rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
-  scale_y_continuous(name = "CPM Performance", breaks = scales::breaks_width(0.02)) +
-  # guides(fill = guide_legend(nrow = 1)) +
+  scale_y_continuous(
+    name = "CPM Performance",
+    breaks = scales::breaks_width(0.02)
+  ) +
   facet_grid(
     cols = vars(thresh_method),
     labeller = labeller(
@@ -226,27 +293,16 @@ p_hypers_cpm <- pred_hypers |>
     ),
     scales = "free_x"
   ) +
-  # guide_common +
   ggpubr::theme_pubr()
 p_cond <- pred_cond |>
-  # filter(model_type == "all") |>
   ggplot(aes(cond, all, fill = parcel)) +
-  # stat_summary(size = 0.2) +
-  # stat_summary(aes(group = parcel), geom = "line") +
   geom_boxplot() +
-  # ggdist::stat_dots(position = position_dodge(width = 0.4), side = "left") +
-  # ggdist::stat_slabinterval(position = position_dodge(width = 0.4)) +
   rlang::exec(scale_x_discrete, !!!scale_conds) +
   scale_y_continuous(name = "CPM Performance") +
-  # rlang::exec(scale_color_brewer, !!!scale_parcels, palette = "Dark2", aesthetics = "fill") +
   rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
   facet_grid(
-    # rows = vars(model_type),
     cols = vars(gsr),
-    labeller = labeller(
-      # model_type = model_types,
-      gsr = gsrs
-    )
+    labeller = labeller(gsr = gsrs)
   ) +
   ggpubr::theme_pubr()
 p <- p_hypers_cpm / p_cond +
@@ -258,16 +314,12 @@ ggsave(fs::path(path_ms_fig, "bench_cpm_with_parcels.png"), p, width = 8, height
 p_hypers_cpm <- pred_hypers |>
   filter(parcel == "nn268") |>
   ggplot(aes(factor(thresh_level), all)) +
-  geom_boxplot() +
-  # stat_summary(size = 0.2) +
-  # stat_summary(aes(group = parcel), geom = "line") +
+  geom_boxplot(width = 0.4) +
   scale_x_discrete(name = "Threshold Level") +
-  # rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
   scale_y_continuous(
     name = "CPM Performance",
     breaks = scales::breaks_width(0.02)
   ) +
-  # guides(fill = guide_legend(nrow = 1)) +
   facet_grid(
     cols = vars(thresh_method),
     labeller = labeller(
@@ -275,28 +327,19 @@ p_hypers_cpm <- pred_hypers |>
     ),
     scales = "free_x"
   ) +
-  # guide_common +
   ggpubr::theme_pubr()
 p_cond <- pred_cond |>
   filter(parcel == "nn268") |>
-  # filter(model_type == "all") |>
   ggplot(aes(cond, all)) +
-  # stat_summary(size = 0.2) +
-  # stat_summary(aes(group = parcel), geom = "line") +
-  geom_boxplot() +
-  # ggdist::stat_dots(position = position_dodge(width = 0.4), side = "left") +
-  # ggdist::stat_slabinterval(position = position_dodge(width = 0.4)) +
+  geom_boxplot(width = 0.4) +
   rlang::exec(scale_x_discrete, !!!scale_conds) +
-  scale_y_continuous(name = "CPM Performance") +
-  # rlang::exec(scale_color_brewer, !!!scale_parcels, palette = "Dark2", aesthetics = "fill") +
-  # rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
+  scale_y_continuous(
+    name = "CPM Performance",
+    breaks = scales::breaks_width(0.03)
+  ) +
   facet_grid(
-    # rows = vars(model_type),
     cols = vars(gsr),
-    labeller = labeller(
-      # model_type = model_types,
-      gsr = gsrs
-    )
+    labeller = labeller(gsr = gsrs)
   ) +
   ggpubr::theme_pubr()
 p <- p_hypers_cpm / p_cond +
@@ -487,7 +530,7 @@ brain_masks <- targets::tar_read(
 dice_simil <- brain_masks |>
   summarise(
     across(
-      any_of(names(model_types)), 
+      any_of(names(model_types)),
       \(mask) calc_mask_dice(
         mask,
         binarize_method = "value",
@@ -567,7 +610,7 @@ for col in range(2):
   cmap = plt.get_cmap(cmap)
   norm = matplotlib.colors.Normalize(vmin=0, vmax=vmax)
   cb = fig.colorbar(
-    matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axes[:, col], 
+    matplotlib.cm.ScalarMappable(norm=norm, cmap=cmap), ax=axes[:, col],
     orientation='horizontal', anchor=(0.5, 4),
     aspect=25, shrink=0.4, use_gridspec=True, pad=0
   )
@@ -594,7 +637,7 @@ for i, ax, title_row in zip(range(2), axes[:,0], title_rows):
 
 fig.set_size_inches(15, 6)
 fig.savefig(
-  os.path.join(r.path_ms_fig, "network-node-markers-cmbcb-prob.pdf"), 
+  os.path.join(r.path_ms_fig, "network-node-markers-cmbcb-prob.pdf"),
   dpi=100, bbox_inches='tight'
 )
 fig.clear
