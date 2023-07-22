@@ -180,7 +180,7 @@ cor_rapm_gca <- tar_read(scores_bifac, store = store_preproc_behav) |>
     tar_read(scores_rapm, store = store_preproc_behav),
     by = "sub_id"
   ) |>
-  summarise(cor = cor(g, RAPM, use = "pairwise"))
+  summarise(r = cor(g, RAPM, use = "pairwise"), r_fisher = atanh(r))
 cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
   unnest(scores) |>
   inner_join(
@@ -188,7 +188,8 @@ cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
     by = "sub_id"
   ) |>
   summarise(
-    cor = cor(g, RAPM, use = "pairwise"),
+    r = cor(g, RAPM, use = "pairwise"),
+    r_fisher = atanh(r),
     .by = c(num_vars, id_pairs, idx_rsmp)
   )
 
@@ -216,11 +217,11 @@ datasummary(
 )
 
 p_cor_ramp <- cor_rapm_sampled |>
-  ggplot(aes(num_vars, cor)) +
+  ggplot(aes(num_vars, r)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
   geomtextpath::geom_texthline(
-    yintercept = cor_rapm_gca$cor,
+    yintercept = cor_rapm_gca$r,
     hjust = 0,
     linetype = "dashed",
     color = "black",
@@ -246,6 +247,22 @@ p <- p_rel + p_cor_ramp +
   plot_layout(widths = c(1, 2)) +
   plot_annotation(tag_levels = "A")
 ggsave(fs::path(path_ms_fig, "task_influence_behav_only.png"), p, width = 8, height = 4)
+
+p_cor_ramp_fisher <- cor_rapm_sampled |>
+  ggplot(aes(num_vars, r_fisher)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  geomtextpath::geom_texthline(
+    yintercept = cor_rapm_gca$r_fisher,
+    hjust = 0,
+    linetype = "dashed",
+    color = "black",
+    label = "All"
+  ) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  ggpubr::theme_pubr() +
+  labs(x = "Number of Tasks", y = "Correlation with RAPM (Fisher Transformed)")
+ggsave(fs::path(path_ms_fig, "task_influence_fisher.png"), p_cor_ramp_fisher, width = 6, height = 4)
 ```
 
 ```{r}
