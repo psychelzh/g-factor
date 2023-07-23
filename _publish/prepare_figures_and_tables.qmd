@@ -397,13 +397,14 @@ preds_main <- targets::tar_read(
     cond == "nbackrun1",
     parcel == "nn268",
     gsr == "with",
+    trait %in% names(meas_trait),
     thresh_method == "alpha",
     thresh_level == 0.01
   ) |>
   summarise(
     estimate = average_correlation(all),
     .by = any_of(
-      c("idx", names(config), names(hypers_cpm))
+      c("trait", names(config), names(hypers_cpm))
     )
   )
 preds_sampled <- targets::tar_read(
@@ -424,21 +425,14 @@ p_pred_trend <- preds_sampled |>
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
   geom_hline(
-    aes(color = idx, yintercept = estimate),
+    aes(color = trait, yintercept = estimate),
     linetype = "dashed",
     preds_main
   ) +
-  # geomtextpath::geom_texthline(
-  #   aes(label = meas_trait[idx], yintercept = estimate, color = idx),
-  #   preds_main,
-  #   size = 2,
-  #   linetype = "dotted",
-  #   hjust = 0
-  # ) +
   scale_x_continuous(breaks = scales::breaks_width(3)) +
   rlang::exec(
-    scale_color_viridis_d, !!!scale_meas_trait,
-    option = "H"
+    scale_colour_brewer, !!!scale_meas_trait,
+    palette = "Accent"
   ) +
   ggpubr::theme_pubr() +
   theme(legend.position = c(0.8, 0.2)) +
@@ -448,10 +442,10 @@ dice_clean <- targets::tar_read(
   dice_mask_pairs,
   store = store_g_invariance
 ) |>
-  mutate(dice_avg = (pos_dice + neg_dice) / 2) |>
+  mutate(dice_avg = tanh((atanh(pos_dice) + atanh(neg_dice)) / 2)) |>
   filter(
     parcel == "nn268",
-    binarize_method == "value",
+    binarize_method == "prob",
     binarize_level == 0.95,
     cond == "nbackrun1"
   )
@@ -469,13 +463,13 @@ p <- p_pred_trend + p_dice_avg +
 ggsave(fs::path(path_ms_fig, "pred_cpm_dice_avg.png"), p, width = 8, height = 4)
 
 datasummary(
-  Factor(num_vars) ~ estimate * (Mean + SD + Max + Min),
+  Factor(num_vars) ~ estimate * (Median + SD + Max + Min),
   preds_sampled,
   fs::path(path_ms_tbl, "preds_sampled_cpm.xlsx")
 )
 datasummary(
   Factor(num_vars) ~
-    dice_avg * (Mean + SD + Max + Min),
+    dice_avg * (Median + SD + Max + Min),
   dice_clean,
   fs::path(path_ms_tbl, "dice_clean.xlsx")
 )
