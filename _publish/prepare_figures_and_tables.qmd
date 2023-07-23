@@ -125,6 +125,7 @@ p_corrmat <- indices_wider_clean |>
   ) +
   scale_x_discrete(position = "top") +
   theme(axis.text.x.top = element_text(hjust = 0), aspect.ratio = 1)
+ggsave(fs::path(path_ms_fig, "cfa_task_corrs.png"), p_corrmat, width = 8, height = 6)
 ggsave(fs::path(path_ms_fig, "cfa_task_corrs.pdf"), p_corrmat, width = 8, height = 6)
 
 vss_stats <- psych::vss(indices_wider_clean, n = 10, plot = FALSE)
@@ -181,7 +182,7 @@ p_comp_rel <- tar_read(comp_rel, store = store_g_invariance) |>
   # geom_violin() +
   geom_boxplot() +
   geomtextpath::geom_texthline(
-    yintercept = tar_read(comp_rel_bifac, store = store_preproc_behav)[[1]],
+    yintercept = tar_read(comp_rel_spearman, store = store_preproc_behav),
     linetype = "dotted",
     hjust = 0,
     color = "black",
@@ -199,12 +200,29 @@ datasummary(
   output = fs::path(path_ms_tbl, "com_rel.xlsx")
 )
 
-cor_rapm_gca <- tar_read(scores_bifac, store = store_preproc_behav) |>
+# visualize pairwise correlation and correlation with RAPM
+rel_pairs <- tar_read(scores_g, store = store_g_invariance) |>
+  group_by(num_vars, idx_rsmp) |>
+  filter(n() == 2) |>
+  summarise(
+    r = cor(scores[[1]]$g, scores[[2]]$g, use = "pairwise"),
+    .groups = "drop"
+  )
+datasummary(
+  Factor(num_vars) ~ r * (Median + SD + Min + Max),
+  rel_pairs,
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "rel_pairs.xlsx")
+)
+cor_rapm_gca <- tar_read(scores_spearman, store = store_preproc_behav) |>
   inner_join(
     tar_read(scores_rapm, store = store_preproc_behav),
     by = "sub_id"
   ) |>
-  summarise(r = cor(g, RAPM, use = "pairwise"), r_fisher = atanh(r))
+  summarise(
+    r = cor(g, RAPM, use = "pairwise"), 
+    r_fisher = atanh(r)
+  )
 cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
   unnest(scores) |>
   inner_join(
@@ -217,13 +235,19 @@ cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
     .by = c(num_vars, id_pairs, idx_rsmp)
   )
 datasummary(
-  Factor(num_vars) ~ r * (Mean + SD + Min + Max),
+  Factor(num_vars) ~ r * (Median + SD + Min + Max),
   cor_rapm_sampled,
   fmt = 3,
   output = fs::path(path_ms_tbl, "cor_rapm_sampled.xlsx")
 )
 
-# pairwise correlation and correlation with RAPM
+p_rel <- rel_pairs |>
+  ggplot(aes(num_vars, r)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  ggpubr::theme_pubr() +
+  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
 p_cor_ramp <- cor_rapm_sampled |>
   ggplot(aes(num_vars, r)) +
   ggdist::stat_slabinterval() +
@@ -232,25 +256,13 @@ p_cor_ramp <- cor_rapm_sampled |>
     yintercept = cor_rapm_gca$r,
     hjust = 0,
     linetype = "dashed",
-    color = "black",
     label = "All"
   ) +
   scale_x_continuous(breaks = scales::breaks_width(3)) +
+  rlang::exec(scale_color_brewer, !!!scale_meas_trait, palette = "Accent") +
   ggpubr::theme_pubr() +
   labs(x = "Number of Tasks", y = "Correlation with RAPM")
-p_rel <- tar_read(scores_g, store = store_g_invariance) |>
-  group_by(num_vars, idx_rsmp) |>
-  filter(n() == 2) |>
-  summarise(
-    estimate = cor(scores[[1]]$g, scores[[2]]$g, use = "pairwise"),
-    .groups = "drop"
-  ) |>
-  ggplot(aes(num_vars, estimate)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  scale_x_continuous(breaks = scales::breaks_width(3)) +
-  ggpubr::theme_pubr() +
-  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
+
 p <- p_rel + p_cor_ramp +
   plot_layout(widths = c(1, 2)) +
   plot_annotation(tag_levels = "A")
