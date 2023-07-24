@@ -9,13 +9,20 @@ fit_g <- function(data, vars) {
   efa(data, ov.names = vars, std.ov = TRUE, missing = "ml")
 }
 
-#' Calculate the variance explained by g factor
+#' Calculate the composite reliability
 #'
-#' @param fit A fitted one-g factor model.
-#' @returns A numeric value indicating the variance explained by g factor.
+#' Note based on Flora (2020), we calculated omega reliability as the variance
+#' explained by g factor.
+#'
+#' @param fit A fitted factor model.
+#' @returns A numeric vector indicating the omega reliability of all the latent
+#'   factors.
 #' @export
-calc_var_exp <- function(fit) {
-  mean(loadings(fit)^2)
+calc_comp_rel <- function(fit) {
+  if (inherits(fit, "efaList")) {
+    fit <- fit$nf1
+  }
+  semTools::compRelSEM(fit)
 }
 
 #' Predict g factor scores
@@ -28,14 +35,10 @@ calc_var_exp <- function(fit) {
 #' @export
 predict_g_score <- function(data, mdl, id_cols = 1) {
   g <- lavPredict(mdl)[, 1]
-  data_names <- rownames(loadings(mdl))
-  for (data_name in data_names) {
-    test <- cor.test(g, data[[data_name]], use = "pairwise")
-    # if g is anti-correlated significantly with any ov, inverse it
-    if (test$estimate < 0 && test$p.value < 0.05) {
-      g <- -g
-      break
-    }
+  # inverse g if anti-correlated with the largest loading variable
+  name_max_loading <- rownames(loadings(mdl))[which.max(abs(loadings(mdl)))]
+  if (cor(g, data[[name_max_loading]], use = "pairwise") < 0) {
+    g <- -g
   }
   add_column(data[, id_cols], g = g)
 }

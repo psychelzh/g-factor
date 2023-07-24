@@ -7,22 +7,33 @@ Authors@R:
 Description: This is a mocking (not real) data analysis package for the G
     Factor analysis.
 License: MIT + file LICENSE
-Depends: 
+Depends:
     tidyverse
-Imports: 
+Imports:
     circlize,
     collapse,
     conflicted,
-    devtools,
+    DescTools,
     ggh4x,
     here,
     lavaan,
+    lme4,
+    performance,
+    pracma,
     proxy,
     qs,
+    rlang,
+    semTools,
     tarchetypes,
     targets
+Suggests:
+    colorspace,
+    corrplot,
+    crew,
+    devtools,
+    dm,
+    future,
+    future.callr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Suggests: 
-    crew

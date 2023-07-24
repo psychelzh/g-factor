@@ -7,7 +7,7 @@ tar_option_set(
   garbage_collection = TRUE,
   storage = "worker",
   retrieval = "worker",
-  error = "null",
+  error = "abridge",
   format = "qs",
   controller = crew::crew_controller_local(
     name = "local",
@@ -88,6 +88,7 @@ g_invariance <- tarchetypes::tar_map(
   ),
   prepare_permute_cpm2(
     config, hypers_cpm, scores_g,
+    include_file_targets = FALSE,
     subjs_subset = subjs_combined,
     subjs_info = subjs_covariates,
     covars = c("age", "sex")
@@ -132,16 +133,7 @@ mask_dices <- tarchetypes::tar_map(
             c("idx_rsmp", names(config), names(hypers_cpm))
           )
         ),
-      values = dplyr::bind_rows(
-        data.frame(
-          binarize_method = "value",
-          binarize_level = c(0.5, 0.8, 0.9, 0.95, 0.99, 0.995)
-        ),
-        data.frame(
-          binarize_method = "count",
-          binarize_level = seq(100, 1000, 100)
-        )
-      )
+      values = hypers_binarize
     )
   )
 )
@@ -165,11 +157,12 @@ list(
   ),
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
+  prepare_permute_cpm2(config),
   g_invariance,
   lapply(
     rlang::exprs(
       data_names,
-      var_exp,
+      comp_rel,
       scores_g,
       cpm_pred
     ),

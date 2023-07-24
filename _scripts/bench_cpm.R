@@ -7,7 +7,7 @@ tar_option_set(
   garbage_collection = TRUE,
   storage = "worker",
   retrieval = "worker",
-  error = "null",
+  error = "abridge",
   format = "qs",
   controller = crew::crew_controller_local(
     name = "local",
@@ -33,13 +33,14 @@ list(
     read = qs::qread(!!.x)
   ),
   tarchetypes::tar_file_read(
-    behav_main,
-    fs::path(store_preproc_behav, "objects", "behav_main"),
+    scores_rapm,
+    fs::path(store_preproc_behav, "objects", "scores_rapm"),
     read = qs::qread(!!.x)
   ),
   prepare_permute_cpm2(
     dplyr::filter(config, acq == "reg"),
-    hypers_cpm, behav_main,
+    hypers_cpm,
+    tibble::tibble(scores = list(scores_rapm)),
     subjs_subset = subjs_combined,
     subjs_info = subjs_covariates,
     covars = c("age", "sex")

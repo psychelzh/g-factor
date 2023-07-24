@@ -208,18 +208,20 @@ preproc_stopsignal <- function(data) {
 
 preproc_stroop <- function(data) {
   data |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(sum(acc == 1) > qbinom(0.95, n(), 0.25)) |>
-    ungroup() |>
-    tidytable::mutate(
-      char = tidytable::recode(
+    mutate(across(everything(), unname)) |>
+    filter(
+      sum(acc == 1) > qbinom(0.95, n(), 0.25),
+      .by = id_cols()
+    ) |>
+    mutate(
+      char = case_match(
         char,
-        红 = "r",
-        黄 = "y",
-        绿 = "g",
-        蓝 = "b"
+        "红" ~ "r",
+        "黄" ~ "y",
+        "绿" ~ "g",
+        "蓝" ~ "b"
       ),
-      type = tidytable::if_else(
+      type = if_else(
         color == char,
         "con",
         "inc"

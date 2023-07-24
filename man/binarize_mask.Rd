@@ -6,7 +6,7 @@
 \usage{
 binarize_mask(
   mask,
-  binarize_method = c("count", "value"),
+  binarize_method = c("prob", "count"),
   binarize_level = NULL
 )
 }
@@ -15,10 +15,10 @@ binarize_mask(
 original full mask.}
 
 \item{binarize_method}{A character string of binarization method, should be
-one of \code{"count"} and \code{"value"}.}
+one of \code{"prob"} and \code{"count"}.}
 
 \item{binarize_level}{A numeric value of binarization level, should be a
-number between 0 and 1 (default: \code{0.95}) if \code{binarize_method} is \code{"value"},
+number between 0 and 1 (default: \code{0.95}) if \code{binarize_method} is \code{"prob"},
 or a number between 1 and length of \code{mask} (default: \code{500}) if
 \code{binarize_method} is \code{"count"}.}
 }

@@ -5,7 +5,7 @@ TWOBACK,WM
 KPTRK,WM
 OSPAN,WM
 SSPAN,WM
-ANTI.pe,Inh
+ANTI,Inh
 STOPSIG,Inh
 STROOP,Inh
 NUMLET,Shf
@@ -16,6 +16,6 @@ SYMMEM,EM
 MST,EM
 SRT,Spd
 CRT,Spd
-PCPT,Spd
+PCPT.mrt,Spd
+PCPT.dprime,Spd
 PLOT,Spd
-ANTI.mrt,Spd

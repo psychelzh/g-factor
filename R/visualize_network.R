@@ -131,9 +131,9 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
 #' @returns See [corrplot::corrplot()].
 visualize_corrplot <- function(adj_mat, model_type, labels, ...,
                                which = "contrib",
-                               range = c(0, 100)) {
-  summarise_adjacency(adj_mat, labels) |>
-    mutate(val = scales::oob_squish(.data[[which]], range)) |>
+                               thresh = 1) {
+  stats <- summarise_adjacency(adj_mat, labels) |>
+    mutate(val = .data[[which]] * (.data[[which]] > thresh)) |>
     pivot_wider(
       id_cols = x,
       names_from = y,
@@ -142,14 +142,16 @@ visualize_corrplot <- function(adj_mat, model_type, labels, ...,
     ) |>
     arrange(x) |>
     column_to_rownames("x") |>
-    as.matrix() |>
-    corrplot::corrplot(
-      method = "shade",
-      type = "upper",
-      is.corr = FALSE,
-      col = corrplot::COL1(if (model_type == "pos") "Reds" else "Blues"),
-      ...
-    )
+    as.matrix()
+  corrplot::corrplot(
+    stats,
+    method = "shade",
+    type = "upper",
+    is.corr = FALSE,
+    col = corrplot::COL1(if (model_type == "pos") "Reds" else "Blues"),
+    col.lim = c(0, round(max(stats, na.rm = TRUE))),
+    ...
+  )
 }
 
 #' Prepare ROI information
