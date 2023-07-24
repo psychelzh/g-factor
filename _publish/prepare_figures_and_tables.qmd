@@ -43,7 +43,7 @@ arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
       )
       # add column and row annotations
       text_model_type <- model_types[[cur_adj_mat$model_type]]
-      text_meas_trait <- meas_trait[[cur_adj_mat$idx]]
+      text_meas_trait <- meas_trait[[cur_adj_mat$trait]]
       if (idx_row == 1) {
         add_custom_title(text_model_type, "column")
         if (idx_col == 1) {
@@ -69,33 +69,33 @@ targets::tar_load(indices_wider_clean, store = store_preproc_behav)
 targets::tar_load(indices_clean, store = store_preproc_behav)
 dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
 
-indices <- dims |> 
+indices <- dims |>
   left_join(
-    indices_clean |> 
-      semi_join(indices_wider_clean, by = "sub_id") |> 
-      mutate(n_indices = n_distinct(index), .by = disp_name) |> 
+    indices_clean |>
+      semi_join(indices_wider_clean, by = "sub_id") |>
+      mutate(n_indices = n_distinct(index), .by = disp_name) |>
       mutate(
         task_index = if_else(
-          n_indices == 2, 
+          n_indices == 2,
           str_c(disp_name, ".", index),
           disp_name
         )
       ),
     by = "task_index"
-  ) 
-indices |> 
+  )
+indices |>
   reframe(
     psych::describe(score),
     .by = c(disp_name, index, dim)
-  ) |> 
+  ) |>
   select(
-    dim, disp_name, index, 
+    dim, disp_name, index,
     n, mean, sd, min, max,
     skew, kurtosis
-  ) |> 
-  mutate(across(where(is.numeric), ~ round(., 2))) |> 
+  ) |>
+  mutate(across(where(is.numeric), ~ round(., 2))) |>
   writexl::write_xlsx(fs::path(path_ms_tbl, "stats_desc.xlsx"))
-p_hist <- indices |> 
+p_hist <- indices |>
   ggplot(aes(score)) +
   geom_histogram() +
   facet_wrap(~ task_index, scales = "free_x") +
@@ -109,8 +109,8 @@ ggsave(fs::path(path_ms_fig, "hist_all_tasks.png"), p_hist, width = 10, height =
 targets::tar_load(indices_wider_clean, store = store_preproc_behav)
 dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
 
-p_miss <- indices_wider_clean |> 
-  select(-sub_id) |> 
+p_miss <- indices_wider_clean |>
+  select(-sub_id) |>
   naniar::vis_miss() +
   theme(axis.text.x = element_text(angle = 90))
 ggsave(fs::path(path_ms_fig, "missing_pattern.png"), p_miss, width = 8, height = 6)
@@ -129,14 +129,14 @@ ggsave(fs::path(path_ms_fig, "cfa_task_corrs.png"), p_corrmat, width = 8, height
 ggsave(fs::path(path_ms_fig, "cfa_task_corrs.pdf"), p_corrmat, width = 8, height = 6)
 
 vss_stats <- psych::vss(indices_wider_clean, n = 10, plot = FALSE)
-p_nfact <- vss_stats$vss.stats |> 
-  as_tibble(rownames = "n_fact") |> 
-  mutate(n_fact = as.integer(n_fact)) |> 
-  ggplot(aes(n_fact, eBIC)) + 
+p_nfact <- vss_stats$vss.stats |>
+  as_tibble(rownames = "n_fact") |>
+  mutate(n_fact = as.integer(n_fact)) |>
+  ggplot(aes(n_fact, eBIC)) +
   geom_point() +
   geom_line() +
   scale_x_continuous(
-    name = "Number of factors", 
+    name = "Number of factors",
     breaks = scales::breaks_width(2)
   ) +
   scale_y_continuous(
@@ -147,7 +147,7 @@ ggsave(fs::path(path_ms_fig, "cfa_nfact.pdf"), p_nfact, width = 8, height = 6)
 
 tar_load(fit_bifac, store = store_preproc_behav)
 cairo_pdf(
-  filename = fs::path(path_ms_fig, "cfa_struct_bifac.pdf"), 
+  filename = fs::path(path_ms_fig, "cfa_struct_bifac.pdf"),
   width = 16, height = 6
 )
 semPlot::semPaths(
@@ -220,7 +220,7 @@ cor_rapm_gca <- tar_read(scores_spearman, store = store_preproc_behav) |>
     by = "sub_id"
   ) |>
   summarise(
-    r = cor(g, RAPM, use = "pairwise"), 
+    r = cor(g, RAPM, use = "pairwise"),
     r_fisher = atanh(r)
   )
 cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
@@ -554,20 +554,10 @@ brain_masks <- targets::tar_read(
   store = store_cpm_main
 ) |>
   filter(
+    trait %in% names(meas_trait),
     cond == "nbackrun1", gsr == "with", acq == "reg",
     thresh_method == "alpha", thresh_level == 0.01,
     parcel == "nn268"
-  )
-dice_simil <- brain_masks |>
-  summarise(
-    across(
-      any_of(names(model_types)),
-      \(mask) calc_mask_dice(
-        mask,
-        binarize_method = "value",
-        binarize_level = 0.95
-      )
-    )
   )
 roi_info <- prepare_roi_info(readRDS(here::here("data/atlases/Shen268.rds")))
 roi_coords <- as.matrix(select(roi_info, contains("mni")))
@@ -581,7 +571,7 @@ adj_mat_pool <- brain_masks |>
     adj_mat = map(
       mask,
       prepare_adjacency,
-      binarize_method = "value",
+      binarize_method = "prob",
       binarize_level = 0.95,
       diagonal = 0
     ),
@@ -596,7 +586,7 @@ adj_mat_pool <- brain_masks |>
     .keep = "unused"
   ) |>
   mutate(
-    row = as.integer(factor(idx, names(meas_trait))),
+    row = as.integer(factor(trait, names(meas_trait))),
     col = as.integer(droplevels(factor(model_type, names(model_types))))
   )
 ```
@@ -707,6 +697,19 @@ dev.off()
 ```
 
 ```{r}
+#| label: misc-stats-brain-mask
+
+dice_simil <- brain_masks |>
+  summarise(
+    across(
+      any_of(names(model_types)),
+      \(mask) calc_mask_dice(
+        mask,
+        binarize_method = "prob",
+        binarize_level = 0.95
+      )
+    )
+  )
 adj_mat_pool |>
   summarise(
     cor.test(node_degree[[1]], node_degree[[2]], method = "spearman", exact = FALSE) |>
@@ -719,15 +722,6 @@ adj_mat_pool |>
       broom::tidy(),
     .by = idx
   )
-
-# adj_mat_pool |>
-#   select(idx, model_type, node_degree) |>
-#   unchop(node_degree) |>
-#   mutate(index = row_number(), .by = c(idx, model_type)) |>
-#   left_join(select(roi_info, index, hemi), by = "index") |>
-#   summarise(
-#     cor.test(node_degree[hemi == "left"], node_degree[hemi == "right"])
-#   )
 
 node_degrees <- adj_mat_pool |>
   select(idx, model_type, node_degree) |>
