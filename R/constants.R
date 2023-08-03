@@ -115,8 +115,14 @@ scale_model_types <- list(
 
 # scales for behavioral parameters
 meas_trait <- c(
-  spearman = "GCA",
+  spearman = "GCA-S",
+  bifac = "GCA-B",
   rapm = "RAPM"
+)
+color_traits <- c(
+  spearman = "#1b9e77",
+  bifac = "#d95f02",
+  rapm = "#7570b3"
 )
 scale_meas_trait <- list(
   name = "Trait Measure",
