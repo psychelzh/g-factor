@@ -133,7 +133,13 @@ visualize_corrplot <- function(adj_mat, model_type, labels, ...,
                                which = "contrib",
                                thresh = 1) {
   stats <- summarise_adjacency(adj_mat, labels) |>
-    mutate(val = .data[[which]] * (.data[[which]] > thresh)) |>
+    mutate(
+      val = if_else(
+        .data[[which]] > thresh,
+        .data[[which]],
+        NA_real_
+      )
+    ) |>
     pivot_wider(
       id_cols = x,
       names_from = y,
@@ -149,7 +155,9 @@ visualize_corrplot <- function(adj_mat, model_type, labels, ...,
     type = "upper",
     is.corr = FALSE,
     col = corrplot::COL1(if (model_type == "pos") "Reds" else "Blues"),
-    col.lim = c(0, round(max(stats, na.rm = TRUE))),
+    col.lim = c(0, ceiling(max(stats, na.rm = TRUE))),
+    na.label = "square",
+    na.label.col = "white",
     ...
   )
 }
