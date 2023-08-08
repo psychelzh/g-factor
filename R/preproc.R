@@ -56,38 +56,18 @@ preproc_srt <- function(data) {
 }
 
 preproc_filtering <- function(data) {
-  data_clean <- data |>
-    # missing trials are treated as incorrect
-    mutate(acc = coalesce(acc, 0)) |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
-    mutate(grp_id = cur_group_id(), .before = 1L) |>
-    ungroup()
-  # this step is time consuming
-  fit <- lme4::glmer(
-    acc ~ n_distractor + (n_distractor | grp_id),
-    data_clean,
-    family = binomial()
-  )
-  slopes <- lme4::ranef(fit)$grp_id |>
-    as_tibble(rownames = "grp_id") |>
-    transmute(
-      grp_id = as.integer(grp_id),
-      filt_eff = n_distractor + lme4::fixef(fit)["n_distractor"]
-    )
-  capacity <- data_clean |>
-    filter(n_distractor == 0) |>
-    group_by(grp_id, rotated) |>
+  data |>
+    replace_na(list(acc = 0)) |>
+    filter(
+      sum(acc == 1) > qbinom(0.95, n(), 0.5),
+      .by = all_of(id_cols())
+    ) |>
+    group_by(pick(all_of(c(id_cols(), "rotated")))) |>
     summarise(
       pc = mean(acc == 1),
       .groups = "drop_last"
     ) |>
-    summarise(k = 2 * sum(pc))
-  data_clean |>
-    distinct(across(all_of(c("grp_id", id_cols())))) |>
-    inner_join(slopes, by = "grp_id") |>
-    inner_join(capacity, by = "grp_id") |>
-    select(-grp_id)
+    summarise(k = 2 * (sum(pc) - 1))
 }
 
 #' Long-term Memory
