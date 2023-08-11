@@ -428,7 +428,7 @@ preds_main <- targets::tar_read(
     gsr == "with",
     trait %in% names(meas_trait),
     thresh_method == "alpha",
-    thresh_level == 0.05
+    thresh_level == 0.01
   ) |>
   summarise(
     estimate = average_correlation(all),
