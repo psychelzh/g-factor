@@ -162,6 +162,7 @@ list(
       semi_join(subjs_info_clean, by = "sub_id")
   ),
   # part III: factor analysis ----
+  tar_target(data_subsamples, split_data_solomon(indices_wider_clean)),
   tarchetypes::tar_file_read(
     mdl_bifac,
     "config/bifac.lavaan",
@@ -171,7 +172,7 @@ list(
     fit_bifac,
     cfa(
       mdl_bifac,
-      indices_wider_clean,
+      data_subsamples[[2]],
       missing = "ml",
       orthogonal = TRUE,
       std.ov = TRUE,
@@ -206,7 +207,17 @@ list(
     scores_bifac,
     bind_cols(
       select(indices_wider_clean, sub_id),
-      as_tibble(unclass(lavPredict(fit_bifac)))
+      cfa(
+        mdl_bifac,
+        indices_wider_clean,
+        missing = "ml",
+        orthogonal = TRUE,
+        std.ov = TRUE,
+        std.lv = TRUE
+      ) |>
+        lavPredict() |>
+        unclass() |>
+        as_tibble()
     )
   ),
   tar_target(
