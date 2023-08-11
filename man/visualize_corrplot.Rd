@@ -10,7 +10,7 @@ visualize_corrplot(
   labels,
   ...,
   which = "contrib",
-  range = c(0, 100)
+  thresh = 1
 )
 }
 \arguments{
@@ -30,8 +30,9 @@ arguments are not allowed to be changed: \code{method}, \code{type}, \code{is.co
 \item{which}{A character string specifying which value to use. Can be
 \code{"degree"}, \code{"n"}, \code{"relative"} or \code{"contrib"}.}
 
-\item{range}{A numeric vector of length two specifying the range of the
-values to be visualized.}
+\item{thresh}{A numeric value specifying the threshold of the value to be
+visualized. If the value is less than the threshold, it will be set as
+\code{NA}.}
 }
 \value{
 See \code{\link[corrplot:corrplot]{corrplot::corrplot()}}.

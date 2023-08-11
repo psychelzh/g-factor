@@ -126,8 +126,9 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
 #'   rows/columns of the adjacency matrix.
 #' @param which A character string specifying which value to use. Can be
 #'   `"degree"`, `"n"`, `"relative"` or `"contrib"`.
-#' @param range A numeric vector of length two specifying the range of the
-#'   values to be visualized.
+#' @param thresh A numeric value specifying the threshold of the value to be
+#'   visualized. If the value is less than the threshold, it will be set as
+#'   `NA`.
 #' @returns See [corrplot::corrplot()].
 visualize_corrplot <- function(adj_mat, model_type, labels, ...,
                                which = "contrib",
