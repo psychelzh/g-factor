@@ -79,7 +79,7 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
           "(left|right)_"
         ),
         facing = "clockwise",
-        cex = 0.6,
+        cex = 1,
         adj = c(0, 0.5),
         niceFacing = TRUE
       )
