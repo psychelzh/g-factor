@@ -120,7 +120,7 @@ ggsave(fs::path(path_ms_fig, "hist_all_tasks.png"), p_hist, width = 12, height =
 ```{r}
 #| label: cfa-statistics
 
-targets::tar_load(indices_wider_clean, store = store_preproc_behav)
+targets::tar_load(data_subsamples, store = store_preproc_behav)
 dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
 
 p_miss <- indices_wider_clean |>
@@ -142,7 +142,9 @@ p_corrmat <- indices_wider_clean |>
 ggsave(fs::path(path_ms_fig, "cfa_task_corrs.png"), p_corrmat, width = 8, height = 6)
 ggsave(fs::path(path_ms_fig, "cfa_task_corrs.pdf"), p_corrmat, width = 8, height = 6)
 
-vss_stats <- psych::vss(indices_wider_clean, n = 10, plot = FALSE)
+vss_stats <- data_subsamples[[1]] |>
+  select(-sub_id) |>
+  psych::vss(n = 10, plot = FALSE)
 p_nfact <- vss_stats$vss.stats |>
   as_tibble(rownames = "n_fact") |>
   mutate(n_fact = as.integer(n_fact)) |>
@@ -203,7 +205,7 @@ bind_rows(
   bifactor = tar_read(fit_meas_bifac, store = store_preproc_behav),
   .id = "model"
 ) |>
-  select(model, CFI = cfi, RMSEA = rmsea, SRMR = srmr, BIC = bic) |>
+  select(model, df = df, RMSEA = rmsea, SRMR = srmr, CFI = cfi, TLI = tli) |>
   writexl::write_xlsx(fs::path(path_ms_tbl, "fit_meas.xlsx"))
 ```
 
