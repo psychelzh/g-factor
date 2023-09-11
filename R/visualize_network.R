@@ -216,10 +216,6 @@ prepare_adjacency <- function(mask, ..., value = c("binary", "frac"),
 
 #' Summarise adjacency matrix
 #'
-#' This will add labels to the adjacency matrix and summarise the adjacency
-#' matrix to get the degree, number of links, relative degree and contribution
-#' of each ROI.
-#'
 #' @param adj_mat A matrix of adjacency.
 #' @param labels A vector of labels. Must have the same length as the number of
 #'   rows/columns of the adjacency matrix.
@@ -243,13 +239,13 @@ summarise_adjacency <- function(adj_mat, labels) {
       .keep = "unused"
     ) |>
     summarise(
-      degree = sum(val),
-      n = n(),
+      n = sum(val),
+      total = n(),
       .by = c(x, y)
     ) |>
     mutate(
-      relative = degree / n,
-      contrib = relative / (n / sum(n))
+      prop = n / total,
+      enrich = (n / sum(n)) / (total / sum(total))
     )
 }
 

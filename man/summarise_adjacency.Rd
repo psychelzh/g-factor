@@ -18,7 +18,5 @@ as a matrix of upper triangle if \code{x} and \code{y} are used as row and colum
 respectively.
 }
 \description{
-This will add labels to the adjacency matrix and summarise the adjacency
-matrix to get the degree, number of links, relative degree and contribution
-of each ROI.
+Summarise adjacency matrix
 }
