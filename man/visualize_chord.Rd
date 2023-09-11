@@ -9,9 +9,11 @@ visualize_chord(
   roi_info,
   ...,
   model_type = NULL,
-  link_val = c("degree", "relative", "contrib"),
+  link_val = c("n", "total", "prop", "enrich"),
   link_color = c("white", "black"),
-  group_by_hemi = TRUE
+  group_by_hemi = TRUE,
+  thresh = NULL,
+  add_legend = FALSE
 )
 }
 \arguments{
@@ -33,6 +35,12 @@ argument should not be used, and the color will be set automatically.}
 
 \item{group_by_hemi}{A logical value indicating whether to group ROIs by
 hemisphere.}
+
+\item{thresh}{A numeric value specifying the threshold of the value to be
+visualized. If the value is less than the threshold, it will be set as
+0.}
+
+\item{add_legend}{A logical value indicating whether to add a legend.}
 }
 \value{
 Invisible \code{NULL}.
