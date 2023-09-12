@@ -3,7 +3,7 @@ AntiSac,ANTI,antisac
 CateSwitch,SIZELIFE,cateswitch
 CRT,CRT,crt
 DelayDiscount,,
-Filtering,FLT,filtering
+Filtering,CHGDTN,filtering
 FNRecog,FN,ltm
 KRecog,SYMMEM,ltm
 OSpan,OSPAN,ospan

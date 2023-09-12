@@ -12,28 +12,45 @@ Depends:
 Imports:
     circlize,
     collapse,
+    colorspace,
+    ComplexHeatmap,
     conflicted,
+    corrplot,
+    crew,
     DescTools,
+    devtools,
+    dm,
+    dplyover (>= 0.0.8.9002),
+    easystats,
+    future,
+    future.callr,
+    geomtextpath,
+    ggdist,
     ggh4x,
+    ggpubr,
+    ggstatsplot,
+    ggthemes,
     here,
+    label4MRI (>= 1.2),
     lavaan,
     lme4,
+    modelsummary,
+    naniar,
+    patchwork,
     performance,
     pracma,
     proxy,
+    psych,
     qs,
-    rlang,
+    reticulate,
+    semPlot,
     semTools,
     tarchetypes,
-    targets
-Suggests:
-    colorspace,
-    corrplot,
-    crew,
-    devtools,
-    dm,
-    future,
-    future.callr
+    targets,
+    writexl
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Remotes:  
+    TimTeaFan/dplyover,
+    yunshiuan/label4MRI

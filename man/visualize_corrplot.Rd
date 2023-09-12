@@ -9,8 +9,9 @@ visualize_corrplot(
   model_type,
   labels,
   ...,
-  which = "contrib",
-  range = c(0, 100)
+  which = c("n", "total", "prop", "enrich"),
+  thresh = NULL,
+  digits = NULL
 )
 }
 \arguments{
@@ -27,11 +28,14 @@ arguments are not allowed to be changed: \code{method}, \code{type}, \code{is.co
 \code{col} which are set to \code{"shade"}, \code{"upper"}, \code{FALSE} and \code{"Reds"} or
 \code{"Blues"} depending on the \code{model_type}.}
 
-\item{which}{A character string specifying which value to use. Can be
-\code{"degree"}, \code{"n"}, \code{"relative"} or \code{"contrib"}.}
+\item{which}{A character string specifying which value to use.}
 
-\item{range}{A numeric vector of length two specifying the range of the
-values to be visualized.}
+\item{thresh}{A numeric value specifying the threshold of the value to be
+visualized. If the value is less than the threshold, it will be set as
+\code{NA}.}
+
+\item{digits}{A numeric value specifying the number of digits to be rounded
+up.}
 }
 \value{
 See \code{\link[corrplot:corrplot]{corrplot::corrplot()}}.

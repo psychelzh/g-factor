@@ -12,13 +12,19 @@
 #'   argument should not be used, and the color will be set automatically.
 #' @param group_by_hemi A logical value indicating whether to group ROIs by
 #'   hemisphere.
+#' @param thresh A numeric value specifying the threshold of the value to be
+#'   visualized. If the value is less than the threshold, it will be set as
+#'   0.
+#' @param add_legend A logical value indicating whether to add a legend.
 #' @returns Invisible `NULL`.
 #' @import circlize
 #' @export
 visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
-                            link_val = c("degree", "relative", "contrib"),
+                            link_val = c("n", "total", "prop", "enrich"),
                             link_color = c("white", "black"),
-                            group_by_hemi = TRUE) {
+                            group_by_hemi = TRUE,
+                            thresh = NULL,
+                            add_legend = FALSE) {
   rlang::check_exclusive(model_type, link_color)
   if (!is.null(model_type)) {
     link_color <- if (model_type == "pos") {
@@ -28,11 +34,18 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
     }
   }
   link_val <- match.arg(link_val)
+  thresh <- if (link_val == "enrich") 1 else 0
   col_label <- if (group_by_hemi) "label_hemi" else "label"
   col_color <- if (group_by_hemi) "color_hemi" else "color_hex"
 
   data_plot <- summarise_adjacency(adj_mat, roi_info[[col_label]]) |>
-    select(x, y, all_of(link_val))
+    select(x, y, all_of(link_val)) |>
+    mutate(
+      "{link_val}" := if_else(
+        .data[[link_val]] < thresh,
+        0, .data[[link_val]]
+      )
+    )
 
   # setup grid colors
   grid_colors <- roi_info |>
@@ -53,6 +66,7 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
 
   # plot chord diagram with groups support
   circos.clear()
+  circos.par(start.degree = 90, clock.wise = FALSE)
   chordDiagram(
     data_plot,
     grid.col = grid_colors,
@@ -79,7 +93,7 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
           "(left|right)_"
         ),
         facing = "clockwise",
-        cex = 0.6,
+        cex = 1,
         adj = c(0, 0.5),
         niceFacing = TRUE
       )
@@ -109,6 +123,25 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
       facing = "bending"
     )
   }
+  if (add_legend) {
+    ComplexHeatmap::Legend(
+      at = round(
+        seq(min(data_plot[[3]]), max(data_plot[[3]]), length.out = 3),
+        digits = 1
+      ),
+      col_fun = colorRamp2(
+        range(data_plot[[3]]),
+        link_color,
+        transparency = 0.5
+      ),
+      grid_width = unit(grconvertX(0.005, "npc", "nic"), "npc"),
+      grid_height = unit(grconvertX(0.02, "npc", "nic"), "npc")
+    ) |>
+      ComplexHeatmap::draw(
+        x = unit(grconvertX(1, "npc", "nic"), "npc"),
+        y = unit(grconvertY(0.15, "npc", "nic"), "npc")
+      )
+  }
   circos.clear()
   invisible()
 }
@@ -118,22 +151,34 @@ visualize_chord <- function(adj_mat, roi_info, ..., model_type = NULL,
 #' @param adj_mat The adjacency matrix.
 #' @param model_type A character string specifying the type of the edge. Can be
 #'   `"pos"` or `"neg"`.
+#' @param labels A vector of labels. Must have the same length as the number of
+#'   rows/columns of the adjacency matrix.
 #' @param ... Further arguments passed to [corrplot::corrplot()]. These
 #'   arguments are not allowed to be changed: `method`, `type`, `is.corr` and
 #'   `col` which are set to `"shade"`, `"upper"`, `FALSE` and `"Reds"` or
 #'   `"Blues"` depending on the `model_type`.
-#' @param labels A vector of labels. Must have the same length as the number of
-#'   rows/columns of the adjacency matrix.
-#' @param which A character string specifying which value to use. Can be
-#'   `"degree"`, `"n"`, `"relative"` or `"contrib"`.
-#' @param range A numeric vector of length two specifying the range of the
-#'   values to be visualized.
+#' @param which A character string specifying which value to use.
+#' @param thresh A numeric value specifying the threshold of the value to be
+#'   visualized. If the value is less than the threshold, it will be set as
+#'   `NA`.
+#' @param digits A numeric value specifying the number of digits to be rounded
+#'   up.
 #' @returns See [corrplot::corrplot()].
 visualize_corrplot <- function(adj_mat, model_type, labels, ...,
-                               which = "contrib",
-                               thresh = 1) {
+                               which = c("n", "total", "prop", "enrich"),
+                               thresh = NULL, digits = NULL) {
+  which <- match.arg(which)
+  thresh <- if (which == "enrich") 1 else 0
+  digits <- if (which == "prop") 2 else 0
+  ceiling_dec <- function(x, level = 1) round(x + 5 * 10^(-level - 1), level)
   stats <- summarise_adjacency(adj_mat, labels) |>
-    mutate(val = .data[[which]] * (.data[[which]] > thresh)) |>
+    mutate(
+      val = if_else(
+        .data[[which]] > thresh,
+        .data[[which]],
+        NA_real_
+      )
+    ) |>
     pivot_wider(
       id_cols = x,
       names_from = y,
@@ -149,7 +194,9 @@ visualize_corrplot <- function(adj_mat, model_type, labels, ...,
     type = "upper",
     is.corr = FALSE,
     col = corrplot::COL1(if (model_type == "pos") "Reds" else "Blues"),
-    col.lim = c(0, round(max(stats, na.rm = TRUE))),
+    col.lim = c(0, ceiling_dec(max(stats, na.rm = TRUE), digits)),
+    na.label = "square",
+    na.label.col = "white",
     ...
   )
 }
@@ -207,10 +254,6 @@ prepare_adjacency <- function(mask, ..., value = c("binary", "frac"),
 
 #' Summarise adjacency matrix
 #'
-#' This will add labels to the adjacency matrix and summarise the adjacency
-#' matrix to get the degree, number of links, relative degree and contribution
-#' of each ROI.
-#'
 #' @param adj_mat A matrix of adjacency.
 #' @param labels A vector of labels. Must have the same length as the number of
 #'   rows/columns of the adjacency matrix.
@@ -234,13 +277,13 @@ summarise_adjacency <- function(adj_mat, labels) {
       .keep = "unused"
     ) |>
     summarise(
-      degree = sum(val),
-      n = n(),
+      n = sum(val),
+      total = n(),
       .by = c(x, y)
     ) |>
     mutate(
-      relative = degree / n,
-      contrib = relative / (n / sum(n))
+      prop = n / total,
+      enrich = (n / sum(n)) / (total / sum(total))
     )
 }
 

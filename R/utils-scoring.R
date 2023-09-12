@@ -96,3 +96,28 @@ regress_covariates <- function(data, subjs_info, covars = TRUE, cond = NULL) {
     ) |>
     select(all_of(names(data)))
 }
+
+#' Split data into two equivalent halves by SOLOMON method
+#'
+#' Details can be found at Lorenzo-Seva, 2021.
+#'
+#' @param data The data to split.
+#' @param id_cols The names for identifier columns.
+#' @return A list of two equivalent data.
+#' @export
+split_data_solomon <- function(data, id_cols = "sub_id") {
+  pca_result <- psych::principal(
+    select(data, -all_of(id_cols)),
+    nfactors = ncol(data) - 1,
+    rotate = "none",
+    missing = TRUE
+  )
+  data |>
+    add_column(
+      d = as.vector(
+        pca_result$scores %*% matrix(colMeans(pca_result$loadings ^ 2), ncol = 1)
+      )
+    ) |>
+    mutate(id = row_number(d) %% 2, .keep = "unused") |>
+    group_split(id, .keep = FALSE)
+}
