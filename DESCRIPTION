@@ -14,7 +14,9 @@ Imports:
     collapse,
     conflicted,
     DescTools,
+    ggdist,
     ggh4x,
+    ggpubr,
     here,
     lavaan,
     lme4,
@@ -22,7 +24,6 @@ Imports:
     pracma,
     proxy,
     qs,
-    rlang,
     semTools,
     tarchetypes,
     targets
@@ -32,8 +33,10 @@ Suggests:
     crew,
     devtools,
     dm,
+    easystats,
     future,
-    future.callr
+    future.callr,
+    writexl
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
