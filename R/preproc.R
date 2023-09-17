@@ -426,12 +426,3 @@ summarise_ssd <- function(ssd) {
   keep_length <- min(length(peaks), length(valleys))
   mean(c(tail(peaks, keep_length), tail(valleys, keep_length)))
 }
-
-# for neural FC data ----
-write_feather_safely <- function(data, file) {
-  if (!fs::dir_exists(fs::path_dir(file))) {
-    fs::dir_create(fs::path_dir(file))
-  }
-  arrow::write_feather(data, file, compression = FALSE)
-  file
-}

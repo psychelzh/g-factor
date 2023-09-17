@@ -7,7 +7,10 @@ file_subjs_neural <- "data/subjs_neural"
 
 # basic configurations for CPM modeling ----
 config <- tidyr::expand_grid(
-  cond = c("nbackrun1", "rest", "run1rest", "latent"),
+  cond = c(
+    "nbackrun1", "rest", "run1rest", "latent",
+    "resteq", "run1resteq", "latenteq"
+  ),
   parcel = c("nn268", "Power264"),
   gsr = c("with", "without"),
   acq = c("orig", "reg")

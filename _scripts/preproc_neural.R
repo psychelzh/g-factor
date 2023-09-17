@@ -18,6 +18,14 @@ tar_option_set(
 tar_source()
 future::plan(future.callr::callr)
 
+write_feather_safely <- function(data, file) {
+  if (!fs::dir_exists(fs::path_dir(file))) {
+    fs::dir_create(fs::path_dir(file))
+  }
+  arrow::write_feather(data, file, compression = FALSE)
+  file
+}
+
 write_regressed_fc <- function(origin, dest, ...) {
   arrow::read_feather(origin) |>
     regress_covariates(...) |>
@@ -45,12 +53,11 @@ output_latent_fc <- function(files_in, file_out) {
     write_feather_safely(file_out)
 }
 
+# prepare values used in targets pipeline
 config_files <- config_file_tracking(config)
-
-# latent construct
 config_latent <- config_files |>
   dplyr::filter(
-    cond %in% c("nbackrun1", "rest"),
+    cond %in% c("nbackrun1", "rest", "resteq"),
     acq == "orig"
   ) |>
   tidyr::pivot_wider(
@@ -61,13 +68,11 @@ config_latent <- config_files |>
   dplyr::left_join(
     config_files |>
       dplyr::filter(
-        cond == "latent",
+        grepl("latent", cond),
         acq == "orig"
       ),
     by = c("parcel", "gsr", "acq")
   )
-
-# regress covariates
 config_regress <- config_files |>
   tidyr::pivot_wider(
     names_from = acq,
@@ -84,7 +89,7 @@ list(
   tarchetypes::tar_eval(
     tar_target(name, file, format = "file_fast"),
     values = config_files |>
-      dplyr::filter(cond != "latent", acq != "reg")
+      dplyr::filter(!grepl("latent", cond), acq != "reg")
   ),
   tarchetypes::tar_eval(
     tar_target(
@@ -92,7 +97,17 @@ list(
       output_latent_fc(list(nbackrun1, rest), file),
       format = "file_fast"
     ),
-    values = config_latent
+    values = config_latent |>
+      dplyr::filter(!grepl("eq", cond))
+  ),
+  tarchetypes::tar_eval(
+    tar_target(
+      name,
+      output_latent_fc(list(nbackrun1, resteq), file),
+      format = "file_fast"
+    ),
+    values = config_latent |>
+      dplyr::filter(grepl("eq", cond))
   ),
   tarchetypes::tar_eval(
     tar_target(
@@ -101,7 +116,7 @@ list(
         name_orig, file_reg,
         subjs_info = subjs_covariates,
         covars = c("age", "sex"),
-        cond = cond
+        extracov = extracov
       ),
       format = "file_fast"
     ),
