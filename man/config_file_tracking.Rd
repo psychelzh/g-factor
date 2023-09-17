@@ -2,35 +2,17 @@
 % Please edit documentation in R/targets-factory.R
 \name{config_file_tracking}
 \alias{config_file_tracking}
-\title{Configure file tracking for data}
+\title{Configure tracking of neural data files}
 \usage{
-config_file_tracking(
-  config,
-  type = c("neural", "behav"),
-  label = "file",
-  return_symbol = TRUE,
-  name_suffix = ""
-)
+config_file_tracking(config)
 }
 \arguments{
 \item{config}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of data used.}
-
-\item{type}{A character scalar specifying the type of data. It can be either
-\code{neural} or \code{behav}.}
-
-\item{label}{A character scalar specifying the label for the target tracking
-data.}
-
-\item{return_symbol}{A logical value indicating if the returned target name
-should a symbol or not.}
-
-\item{name_suffix}{A character scalar specifying the name suffix for the
-targets. This will change the column names of the returned \code{\link[=data.frame]{data.frame()}}.}
 }
 \value{
 Add two columns to \code{config} specifying the file name and the target
 name for the data.
 }
 \description{
-Configure file tracking for data
+Configure tracking of neural data files
 }

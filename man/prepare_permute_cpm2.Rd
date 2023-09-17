@@ -6,9 +6,9 @@
 \usage{
 prepare_permute_cpm2(
   config,
+  ...,
   hypers_cpm = NULL,
   behav = NULL,
-  ...,
   subjs_subset = NULL,
   name_suffix = NULL,
   include_file_targets = TRUE,
@@ -22,6 +22,8 @@ prepare_permute_cpm2(
 \arguments{
 \item{config}{A \code{\link[=data.frame]{data.frame()}} storing the specifications of analysis.}
 
+\item{...}{For extension use. Should be empty.}
+
 \item{hypers_cpm}{A \code{\link[=data.frame]{data.frame()}} storing the CPM hyper parameters passed to
 the \code{values} argument of \code{\link[tarchetypes:tar_map_rep]{tarchetypes::tar_map_rep()}}. Note the names must
 be consistent with the argument names of \code{\link[=do_cpm2]{do_cpm2()}}. If this argument is
@@ -29,10 +31,6 @@ not specified or is \code{NULL}, it will only return targets tracking the neural
 data.}
 
 \item{behav}{The expression to get behavioral data.}
-
-\item{...}{Additional arguments passed to \code{\link[=config_file_tracking]{config_file_tracking()}}. This is
-especially useful when covariates regression has been done on the
-behavioral data.}
 
 \item{subjs_subset}{The expression to get the subject list to include in CPM
 analysis.}
