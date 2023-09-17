@@ -1,34 +1,34 @@
 import net_construct.transform_to_fc
 
-file_config = fullfile("config", "net_construction.csv");
-file_config_path = fullfile("config", "path_input.csv");
+file_config_proc = fullfile("config.local", "process_net_construct.xlsx");
+file_config_path = fullfile("config.local", "neural_raw_path.csv");
 config_path_input = readtable(file_config_path, ...
     Delimiter=',', TextType='string');
 config_path_output = dictionary( ...
     "yes", fullfile('data', 'neural'), ...
     "no", fullfile('data', 'neural-legacy'));
-configs = readtable(file_config, Delimiter=',', TextType='string');
+configs_proc = readtable(file_config_proc, TextType='string');
 subjs_subset = readmatrix(fullfile("data", "subjs_neural"));
 
-for row = 1:height(configs)
-    config = configs(row, :);
-    fprintf("Begin cond: %s, use_gretna: %s, filt: %s, parcel: %s, gsr: %s.\n", ...
-        config.cond, config.use_gretna, config.filt, config.parcel, config.gsr)
-    if config.status == "done"
+for row = 1:height(configs_proc)
+    config_proc = configs_proc(row, :);
+    fprintf("Begin new config:\n")
+    disp(config_proc)
+    if config_proc.status == "done"
         fprintf("Already done! Contine to next.\n")
         continue
     end
-    if config.use_gretna == "yes"
-        config.filt = config.filt + "_gretna";
+    if config_proc.use_gretna == "yes"
+        config_proc.filt = config_proc.filt + "_gretna";
     end
     try
-        transform_to_fc(config_path_input, config, subjs_subset, ...
-            config_path_output(config.use_gretna))
-        configs.status(row) = "done";
+        transform_to_fc(config_path_input, config_proc, subjs_subset, ...
+            config_path_output(config_proc.use_gretna))
+        configs_proc.status(row) = "done";
     catch ME
-        configs.status(row) = "error";
+        configs_proc.status(row) = "error";
     end
-    writetable(configs, file_config)
+    writetable(configs_proc, file_config_proc)
     if exist("ME", "var")
         rethrow(ME)
     end

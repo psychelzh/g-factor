@@ -1,16 +1,27 @@
-function transform_to_fc(config_path_input, config_proc, subset, path_out)
+function transform_to_fc(config_path_input, config_proc, subjs_subset, path_out)
 % config_path_input: path for each condition, required fields: path, cond
 % config_proc: process status, required fields: cond, parcel, filt, gsr
 % subset: subset of subjects
 % path_out: output path
 
-if config_proc.cond ~= "run1rest"
-    path = config_path_input.path(config_path_input.cond == config_proc.cond);
-    [subjs, files] = match_files(path, config_proc, subset);
+truncate_rest = false;
+% the minimal time points is 190 across conditions
+truncate_points = 190;
+cond = config_proc.cond;
+if endsWith(cond, "eq")
+    cond = erase(cond, "eq");
+    truncate_rest = true;
+end
+if cond ~= "run1rest"
+    path = config_path_input.path(config_path_input.cond == cond);
+    [subjs, files] = match_files(path, config_proc, subjs_subset);
     num_subjs = length(subjs);
     results = cell(num_subjs, 1);
     for i_subj = progress(1:num_subjs)
         tc = load(files{i_subj});
+        if truncate_rest && cond == "rest"
+            tc.time_nodes = tc.time_nodes(1:truncate_points, :);
+        end
         results{i_subj} = calc_fc(tc.time_nodes);
     end
 else
@@ -18,7 +29,7 @@ else
     [subjs_cond, files_cond] = arrayfun( ...
         @(cond) match_files( ...
         config_path_input.path(config_path_input.cond == cond), ...
-        config_proc, subset), ...
+        config_proc, subjs_subset), ...
         conds, ...
         UniformOutput=false);
     subjs = intersect(subjs_cond{1}, subjs_cond{2});
@@ -29,6 +40,10 @@ else
         tcs = cellfun(@(s, f) load(f{s == subj_id}).time_nodes, ...
             subjs_cond, files_cond, ...
             UniformOutput=false);
+        if truncate_rest
+            tcs{conds == "rest"} = ...
+                tcs{conds == "rest"}(1:truncate_points, :);
+        end
         tc_combined = vertcat(tcs{:});
         results{i_subj} = calc_fc(tc_combined);
     end
