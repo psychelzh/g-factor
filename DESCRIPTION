@@ -10,6 +10,7 @@ License: MIT + file LICENSE
 Depends:
     tidyverse
 Imports:
+    arrow,
     circlize,
     collapse,
     colorspace,
@@ -51,6 +52,6 @@ Imports:
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Remotes:  
+Remotes: 
     TimTeaFan/dplyover,
     yunshiuan/label4MRI
