@@ -4,7 +4,7 @@
 \alias{regress_covariates}
 \title{Regress out covariates}
 \usage{
-regress_covariates(data, subjs_info, covars = TRUE, cond = NULL)
+regress_covariates(data, subjs_info, covars = TRUE, extracov = NULL)
 }
 \arguments{
 \item{data}{A data frame with subject identifiers and outcome variables.}
@@ -19,9 +19,11 @@ be included. If set as \code{TRUE} (default), all covariates will be regressed
 out (not including FD values, those are treated in \code{cond}). If set as
 \code{NULL}, no covariates will be regressed out.}
 
-\item{cond}{A character string specifying which FD values to be regressed
-out. It can be either \code{nbackrun1}, \code{rest}, \code{run1rest} or \code{latent}. If set
-as \code{NULL} (default), no FD values will be regressed out.}
+\item{extracov}{A numeric value indicating if and which FD values should be
+included. \code{0} means no FD values will be included. \code{1} means only FD values
+for n-back task will be included. \code{2} means only FD values for resting
+state data will be included. \code{NULL} (default) means no FD values will be
+included.}
 }
 \value{
 A data frame with residuals.

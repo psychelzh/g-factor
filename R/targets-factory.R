@@ -125,10 +125,10 @@ prepare_permute_cpm2 <- function(config,
                                  covars = NULL,
                                  batches = 4, reps = 5) {
   rlang::check_dots_empty()
-  config_neural_files <- config_file_tracking(config)
+  config_neural <- config_file_tracking(config)
   file_targets <- tarchetypes::tar_eval(
     tar_target(name, file, format = "file_fast"),
-    values = config_neural_files
+    values = config_neural
   )
   if (is.null(hypers_cpm)) {
     return(file_targets)
@@ -159,7 +159,7 @@ prepare_permute_cpm2 <- function(config,
             .,
             subjs_info = !!subjs_info,
             covars = !!covars,
-            cond = cond
+            extracov = extracov
           )
         )
       )
@@ -197,9 +197,9 @@ prepare_permute_cpm2 <- function(config,
           .keep = "unused"
         )
       ),
-      values = tidyr::expand_grid(config_neural_files, hypers_cpm),
-      # `tar_neural` and `file` are constructed from other core elements
-      columns = rlang::expr(-c(name, file)),
+      values = tidyr::expand_grid(config_neural, hypers_cpm),
+      # constructed columns should be removed
+      columns = rlang::expr(-c(name, file, extracov)),
       batches = batches,
       reps = reps
     ),
@@ -245,6 +245,11 @@ config_file_tracking <- function(config) {
       ),
       name = rlang::syms(
         stringr::str_glue("file_neural_{cond}_{parcel}_{gsr}_{acq}")
+      ),
+      extracov = dplyr::case_when(
+        cond == "nbackrun1" ~ 1,
+        stringr::str_detect(cond, "^rest(eq)?$") ~ 2,
+        .default = 0
       )
     )
 }
