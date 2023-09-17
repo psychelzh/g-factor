@@ -115,7 +115,7 @@ split_data_solomon <- function(data, id_cols = "sub_id") {
   data |>
     add_column(
       d = as.vector(
-        pca_result$scores %*% matrix(colMeans(pca_result$loadings ^ 2), ncol = 1)
+        pca_result$scores %*% matrix(colMeans(pca_result$loadings^2), ncol = 1)
       )
     ) |>
     mutate(id = row_number(d) %% 2, .keep = "unused") |>
