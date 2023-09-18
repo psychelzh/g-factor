@@ -87,7 +87,9 @@ g_invariance <- tarchetypes::tar_map(
     data_names
   ),
   prepare_permute_cpm2(
-    config, hypers_cpm, scores_g,
+    config,
+    hypers_cpm = hypers_cpm,
+    behav = scores_g,
     include_file_targets = FALSE,
     subjs_subset = subjs_combined,
     subjs_info = subjs_covariates,

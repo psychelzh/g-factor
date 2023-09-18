@@ -48,7 +48,9 @@ task_selection <- tarchetypes::tar_map(
       include_comp_rel = FALSE
     ),
     prepare_permute_cpm2(
-      config, hypers_cpm, scores_g,
+      config,
+      hypers_cpm = hypers_cpm,
+      behav = scores_g,
       include_file_targets = FALSE,
       subjs_subset = subjs_combined,
       subjs_info = subjs_covariates,
@@ -98,8 +100,8 @@ list(
   ),
   prepare_permute_cpm2(
     config,
-    hypers_cpm,
-    scores_single,
+    hypers_cpm = hypers_cpm,
+    behav = scores_single,
     subjs_subset = subjs_combined,
     name_suffix = "single",
     subjs_info = subjs_covariates,

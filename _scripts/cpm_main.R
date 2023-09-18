@@ -47,9 +47,9 @@ cpm_main <- tarchetypes::tar_map(
     ),
     prepare_permute_cpm2(
       config,
-      hypers_cpm,
+      hypers_cpm = hypers_cpm,
       # bifactor model gives more than 1 score, keep the first only
-      tibble::tibble(scores = list(behav[, 1:2])),
+      behav = tibble::tibble(scores = list(behav[, 1:2])),
       include_file_targets = FALSE,
       subjs_subset = subjs_combined,
       subjs_info = subjs_covariates,
