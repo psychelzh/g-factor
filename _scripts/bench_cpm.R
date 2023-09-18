@@ -38,7 +38,7 @@ list(
     read = qs::qread(!!.x)
   ),
   prepare_permute_cpm2(
-    dplyr::filter(config, acq == "reg"),
+    dplyr::filter(config, grepl("eq", cond) & acq == "reg"),
     hypers_cpm = hypers_cpm,
     behav = tibble::tibble(scores = list(scores_rapm)),
     subjs_subset = subjs_combined,
