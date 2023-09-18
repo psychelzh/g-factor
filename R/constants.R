@@ -9,7 +9,7 @@ file_subjs_neural <- "data/subjs_neural"
 config <- tidyr::expand_grid(
   cond = c(
     "nbackrun1", "rest", "run1rest", "latent",
-    "resteq", "run1resteq", "latenteq"
+    "nbackrun1eq", "resteq", "run1resteq", "latenteq"
   ),
   parcel = c("nn268", "Power264"),
   gsr = c("with", "without"),

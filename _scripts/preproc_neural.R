@@ -57,7 +57,7 @@ output_latent_fc <- function(files_in, file_out) {
 config_files <- config_file_tracking(config)
 config_latent <- config_files |>
   dplyr::filter(
-    cond %in% c("nbackrun1", "rest", "resteq"),
+    !grepl("run1rest|latent", cond),
     acq == "orig"
   ) |>
   tidyr::pivot_wider(
@@ -103,7 +103,7 @@ list(
   tarchetypes::tar_eval(
     tar_target(
       name,
-      output_latent_fc(list(nbackrun1, resteq), file),
+      output_latent_fc(list(nbackrun1eq, resteq), file),
       format = "file_fast"
     ),
     values = config_latent |>

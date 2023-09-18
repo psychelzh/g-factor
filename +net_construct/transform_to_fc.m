@@ -4,13 +4,13 @@ function transform_to_fc(config_path_input, config_proc, subjs_subset, path_out)
 % subset: subset of subjects
 % path_out: output path
 
-truncate_rest = false;
+match_duration = false;
 % the minimal time points is 190 across conditions
 truncate_points = 190;
 cond = config_proc.cond;
 if endsWith(cond, "eq")
     cond = erase(cond, "eq");
-    truncate_rest = true;
+    match_duration = true;
 end
 if cond ~= "run1rest"
     path = config_path_input.path(config_path_input.cond == cond);
@@ -19,7 +19,7 @@ if cond ~= "run1rest"
     results = cell(num_subjs, 1);
     for i_subj = progress(1:num_subjs)
         tc = load(files{i_subj});
-        if truncate_rest && cond == "rest"
+        if match_duration
             tc.time_nodes = tc.time_nodes(1:truncate_points, :);
         end
         results{i_subj} = calc_fc(tc.time_nodes);
@@ -40,9 +40,9 @@ else
         tcs = cellfun(@(s, f) load(f{s == subj_id}).time_nodes, ...
             subjs_cond, files_cond, ...
             UniformOutput=false);
-        if truncate_rest
-            tcs{conds == "rest"} = ...
-                tcs{conds == "rest"}(1:truncate_points, :);
+        if match_duration
+            tcs = cellfun(@(tc) tc(1:truncate_points, :), tcs, ...
+                "UniformOutput", false);
         end
         tc_combined = vertcat(tcs{:});
         results{i_subj} = calc_fc(tc_combined);
