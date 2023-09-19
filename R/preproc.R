@@ -339,6 +339,58 @@ reshape_data_wider <- function(indices, name_score = "score") {
     )
 }
 
+#' Regress out covariates
+#'
+#' @param data A data frame with subject identifiers and outcome variables.
+#' @param subjs_info A data frame with subject identifiers and covariates. The
+#'   FD values should be named as `mean_fd_task` and `mean_fd_rest` for n-back
+#'   task and resting state data, respectively. And the first column should be
+#'   the subject identifier.
+#' @param covars A character vector specifying the column names of covariates to
+#'   be included. If set as `TRUE` (default), all covariates will be regressed
+#'   out (not including FD values, those are treated in `cond`). If set as
+#'   `NULL`, no covariates will be regressed out.
+#' @param extracov A numeric value indicating if and which FD values should be
+#'   included. `0` means no FD values will be included. `1` means only FD values
+#'   for n-back task will be included. `2` means only FD values for resting
+#'   state data will be included. `NULL` (default) means no FD values will be
+#'   included.
+#' @returns A data frame with residuals.
+#' @export
+regress_covariates <- function(data, subjs_info,
+                               covars = TRUE, extracov = NULL) {
+  # handle user identifier and condition specific FD values
+  names_mean_fd <- c("mean_fd_task", "mean_fd_rest")
+  if (is.null(covars)) {
+    # return the original data
+    return(data)
+  }
+  if (isTRUE(covars)) {
+    covars <- setdiff(names(subjs_info)[-1], names_mean_fd)
+  }
+  if (!is.null(extracov)) {
+    if (extracov == 0) {
+      covars <- setdiff(covars, names_mean_fd)
+    } else {
+      covars <- c(covars, names_mean_fd[extracov])
+    }
+  }
+  data |>
+    left_join(subjs_info, by = "sub_id") |>
+    mutate(
+      across(
+        # the first column is the subject identifier
+        all_of(names(data)[-1]),
+        ~ paste(cur_column(), "~", paste(covars, collapse = " + ")) |>
+          as.formula() |>
+          lm(na.action = na.exclude) |>
+          residuals.lm() |>
+          as.vector()
+      )
+    ) |>
+    select(all_of(names(data)))
+}
+
 # helper functions ----
 id_cols <- function() {
   c("file", "sub_id", "task_datetime")
