@@ -32,9 +32,9 @@ arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
     }
     mtext(text, side = side, line = 0, at = at, outer = TRUE)
   }
-  par(oma = c(0, 2, 2, 0), mfrow = c(3, 2), mar = c(0, 0, 0, 0) + 0.1)
-  for (idx_row in 1:3) {
-    for (idx_col in 1:2) {
+  par(oma = c(0, 2, 2, 0), mfrow = c(2, 3), mar = c(0, 0, 0, 0) + 0.1)
+  for (idx_row in 1:2) {
+    for (idx_col in 1:3) {
       cur_adj_mat <- adj_mat_pool |>
         filter(row == idx_row, col == idx_col)
       plot_fun(
@@ -45,13 +45,13 @@ arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
       text_model_type <- model_types[[cur_adj_mat$model_type]]
       text_meas_trait <- meas_trait[[cur_adj_mat$trait]]
       if (idx_row == 1) {
-        add_custom_title(text_model_type, "column")
+        add_custom_title(text_meas_trait, "column")
         if (idx_col == 1) {
-          add_custom_title(text_meas_trait, "row")
+          add_custom_title(text_model_type, "row")
         }
       } else {
         if (idx_col == 1) {
-          add_custom_title(text_meas_trait, "row")
+          add_custom_title(text_model_type, "row")
         }
       }
     }
@@ -367,13 +367,23 @@ ggsave(fs::path(path_ms_fig, "task_influence_behav_only.png"), p, width = 10, he
 ```{r}
 #| label: benchmark-cpm
 
-targets::tar_load(
+# prepare data ----
+cpm_pred <- targets::tar_read(
   cpm_pred,
   store = store_bench_cpm
-)
-
+) |> 
+  mutate(
+    type = if_else(
+      str_detect(cond, "eq"), 
+      "Equal Duration", 
+      "Origin Duration"
+    ),
+    cond = str_remove(cond, "eq")
+  ) |> 
+  filter(cond != "run1rest")
 pred_hypers <- cpm_pred |>
   filter(
+    type == "Equal Duration",
     cond == "nbackrun1",
     gsr == "with"
   ) |>
@@ -393,41 +403,8 @@ pred_cond <- cpm_pred |>
     gsr = factor(gsr, names(gsrs))
   )
 
-p_hypers_cpm <- pred_hypers |>
-  ggplot(aes(factor(thresh_level), all, fill = parcel)) +
-  geom_boxplot() +
-  scale_x_discrete(name = "Threshold Level") +
-  rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
-  scale_y_continuous(
-    name = "CPM Performance",
-    breaks = scales::breaks_width(0.02)
-  ) +
-  facet_grid(
-    cols = vars(thresh_method),
-    labeller = labeller(
-      thresh_method = thresh_methods
-    ),
-    scales = "free_x"
-  ) +
-  ggpubr::theme_pubr()
-p_cond <- pred_cond |>
-  ggplot(aes(cond, all, fill = parcel)) +
-  geom_boxplot() +
-  rlang::exec(scale_x_discrete, !!!scale_conds) +
-  scale_y_continuous(name = "CPM Performance") +
-  rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
-  facet_grid(
-    cols = vars(gsr),
-    labeller = labeller(gsr = gsrs)
-  ) +
-  ggpubr::theme_pubr()
-p <- p_hypers_cpm / p_cond +
-  plot_layout(heights = c(1, 2), guides = "collect") +
-  plot_annotation(tag_levels = "A") &
-  theme(legend.position = "bottom")
-ggsave(fs::path(path_ms_fig, "bench_cpm_with_parcels.png"), p, width = 8, height = 6)
-
-p_hypers_cpm <- pred_hypers |>
+# plot in main text ----
+p_hypers <- pred_hypers |>
   filter(parcel == "nn268") |>
   ggplot(aes(factor(thresh_level), all)) +
   geom_boxplot(width = 0.4) +
@@ -445,7 +422,7 @@ p_hypers_cpm <- pred_hypers |>
   ) +
   ggpubr::theme_pubr()
 p_cond <- pred_cond |>
-  filter(parcel == "nn268") |>
+  filter(parcel == "nn268", type == "Equal Duration") |>
   ggplot(aes(cond, all)) +
   geom_boxplot(width = 0.4) +
   rlang::exec(scale_x_discrete, !!!scale_conds) +
@@ -458,11 +435,62 @@ p_cond <- pred_cond |>
     labeller = labeller(gsr = gsrs)
   ) +
   ggpubr::theme_pubr()
-p <- p_hypers_cpm / p_cond +
+p <- p_hypers / p_cond +
   plot_layout(heights = c(1, 2)) +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
 ggsave(fs::path(path_ms_fig, "bench_cpm.png"), p, width = 8, height = 6)
+
+# plot in supplementary ----
+p_hypers_parcel <- pred_hypers |>
+  ggplot(aes(factor(thresh_level), all, fill = parcel)) +
+  geom_boxplot() +
+  scale_x_discrete(name = "Threshold Level") +
+  rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
+  scale_y_continuous(
+    name = "CPM Performance",
+    breaks = scales::breaks_width(0.02)
+  ) +
+  facet_grid(
+    cols = vars(thresh_method),
+    labeller = labeller(
+      thresh_method = thresh_methods
+    ),
+    scales = "free_x"
+  ) +
+  ggpubr::theme_pubr()
+p_cond_parcel <- pred_cond |>
+  filter(type == "Equal Duration") |> 
+  ggplot(aes(cond, all, fill = parcel)) +
+  geom_boxplot() +
+  rlang::exec(scale_x_discrete, !!!scale_conds) +
+  scale_y_continuous(name = "CPM Performance") +
+  rlang::exec(ggthemes::scale_fill_few, !!!scale_parcels) +
+  facet_grid(
+    cols = vars(gsr),
+    labeller = labeller(gsr = gsrs)
+  ) +
+  ggpubr::theme_pubr()
+p_parcel <- p_hypers_parcel / p_cond_parcel +
+  plot_layout(heights = c(1, 2), guides = "collect") +
+  plot_annotation(tag_levels = "A") &
+  theme(legend.position = "bottom")
+ggsave(fs::path(path_ms_fig, "bench_cpm_with_parcels.png"), p_parcel, width = 8, height = 6)
+
+# extra check ----
+p_duration <- pred_cond |>
+  ggplot(aes(cond, all, fill = type)) +
+  geom_boxplot() +
+  rlang::exec(scale_x_discrete, !!!scale_conds) +
+  scale_y_continuous(name = "CPM Performance") +
+  rlang::exec(ggthemes::scale_fill_few, name = "") +
+  facet_grid(
+    cols = vars(gsr),
+    rows = vars(parcel),
+    labeller = labeller(gsr = gsrs, parcel = parcels)
+  ) +
+  ggpubr::theme_pubr()
+ggsave(fs::path(path_ms_fig, "bench_cpm_duration.png"), p_duration, width = 8, height = 6)
 ```
 
 ```{r}
@@ -557,7 +585,7 @@ datasummary(
 )
 
 # supplementary
-dice_clean <- targets::tar_read(
+dice_clean_supp <- targets::tar_read(
   dice_mask_pairs,
   store = store_g_invariance
 ) |>
@@ -567,32 +595,37 @@ dice_clean <- targets::tar_read(
     names_pattern = "(.+)_(.+)"
   ) |>
   filter(
-    parcel == "nn268",
-    binarize_method == "count",
-    binarize_level == 500,
+    binarize_method == "prob",
+    binarize_level != 0.9,
     cond == "nbackrun1"
   ) |>
   mutate(
+    parcel = factor(parcel, names(parcels)),
     model_type = factor(model_type, names(model_types)) |>
       droplevels()
   )
 
-p_dice <- dice_clean |>
+p_dice_supp <- dice_clean_supp |>
   ggplot(aes(num_vars, dice)) +
   ggdist::stat_slabinterval(aes(fill = model_type), show.legend = FALSE) +
   ggdist::stat_dots(side = "left", show.legend = FALSE) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
-  scale_fill_brewer(palette = "Set1") +
   ggpubr::theme_pubr() +
-  facet_grid(
-    cols = vars(model_type),
-    labeller = labeller(model_type = model_types)
+  ggh4x::facet_nested(
+    rows = vars(model_type),
+    cols = vars(parcel, binarize_level),
+    labeller = labeller(
+      model_type = model_types,
+      parcel = parcels
+    )
   ) +
   labs(x = "Number of Tasks", y = "Dice Similarity")
+ggsave(fs::path(path_ms_fig, "dice_supp.png"), p_dice_supp, width = 8, height = 6)
 ```
 
 ```{r}
 #| label: benchmark-single-task
+#| eval: false
 
 bench_single <- bind_rows(
   `Single Task` = targets::tar_read(
@@ -631,6 +664,12 @@ ggsave(fs::path(path_ms_fig, "bench_single.png"), p, width = 8, height = 6)
 ```{r}
 #| label: prepare-brain-mask-data
 
+# ROI preparation
+roi_info <- prepare_roi_info(readRDS(here::here("data/atlases/Shen268.rds")))
+roi_coords <- as.matrix(select(roi_info, contains("mni")))
+# writexl::write_xlsx(count(roi_info, label), fs::path(path_ms_tbl, "roi_counts.xlsx"))
+
+# load brain masks of interest
 brain_masks <- targets::tar_read(
   brain_mask,
   store = store_cpm_main
@@ -641,8 +680,8 @@ brain_masks <- targets::tar_read(
     thresh_method == "alpha", thresh_level == 0.01,
     parcel == "nn268"
   )
-roi_info <- prepare_roi_info(readRDS(here::here("data/atlases/Shen268.rds")))
-roi_coords <- as.matrix(select(roi_info, contains("mni")))
+
+# prepare adjacency matrices
 adj_mat_pool <- brain_masks |>
   pivot_longer(
     any_of(names(model_types)),
@@ -652,10 +691,12 @@ adj_mat_pool <- brain_masks |>
   mutate(
     adj_mat = map(
       mask,
-      prepare_adjacency,
-      binarize_method = "prob",
-      binarize_level = 0.95,
-      diagonal = 0
+      ~ prepare_adjacency(
+        .x,
+        binarize_method = "prob",
+        binarize_level = 0.95,
+        diagonal = 0
+      )
     ),
     node_degree = map(
       adj_mat,
@@ -668,105 +709,15 @@ adj_mat_pool <- brain_masks |>
     .keep = "unused"
   ) |>
   mutate(
-    row = as.integer(factor(trait, names(meas_trait))),
-    col = as.integer(droplevels(factor(model_type, names(model_types))))
+    trait = factor(trait, names(meas_trait)),
+    model_type = factor(model_type, names(model_types)),
+    row = as.integer(droplevels(model_type)),
+    col = as.integer(trait)
   )
 ```
 
-```{python}
-#| label: plot-markers
-
-import os
-import numpy as np
-import pandas as pd
-from nilearn import plotting
-import matplotlib.pyplot as plt
-import matplotlib
-
-fig = plt.figure()
-gs = fig.add_gridspec(nrows=3, ncols=2, wspace=0.1, hspace=0)
-axes = gs.subplots()
-# fig, axes = plt.subplots(nrows=2, ncols=2)
-
-# Compute node degree values (dummy values for demonstration)
-for col in range(2):
-  adj_mat_cur_col = r.adj_mat_pool.query(f'col == {col + 1}')
-  model_type = np.unique(adj_mat_cur_col.model_type)
-  for row in range(3):
-    ax = axes[row, col]
-    node_degree = adj_mat_cur_col.query(f'row == {row + 1}').node_degree.to_list()[0]
-    if model_type == "pos":
-      cmap = plt.cm.Reds
-    else:
-      cmap = plt.cm.Blues
-    pmk = plotting.plot_markers(
-      node_degree,
-      r.roi_coords,
-      node_cmap=cmap,
-      display_mode='lzry',
-      colorbar=True,
-      axes=ax
-    )
-
-# set column and row titles
-title_cols = r.model_types[1:]
-title_rows = r.meas_trait
-pad = 10
-for ax, title_col in zip(axes[0], title_cols):
-  ax.set_title(title_col)
-
-for i, ax, title_row in zip(range(3), axes[:,0], title_rows):
-  ax.annotate(
-    title_row,
-    xy=(0, 0.5),
-    xytext=(-ax.yaxis.labelpad - pad, 0),
-    textcoords='offset points',
-    size='large', rotation=90,
-    ha='center', va='center'
-  )
-
-fig.set_size_inches(15, 8)
-fig.savefig(
-  os.path.join(r.path_ms_fig, "network-node-markers-prob.pdf"),
-  dpi=100, bbox_inches='tight'
-)
-fig.clear
-```
-
 ```{r}
-#| label: plot-chord
-
-cairo_pdf(fs::path(path_ms_fig, "network-chord-rel-prob.pdf"), width = 8, height = 12)
-# ragg::agg_png("network-chord.png", width = 1280, height = 1280, res = 180)
-arrange_plots(visualize_chord, adj_mat_pool, roi_info = roi_info, link_val = "relative")
-dev.off()
-```
-
-```{r}
-#| label: plot-chord-ctb
-
-cairo_pdf(fs::path(path_ms_fig, "network-chord-ctb-prob.pdf"), width = 8, height = 12)
-# ragg::agg_png("network-chord.png", width = 1280, height = 1280, res = 180)
-arrange_plots(visualize_chord, adj_mat_pool, roi_info = roi_info, link_val = "contrib")
-dev.off()
-```
-
-```{r}
-#| label: plot-contribution
-
-cairo_pdf(fs::path(path_ms_fig, "network-corrplot-ctb-prob.pdf"), width = 8, height = 12)
-# ragg::agg_png("network-ctb.png", width = 1440, height = 1440, res = 180)
-par(oma = c(0, 2, 2, 0), mfrow = c(2, 2), mar = c(0, 0, 0, 0) + 0.1)
-arrange_plots(
-  visualize_corrplot,
-  adj_mat_pool,
-  labels = roi_info$label
-)
-dev.off()
-```
-
-```{r}
-#| label: misc-stats-brain-mask
+#| label: stats-cor-brain-mask
 
 dice_simil <- brain_masks |>
   pivot_longer(
@@ -778,57 +729,266 @@ dice_simil <- brain_masks |>
     names_from = trait,
     values_from = mask
   ) |>
-  pivot_longer(
-    c(spearman, bifac),
-    names_to = "gca",
-    values_to = "mask_gca"
-  ) |>
+  rowwise() |>
   mutate(
-    simil = map2_dbl(
-      rapm, mask_gca,
-      ~ list(.x, .y) |>
-        calc_mask_dice(
-          binarize_method = "prob",
-          binarize_level = 0.95
-        )
+    dplyover::across2x(
+      all_of(names(meas_trait)),
+      all_of(names(meas_trait)),
+      list(
+        dice = ~ list(.x[[1]], .y[[1]]) |>
+          calc_mask_dice(
+            binarize_method = "prob",
+            binarize_level = 0.95
+          )
+      ),
+      .comb = "minimal"
     )
   ) |>
-  pivot_wider(
-    id_cols = gca,
-    names_from = model_type,
-    values_from = simil
-  ) |>
-  mutate(avg = (pos + neg) / 2)
-
+  ungroup() |>
+  select(model_type, contains("dice")) |>
+  pivot_longer(
+    contains("dice"),
+    names_to = c("trait_x", "trait_y", ".value"),
+    names_pattern = "(.*)_(.*)_(.*)"
+  )
 rho_node_degree <- adj_mat_pool |>
   select(trait, model_type, node_degree) |>
   pivot_wider(
     names_from = trait,
     values_from = node_degree
   ) |>
+  rowwise() |>
+  mutate(
+    dplyover::across2x(
+      all_of(names(meas_trait)),
+      all_of(names(meas_trait)),
+      list(rho = ~ cor(.x[[1]], .y[[1]], method = "spearman")),
+      .comb = "minimal"
+    )
+  ) |>
+  ungroup() |>
+  select(model_type, contains("rho")) |>
+  pivot_longer(
+    contains("rho"),
+    names_to = c("trait_x", "trait_y", ".value"),
+    names_pattern = "(.*)_(.*)_(.*)"
+  )
+
+plots <- dice_simil |>
+  inner_join(rho_node_degree, by = join_by(model_type, trait_x, trait_y)) |>
+  pivot_longer(
+    c(dice, rho),
+    names_to = "meas_cor",
+    values_to = "val"
+  ) |>
+  nest(.by = c(meas_cor, model_type)) |>
+  arrange(meas_cor) |>
+  pmap(
+    \(model_type, meas_cor, data) {
+      meas <- c(rho = "Edge counts correlation", dice = "Edge dice similarity")
+      data |>
+        ggplot(aes(trait_x, trait_y, fill = val)) +
+        geom_raster() +
+        scale_x_discrete(labels = meas_trait, name = NULL, position = "top") +
+        scale_y_discrete(labels = meas_trait, name = NULL, position = "right") +
+        scale_fill_distiller(
+          name = NULL,
+          breaks = scales::breaks_width(0.1),
+          direction = 1,
+          palette = if (model_type == "pos") "Reds" else "Blues"
+        ) +
+        ggtitle(meas[meas_cor], subtitle = model_types[model_type]) +
+        coord_flip() +
+        theme_minimal() +
+        theme(
+          panel.grid = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+          plot.subtitle = element_text(hjust = 0.5),
+          axis.text.y = element_text(angle = 90),
+          aspect.ratio = 1
+        )
+    }
+  )
+p <- wrap_plots(plots, nrow = 1)
+ggsave(fs::path(path_ms_fig, "network-similarity.pdf"), width = 12, height = 3)
+```
+
+```{python}
+#| label: plot-markers
+
+import os
+import numpy as np
+import pandas as pd
+from nilearn import plotting
+import matplotlib.pyplot as plt
+
+fig = plt.figure()
+gs = fig.add_gridspec(nrows=2, ncols=3, wspace=0.1, hspace=0)
+axes = gs.subplots()
+
+# Compute node degree values (dummy values for demonstration)
+for row in range(2):
+  for col in range(3):
+    ax = axes[row, col]
+    cur_adj_mat = r.adj_mat_pool.query('row == @row + 1 & col == @col + 1').to_dict(orient='records')[0]
+    model_type = cur_adj_mat['model_type']
+    node_degree = cur_adj_mat['node_degree']
+    if model_type == "pos":
+      cmap = plt.cm.Reds
+    else:
+      cmap = plt.cm.Blues
+    plotting.plot_markers(
+      node_degree,
+      r.roi_coords,
+      node_cmap=cmap,
+      colorbar=True,
+      axes=ax
+    )
+
+# set column and row titles
+title_rows = r.model_types[1:]
+title_cols = r.meas_trait
+pad = 10
+for ax, title_col in zip(axes[0], title_cols):
+  ax.set_title(title_col)
+
+for i, ax, title_row in zip(range(2), axes[:,0], title_rows):
+  ax.annotate(
+    title_row,
+    xy=(0, 0.5),
+    xytext=(-ax.yaxis.labelpad - pad, 0),
+    textcoords='offset points',
+    size='large', rotation=90,
+    ha='center', va='center'
+  )
+
+fig.set_size_inches(20, 6)
+fig.savefig(
+  os.path.join(r.path_ms_fig, "network-nodes-wide.pdf"),
+  dpi=100, bbox_inches='tight'
+)
+fig.clear()
+```
+
+```{r}
+#| label: plot-chord-ctb
+
+cairo_pdf(fs::path(path_ms_fig, "network-chord.pdf"), width = 8, height = 12)
+arrange_plots(
+  visualize_chord,
+  adj_mat_pool,
+  roi_info = roi_info,
+  link_val = "enrich",
+  add_legend = TRUE
+)
+dev.off()
+
+cairo_pdf(fs::path(path_ms_fig, "network-chord-nohemi.pdf"), width = 8, height = 12)
+arrange_plots(
+  visualize_chord,
+  adj_mat_pool,
+  roi_info = roi_info,
+  link_val = "enrich",
+  add_legend = TRUE,
+  group_by_hemi = FALSE
+)
+dev.off()
+```
+
+```{r}
+#| label: plot-enrichment
+
+cairo_pdf(fs::path(path_ms_fig, "network-corrplot-wide.pdf"), width = 12, height = 8)
+arrange_plots(
+  visualize_corrplot,
+  adj_mat_pool,
+  labels = roi_info$label,
+  which = "enrich"
+)
+dev.off()
+```
+
+```{r}
+#| label: stats-enrichment
+
+adj_mat_pool |> 
+  reframe(
+    map(
+      adj_mat,
+      ~ summarise_adjacency(.x, roi_info$label)
+    ) |> 
+      list_rbind(),
+    .by = c(trait, model_type)
+  ) |> 
+  slice_max(enrich, n = 2, by = c(trait, model_type))
+```
+
+```{r}
+#| label: top-nodes
+
+nodes_degree_sorted <- adj_mat_pool |>
+  select(trait, model_type, node_degree) |>
+  mutate(
+    node_degree = map(
+      node_degree,
+      ~ tibble(
+        index = seq_along(.x),
+        degree = .x
+      )
+    )
+  ) |>
+  unnest(node_degree) |>
+  mutate(
+    rank = min_rank(desc(degree)),
+    .by = c(trait, model_type)
+  )
+
+nodes_degree_sorted |>
+  expand_grid(
+    n_top = seq(10, 100, by = 10)
+  ) |>
+  mutate(top = rank <= n_top) |>
+  nest(.by = c(trait, model_type, n_top)) |>
+  pivot_wider(
+    names_from = trait,
+    values_from = data
+  ) |>
   pivot_longer(
     c(spearman, bifac),
     names_to = "gca",
-    values_to = "node_degree_gca"
+    values_to = "nodes"
   ) |>
   mutate(
-    map2(
-      rapm, node_degree_gca,
-      ~ cor.test(.x, .y, method = "spearman", exact = FALSE) |>
-        broom::tidy()
-    ) |>
-      list_rbind(),
-    .keep = "unused"
-  ) |>
-  pivot_wider(
-    id_cols = model_type,
-    names_from = gca,
-    values_from = estimate
-  ) |>
-  mutate(
-    p_diff = map2_dbl(
-      spearman, bifac,
-      ~ psych::r.test(268, .x, .y, twotailed = FALSE)$p
-    )
+    n = map2_dbl(
+      rapm, nodes,
+      ~ sum(colSums(rbind(.x$top, .y$top)) == 2)
+    ),
+    prop = n / n_top
   )
+
+nodes_degree_sorted |>
+  filter(rank <= 5) |> 
+  left_join(roi_info, by = "index") |>
+  mutate(
+    pmap(
+      list(x.mni, y.mni, z.mni),
+      \(x.mni, y.mni, z.mni) {
+        label4MRI::mni_to_region_name(x.mni, y.mni, z.mni) |>
+          as_tibble()
+      }
+    ) |>
+      list_rbind()
+  ) |>
+  mutate(
+    rank = min_rank(desc(degree)),
+    .by = c(trait, model_type)
+  ) |>
+  arrange(model_type, trait, rank) |>
+  select(trait, model_type, rank, ends_with("mni"), ends_with("label")) |>
+  mutate(
+    trait = meas_trait[as.character(trait)],
+    model_type = model_types[as.character(model_type)],
+    ba.label = as.integer(str_extract(ba.label, "\\d+"))
+  ) |>
+  writexl::write_xlsx(fs::path(path_ms_tbl, "top_nodes.xlsx"))
 ```
