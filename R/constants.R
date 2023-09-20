@@ -59,7 +59,6 @@ scale_sites <- list(
 conds <- c(
   nbackrun1 = "Task",
   rest = "Resting",
-  run1rest = "Combined",
   latent = "Latent"
 )
 scale_conds <- list(
