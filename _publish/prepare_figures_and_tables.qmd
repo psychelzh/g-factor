@@ -967,7 +967,7 @@ nodes_degree_sorted |>
   )
 
 nodes_degree_sorted |>
-  filter(rank <= 5) |> 
+  filter(rank <= 10) |> 
   left_join(roi_info, by = "index") |>
   mutate(
     pmap(
