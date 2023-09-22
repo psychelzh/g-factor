@@ -36,10 +36,18 @@ combine_targets <- function(name, targets, cols_targets) {
 #'   included. `comp_rel` means the composite reliability of latent factors.
 #' @returns A list of new target objects to fit and extract g factor scores.
 #' @export
-include_g_fitting <- function(indices, df_ov, include_comp_rel = TRUE) {
+include_g_fitting <- function(indices, df_ov,
+                              include_comp_rel = TRUE,
+                              name_suffix = NULL) {
+  add_suffix <- function(name) {
+    if (!is.null(name_suffix)){
+      name <- paste(name, name_suffix, sep = "_")
+    }
+    name
+  }
   list(
     tar_target_raw(
-      "mdl_fitted",
+      add_suffix("mdl_fitted"),
       rlang::expr(
         mutate(
           !!rlang::ensym(df_ov),
@@ -53,10 +61,10 @@ include_g_fitting <- function(indices, df_ov, include_comp_rel = TRUE) {
     ),
     if (include_comp_rel) {
       tar_target_raw(
-        "comp_rel",
+        add_suffix("comp_rel"),
         rlang::expr(
           mutate(
-            mdl_fitted,
+            !!rlang::sym(add_suffix("mdl_fitted")),
             prop = map_dbl(mdl, calc_comp_rel),
             .keep = "unused"
           )
@@ -65,10 +73,10 @@ include_g_fitting <- function(indices, df_ov, include_comp_rel = TRUE) {
       )
     },
     tar_target_raw(
-      "scores_g",
+      add_suffix("scores_g"),
       rlang::expr(
         mutate(
-          mdl_fitted,
+          !!rlang::sym(add_suffix("mdl_fitted")),
           scores = map(
             mdl,
             ~ predict_g_score(!!rlang::ensym(indices), .)

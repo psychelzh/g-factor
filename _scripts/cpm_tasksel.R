@@ -58,6 +58,42 @@ task_selection <- tarchetypes::tar_map(
     )
   )
 )
+gca_exclusion <- tarchetypes::tar_map(
+  tibble::tibble(exclude = 1:20),
+  list(
+    tar_target(
+      data_names_exclusion,
+      tibble(
+        target = data_names_ordered[exclude],
+        tasks = list(data_names_ordered[-exclude])
+      )
+    ),
+    include_g_fitting(
+      indices_wider_clean,
+      df_ov = data_names_exclusion,
+      include_comp_rel = FALSE,
+      name_suffix = "exclusion"
+    ),
+    tar_target(
+      cor_task_gca,
+      scores_g_exclusion |>
+        mutate(
+          map2(
+            scores, target,
+            \(x, y) {
+              indices_wider_clean |>
+                select(all_of(c("sub_id", y))) |>
+                left_join(x, by = "sub_id") |>
+                # maybe see: https://github.com/tidyverse/dplyr/issues/6931
+                summarise(r = cor(pick(all_of(y))[[1]], g, use = "pairwise"))
+            }
+          ) |>
+            list_rbind()
+        ) |>
+        select(-scores)
+    )
+  )
+)
 
 # targets pipeline ----
 list(
@@ -67,10 +103,12 @@ list(
     read = qs::qread(!!.x)
   ),
   tar_target(
-    data_names_ordered, {
-      loadings_mdl <- loadings(fit_spearman)
-      rownames(loadings_mdl)[order(loadings_mdl, decreasing = TRUE)]
-    }
+    loadings_mdl,
+    loadings(fit_spearman)
+  ),
+  tar_target(
+    data_names_ordered,
+    rownames(loadings_mdl)[order(loadings_mdl, decreasing = TRUE)]
   ),
   tarchetypes::tar_file_read(
     subjs_combined,
@@ -116,5 +154,10 @@ list(
     combine_targets,
     targets = task_selection,
     cols_targets = names(hypers_behav)
+  ),
+  gca_exclusion,
+  tarchetypes::tar_combine(
+    cor_task_gca,
+    gca_exclusion$cor_task_gca
   )
 )
