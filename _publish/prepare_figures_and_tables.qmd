@@ -213,7 +213,7 @@ bind_rows(
 #| label: influence-on-reliabilty-validity
 
 # composite reliability
-p_comp_rel <- tar_read(comp_rel, store = store_g_invariance) |>
+p_comp_rel <- tar_read(comp_rel, store = store_gca_numtasks) |>
   ggplot(aes(num_vars, prop, group = factor(num_vars))) +
   # geom_violin() +
   geom_boxplot() +
@@ -231,13 +231,13 @@ ggsave(fs::path(path_ms_fig, "com_rel.png"), p_comp_rel, width = 8, height = 6)
 
 datasummary(
   Factor(num_vars) ~ prop * (Mean + SD + Min + Max),
-  tar_read(comp_rel, store = store_g_invariance),
+  tar_read(comp_rel, store = store_gca_numtasks),
   fmt = 3,
   output = fs::path(path_ms_tbl, "com_rel.xlsx")
 )
 
 # visualize pairwise correlation and correlation with RAPM
-rel_pairs <- tar_read(scores_g, store = store_g_invariance) |>
+rel_pairs <- tar_read(scores_g, store = store_gca_numtasks) |>
   group_by(num_vars, idx_rsmp) |>
   filter(n() == 2) |>
   summarise(
@@ -264,7 +264,7 @@ cor_rapm_gca <- bind_rows(
     r_fisher = atanh(r),
     .by = trait
   )
-cor_rapm_sampled <- tar_read(scores_g, store = store_g_invariance) |>
+cor_rapm_sampled <- tar_read(scores_g, store = store_gca_numtasks) |>
   unnest(scores) |>
   inner_join(
     tar_read(scores_rapm, store = store_preproc_behav),
@@ -370,16 +370,16 @@ ggsave(fs::path(path_ms_fig, "task_influence_behav_only.png"), p, width = 10, he
 # prepare data ----
 cpm_pred <- targets::tar_read(
   cpm_pred,
-  store = store_bench_cpm
-) |> 
+  store = store_cpm_bench
+) |>
   mutate(
     type = if_else(
-      str_detect(cond, "eq"), 
-      "Equal Duration", 
+      str_detect(cond, "eq"),
+      "Equal Duration",
       "Origin Duration"
     ),
     cond = str_remove(cond, "eq")
-  ) |> 
+  ) |>
   filter(cond != "run1rest")
 pred_hypers <- cpm_pred |>
   filter(
@@ -460,7 +460,7 @@ p_hypers_parcel <- pred_hypers |>
   ) +
   ggpubr::theme_pubr()
 p_cond_parcel <- pred_cond |>
-  filter(type == "Equal Duration") |> 
+  filter(type == "Equal Duration") |>
   ggplot(aes(cond, all, fill = parcel)) +
   geom_boxplot() +
   rlang::exec(scale_x_discrete, !!!scale_conds) +
@@ -516,7 +516,7 @@ preds_main <- targets::tar_read(
   )
 preds_sampled <- targets::tar_read(
   cpm_pred,
-  store = store_g_invariance
+  store = store_gca_numtasks
 ) |>
   filter(gsr == "with", parcel == "nn268") |>
   summarise(
@@ -550,7 +550,7 @@ p_pred_trend <- preds_sampled |>
 
 dice_clean <- targets::tar_read(
   dice_mask_pairs,
-  store = store_g_invariance
+  store = store_gca_numtasks
 ) |>
   mutate(dice_avg = (pos_dice + neg_dice) / 2) |>
   filter(
@@ -587,7 +587,7 @@ datasummary(
 # supplementary
 dice_clean_supp <- targets::tar_read(
   dice_mask_pairs,
-  store = store_g_invariance
+  store = store_gca_numtasks
 ) |>
   pivot_longer(
     contains("dice"),
@@ -630,7 +630,7 @@ ggsave(fs::path(path_ms_fig, "dice_supp.png"), p_dice_supp, width = 8, height = 
 bench_single <- bind_rows(
   `Single Task` = targets::tar_read(
     cpm_pred_single,
-    store = store_task_selection
+    store = store_cpm_tasksel
   ),
   `Intelligence` = targets::tar_read(
     cpm_pred,
@@ -911,15 +911,15 @@ dev.off()
 ```{r}
 #| label: stats-enrichment
 
-adj_mat_pool |> 
+adj_mat_pool |>
   reframe(
     map(
       adj_mat,
       ~ summarise_adjacency(.x, roi_info$label)
-    ) |> 
+    ) |>
       list_rbind(),
     .by = c(trait, model_type)
-  ) |> 
+  ) |>
   slice_max(enrich, n = 2, by = c(trait, model_type))
 ```
 
@@ -967,7 +967,7 @@ nodes_degree_sorted |>
   )
 
 nodes_degree_sorted |>
-  filter(rank <= 10) |> 
+  filter(rank <= 10) |>
   left_join(roi_info, by = "index") |>
   mutate(
     pmap(

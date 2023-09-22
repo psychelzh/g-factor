@@ -28,7 +28,7 @@ devtools::load_all()
 
 targets::tar_load(
   c(subjs_info_clean, subjs_combined),
-  store = store_bench_cpm
+  store = store_cpm_bench
 )
 subjs_info_clean |>
   filter(sub_id %in% subjs_combined) |>
@@ -54,7 +54,7 @@ Parameters are as follows (mainly inspired by @greene2018):
 #| label: render-results-modality
 #| results: asis
 
-targets::tar_load(cpm_pred, store = store_bench_cpm)
+targets::tar_load(cpm_pred, store = store_cpm_bench)
 config <- distinct(cpm_pred, parcel, gsr)
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
@@ -74,7 +74,7 @@ for (row in seq_len(nrow(config))) {
 #| label: render-results-sex
 #| results: asis
 
-targets::tar_load(cpm_pred_sex, store = here::here(store_bench_cpm))
+targets::tar_load(cpm_pred_sex, store = here::here(store_cpm_bench))
 config <- distinct(cpm_pred_sex, parcel, gsr)
 for (row in seq_len(nrow(config))) {
   knitr::knit_expand(
@@ -107,9 +107,9 @@ The following is to test whether the correlation between the estimated g-factor 
 #|   indicate that more variables might not necesssarily be beneficial to
 #|   the measure of g-factor estimation, esp. when adding low g loading tasks.
 
-targets::tar_load(cpm_pred, store = store_task_selection)
-targets::tar_load(scores_g, store = store_task_selection)
-targets::tar_load(behav_main, store = store_bench_cpm)
+targets::tar_load(cpm_pred, store = store_cpm_tasksel)
+targets::tar_load(scores_g, store = store_cpm_tasksel)
+targets::tar_load(behav_main, store = store_cpm_bench)
 behav_cor <- expand_grid(
   rename(scores_g, tasksel = scores),
   rename(behav_main, baseline = scores)
@@ -178,7 +178,7 @@ cpm_pred |>
 
 targets::tar_load(
   c(cpm_pred_single, data_names_ordered),
-  store = store_task_selection
+  store = store_cpm_tasksel
 )
 cpm_pred_single |>
   mutate(task = factor(task, data_names_ordered)) |>

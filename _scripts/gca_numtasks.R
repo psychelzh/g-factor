@@ -71,7 +71,7 @@ hypers_cpm <- hypers_cpm |>
     thresh_level == 0.01
   )
 
-g_invariance <- tarchetypes::tar_map(
+gca_numtasks <- tarchetypes::tar_map(
   values = cfg_rsmp_vars,
   names = c(num_vars, id_pairs),
   tar_target(
@@ -160,7 +160,7 @@ list(
   # first column is identifier
   tar_target(data_names_all, names(indices_wider_clean)[-1]),
   prepare_permute_cpm2(config),
-  g_invariance,
+  gca_numtasks,
   lapply(
     rlang::exprs(
       data_names,
@@ -169,7 +169,7 @@ list(
       cpm_pred
     ),
     combine_targets,
-    targets = g_invariance,
+    targets = gca_numtasks,
     cols_targets = c("num_vars", "id_pairs")
   ),
   mask_dices,

@@ -202,7 +202,7 @@ indices_clean |>
 #|   **Variance Explained by the g Factor.** The horizontal line gives the variance explained
 #|   by the g factor estimated from all the tasks.
 
-targets::tar_load(var_exp, store = store_g_invariance)
+targets::tar_load(var_exp, store = store_gca_numtasks)
 targets::tar_load(var_exp_full, store = store_preproc_behav)
 var_exp |>
   ggplot(aes(num_vars, prop)) +
@@ -230,7 +230,7 @@ var_exp |>
 #|   horizontal line is the correlation between gF score estimated from all task
 #|   indices and RAPM.
 
-targets::tar_load(scores_g, store = store_g_invariance)
+targets::tar_load(scores_g, store = store_gca_numtasks)
 targets::tar_load(
   c(scores_g_full, indices_rapm),
   store = store_preproc_behav
@@ -269,7 +269,7 @@ cor_rapm_sampled |>
 #|   **Top RAPM correlated tasks.** The tasks for each top 10 samples are displayed.
 #| eval: false
 
-targets::tar_load(data_names, store = store_g_invariance)
+targets::tar_load(data_names, store = store_gca_numtasks)
 tasks_high_cor_rapm <- cor_rapm_sampled |>
   slice_max(cor, n = 10, by = num_vars) |>
   inner_join(
@@ -334,7 +334,7 @@ Seemingly the correlation reaches a plateau? But I am doubting here.
 
 targets::tar_load(
   cpm_pred_reg_nosite,
-  store = store_bench_cpm
+  store = store_cpm_bench
 )
 
 pred_hypers <- cpm_pred_reg_nosite |>
@@ -434,7 +434,7 @@ cpm_pred_reg_nosite |>
 #|   **Prediction Trending (based on CPM)**.
 
 targets::tar_load(cpm_pred_main_reg_nosite, store = store_cpm_main)
-targets::tar_load(cpm_pred_reg_nosite, store = store_g_invariance)
+targets::tar_load(cpm_pred_reg_nosite, store = store_gca_numtasks)
 preds_main <- cpm_pred_main_reg_nosite |>
   filter(
     cond == "nbackrun1",
@@ -527,7 +527,7 @@ tasks_high_pred |>
 ```{r}
 #| label: load-data-dice
 
-targets::tar_load(dice_mask_pairs, store = store_g_invariance)
+targets::tar_load(dice_mask_pairs, store = store_gca_numtasks)
 dice_clean <- dice_mask_pairs |>
   filter(reg_covars == "yes") |>
   pivot_longer(
@@ -672,8 +672,8 @@ The following is to test whether the correlation between the estimated g-factor 
 #|   indicate that more variables might not necesssarily be beneficial to
 #|   the measure of g-factor estimation, esp. when adding low g loading tasks.
 
-targets::tar_load(cpm_pred_reg_nosite, store = store_task_selection)
-targets::tar_load(scores_g, store = store_task_selection)
+targets::tar_load(cpm_pred_reg_nosite, store = store_cpm_tasksel)
+targets::tar_load(scores_g, store = store_cpm_tasksel)
 targets::tar_load(behav_main, store = store_preproc_behav)
 behav_cor <- expand_grid(
   rename(scores_g, tasksel = scores),
@@ -742,7 +742,7 @@ cpm_pred_reg_nosite |>
 
 targets::tar_load(
   c(cpm_pred_single_reg_nosite, data_names_ordered),
-  store = store_task_selection
+  store = store_cpm_tasksel
 )
 bind_rows(
   `Single Task` = cpm_pred_single_reg_nosite,
@@ -797,7 +797,7 @@ brain_masks <- targets::tar_read(
   )
 files_atlas <- map_chr(
   parcels,
-  ~ here::here("data/atlases", tolower(.x)) |> 
+  ~ here::here("data/atlases", tolower(.x)) |>
     fs::path_ext_set("rds")
 )
 options(chord.link.val = "relative")
