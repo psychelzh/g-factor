@@ -662,6 +662,28 @@ ggsave(fs::path(path_ms_fig, "bench_single.png"), p, width = 8, height = 6)
 ```
 
 ```{r}
+#| label: single-task-loading-gca
+
+tar_load(loadings_mdl, store = store_cpm_tasksel)
+tar_load(cor_task_gca, store = store_cpm_tasksel)
+loading_corrs <- cor_task_gca |> 
+  left_join(
+    as_tibble(unclass(loadings_mdl), rownames = "target"), 
+    by = "target"
+  )
+p <- loading_corrs |> 
+  ggplot(aes(f1, r)) +
+  geom_point() +
+  ggpubr::theme_pubr() +
+  labs(x = "Loading on GCA", y = "Correlation with GCA")
+ggsave(fs::path(path_ms_fig, "scatter-loading-cor_gca.png"), p, width = 8, height = 6)
+writexl::write_xlsx(
+  loading_corrs, 
+  fs::path(path_ms_tbl, "loading-cor_gca.xlsx")
+)
+```
+
+```{r}
 #| label: prepare-brain-mask-data
 
 # ROI preparation
