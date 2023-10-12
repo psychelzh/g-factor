@@ -19,3 +19,6 @@ project_cpm_tasksel:
 project_gca_numtasks:
   script: _scripts/gca_numtasks.R
   store: _targets/gca_numtasks
+project_gca_tasksel:
+  script: _scripts/gca_tasksel.R
+  store: _targets/gca_tasksel
