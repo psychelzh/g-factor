@@ -19,6 +19,14 @@ path_ms <- normalizePath(
 path_ms_fig <- fs::path(path_ms, "figures")
 path_ms_tbl <- fs::path(path_ms, "tables")
 
+config_task_index <- read_csv("tasks_index.csv", show_col_types = FALSE)
+task_name_abbr <- config_task_index |>
+  select(abbr_name, task_index) |>
+  deframe()
+match_abbr <- function(tasks) {
+  names(task_name_abbr)[match(tasks, task_name_abbr)]
+}
+
 # helper functions
 arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
   add_custom_title <- function(text, where = c("row", "column")) {
@@ -57,9 +65,7 @@ arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
     }
   }
 }
-average_correlation <- function(x) {
-  tanh(mean(atanh(x)))
-}
+average_correlation <- function(x) tanh(mean(atanh(x)))
 ```
 
 ```{r}
@@ -69,7 +75,6 @@ targets::tar_load(
   c(subjs_info_clean, indices_wider_clean, indices_clean),
   store = store_preproc_behav
 )
-dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
 subjs_combined <- scan(here::here(file_subjs_combined))
 
 descr_behav <- subjs_info_clean |>
@@ -81,7 +86,7 @@ descr_fmri <- subjs_info_clean |>
   select(sub_id, age, sex) |>
   report::report_participants()
 
-indices <- dims |>
+indices <- config_task_index |>
   left_join(
     indices_clean |>
       semi_join(indices_wider_clean, by = "sub_id") |>
@@ -95,7 +100,10 @@ indices <- dims |>
       ),
     by = "task_index"
   ) |>
-  mutate(task_index = as_factor(task_index))
+  mutate(
+    task_index = as_factor(task_index),
+    abbr_name = as_factor(abbr_name)
+  )
 indices |>
   reframe(
     psych::describe(score),
@@ -111,7 +119,7 @@ indices |>
 p_hist <- indices |>
   ggplot(aes(score)) +
   geom_histogram() +
-  facet_wrap(~ task_index, scales = "free_x", ncol = 4) +
+  facet_wrap(~ abbr_name, scales = "free_x", ncol = 4) +
   ggpubr::theme_pubr() +
   labs(x = "Score", y = "Count")
 ggsave(fs::path(path_ms_fig, "hist_all_tasks.png"), p_hist, width = 12, height = 10)
@@ -120,27 +128,27 @@ ggsave(fs::path(path_ms_fig, "hist_all_tasks.png"), p_hist, width = 12, height =
 ```{r}
 #| label: cfa-statistics
 
-targets::tar_load(data_subsamples, store = store_preproc_behav)
-dims <- read_csv("tasks_index.csv", show_col_types = FALSE)
+tar_load(data_subsamples, store = store_preproc_behav)
+tar_load(fit_spearman, store = store_preproc_behav)
+tar_load(fit_bifac, store = store_preproc_behav)
 
 p_miss <- indices_wider_clean |>
-  select(-sub_id) |>
+  select(all_of(task_name_abbr)) |>
   naniar::vis_miss() +
   theme(axis.text.x = element_text(angle = 90))
 ggsave(fs::path(path_ms_fig, "missing_pattern.png"), p_miss, width = 8, height = 6)
 
 p_corrmat <- indices_wider_clean |>
-  select(-sub_id) |>
+  select(all_of(task_name_abbr)) |>
   ggstatsplot::ggcorrmat(
-    cor.vars = all_of(dims$task_index),
+    cor.vars = all_of(config_task_index$abbr_name),
     colors = c("#084594", "white", "#99000D"),
     pch = "",
     ggcorrplot.args = list(pch.cex = 2, lab_size = 2)
   ) +
   scale_x_discrete(position = "top") +
   theme(axis.text.x.top = element_text(hjust = 0), aspect.ratio = 1)
-ggsave(fs::path(path_ms_fig, "cfa_task_corrs.png"), p_corrmat, width = 8, height = 6)
-ggsave(fs::path(path_ms_fig, "cfa_task_corrs.pdf"), p_corrmat, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "cfa_task_corrs.pdf"), p_corrmat, width = 10, height = 8)
 
 vss_stats <- data_subsamples[[1]] |>
   select(-sub_id) |>
@@ -159,44 +167,54 @@ p_nfact <- vss_stats$vss.stats |>
     name = "Empirical BIC"
   ) +
   ggpubr::theme_pubr()
-ggsave(fs::path(path_ms_fig, "cfa_nfact.pdf"), p_nfact, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "cfa_nfact.pdf"), p_nfact, width = 6, height = 8)
 
-tar_load(fit_spearman, store = store_preproc_behav)
+p_cfa_prep <- p_corrmat + p_nfact +
+  plot_annotation(tag_levels = "A")
+ggsave(fs::path(path_ms_fig, "cfa_prep.png"), p_cfa_prep, width = 12, height = 6)
+
 cairo_pdf(
   filename = fs::path(path_ms_fig, "cfa_struct_spearman.pdf"),
-  width = 16, height = 4
+  width = 8, height = 16
 )
 semPlot::semPaths(
   fit_spearman$nf1,
   whatLabels = "std",
+  rotation = 2,
   layout = "tree2",
-  nodeLabels = c(rownames(loadings(fit_spearman)), "GCA-S"),
+  nodeLabels = c(match_abbr(rownames(loadings(fit_spearman))), "GCA-S"),
   intercepts = FALSE,
   nCharNodes = 0,
-  sizeMan = 3.5,
-  edge.label.cex = 0.4,
-  residuals = FALSE
+  sizeMan = 5,
+  sizeMan2 = 3.5,
+  edge.label.cex = 0.5,
+  residuals = TRUE
 )
 dev.off()
 
-tar_load(fit_bifac, store = store_preproc_behav)
 group_struct <- parameterTable(fit_bifac) |> filter(op == "=~", lhs != "g")
 cairo_pdf(
   filename = fs::path(path_ms_fig, "cfa_struct_bifac.pdf"),
-  width = 16, height = 6
+  width = 8, height = 16
 )
 semPlot::semPaths(
   fit_bifac,
   whatLabels = "std",
   layout = "tree2",
-  nodeLabels = c(group_struct$rhs, "GCA-B", unique(group_struct$lhs)),
+  rotation = 2,
+  nodeLabels = c(
+    match_abbr(group_struct$rhs),
+    "GCA-B",
+    unique(group_struct$lhs)
+  ),
   intercepts = FALSE,
   bifactor = "g",
   nCharNodes = 0,
-  sizeMan = 3.5,
-  edge.label.cex = 0.4,
+  sizeMan = 5,
+  sizeMan2 = 3.5,
+  edge.label.cex = 0.5,
   exoCov = FALSE,
-  residuals = FALSE
+  residuals = TRUE
 )
 dev.off()
 
