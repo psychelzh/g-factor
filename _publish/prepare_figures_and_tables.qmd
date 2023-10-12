@@ -28,7 +28,7 @@ match_abbr <- function(tasks) {
 }
 
 # helper functions
-arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
+arrange_plots <- function(plot_fun, adj_mat_pool, ..., cex_title = 1) {
   add_custom_title <- function(text, where = c("row", "column")) {
     where <- match.arg(where)
     if (where == "row") {
@@ -38,7 +38,7 @@ arrange_plots <- function(plot_fun, adj_mat_pool, ...) {
       side <- 3
       at <- grconvertX(0.5, "npc", "nic")
     }
-    mtext(text, side = side, line = 0, at = at, outer = TRUE)
+    mtext(text, side = side, line = 0, at = at, outer = TRUE, cex = cex_title)
   }
   par(oma = c(0, 2, 2, 0), mfrow = c(2, 3), mar = c(0, 0, 0, 0) + 0.1)
   for (idx_row in 1:2) {
@@ -890,7 +890,7 @@ title_rows = r.model_types[1:]
 title_cols = r.meas_trait
 pad = 10
 for ax, title_col in zip(axes[0], title_cols):
-  ax.set_title(title_col)
+  ax.set_title(title_col, size='xx-large')
 
 for i, ax, title_row in zip(range(2), axes[:,0], title_rows):
   ax.annotate(
@@ -898,7 +898,7 @@ for i, ax, title_row in zip(range(2), axes[:,0], title_rows):
     xy=(0, 0.5),
     xytext=(-ax.yaxis.labelpad - pad, 0),
     textcoords='offset points',
-    size='large', rotation=90,
+    size='xx-large', rotation=90,
     ha='center', va='center'
   )
 
@@ -943,7 +943,10 @@ arrange_plots(
   visualize_corrplot,
   adj_mat_pool,
   labels = roi_info$label,
-  which = "enrich"
+  which = "enrich",
+  tl.col = "black",
+  tl.cex = 1.4,
+  cex_title = 1.6
 )
 dev.off()
 ```
