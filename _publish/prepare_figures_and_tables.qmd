@@ -228,6 +228,43 @@ bind_rows(
 ```
 
 ```{r}
+#| label: single-task-loading-gca
+
+tar_load(fit_spearman, store = store_gca_tasksel)
+tar_load(r_with_gca_s, store = store_gca_tasksel)
+p_loading <- loadings(fit_spearman) |>
+  unclass() |> 
+  as_tibble(rownames = "task_index") |>
+  left_join(config_task_index, by = "task_index") |>
+  arrange(desc(f1)) |>
+  mutate(abbr_name = as_factor(abbr_name)) |>
+  ggplot(aes(abbr_name, f1)) +
+  geom_point() +
+  ggpubr::theme_pubclean() +
+  labs(x = "Task Indicator", y = "GCA Loading")
+p_expvars <- r_with_gca_s |>
+  mutate(r2 = r^2) |>
+  ggplot(aes(num_task, r2, color = direction)) +
+  geom_point() +
+  geom_line() +
+  ggthemes::scale_color_few(
+    name = "Direction", 
+    labels = c(desc = "Highest First", asc = "Lowest First")
+  ) +
+  scale_x_continuous(
+    name = "Number of Tasks", 
+    breaks = scales::breaks_width(3)
+  ) +
+  scale_y_continuous(name = "Explained Variance") +
+  ggpubr::theme_pubclean()
+p_single <- p_loading / p_expvars + plot_annotation(tag_levels = "A")
+ggsave(
+  fs::path(path_ms_fig, "p_single.png"), p_single, 
+  width = 10, height = 10
+)
+```
+
+```{r}
 #| label: influence-on-reliabilty-validity
 
 # composite reliability
@@ -677,28 +714,6 @@ p <- bench_single |>
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "Task Indicator", y = "CPM Performance")
 ggsave(fs::path(path_ms_fig, "bench_single.png"), p, width = 8, height = 6)
-```
-
-```{r}
-#| label: single-task-loading-gca
-
-tar_load(loadings_mdl, store = store_cpm_tasksel)
-tar_load(cor_task_gca, store = store_cpm_tasksel)
-loading_corrs <- cor_task_gca |> 
-  left_join(
-    as_tibble(unclass(loadings_mdl), rownames = "target"), 
-    by = "target"
-  )
-p <- loading_corrs |> 
-  ggplot(aes(f1, r)) +
-  geom_point() +
-  ggpubr::theme_pubr() +
-  labs(x = "Loading on GCA", y = "Correlation with GCA")
-ggsave(fs::path(path_ms_fig, "scatter-loading-cor_gca.png"), p, width = 8, height = 6)
-writexl::write_xlsx(
-  loading_corrs, 
-  fs::path(path_ms_tbl, "loading-cor_gca.xlsx")
-)
 ```
 
 ```{r}
