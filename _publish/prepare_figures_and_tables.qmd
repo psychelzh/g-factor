@@ -241,6 +241,7 @@ p_loading <- loadings(fit_spearman) |>
   ggplot(aes(abbr_name, f1)) +
   geom_point() +
   ggpubr::theme_pubclean() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Task Indicator", y = "GCA Loading")
 p_expvars <- r_with_gca_s |>
   mutate(r2 = r^2) |>
@@ -260,7 +261,7 @@ p_expvars <- r_with_gca_s |>
 p_single <- p_loading / p_expvars + plot_annotation(tag_levels = "A")
 ggsave(
   fs::path(path_ms_fig, "p_single.png"), p_single, 
-  width = 10, height = 10
+  width = 8, height = 6
 )
 ```
 
@@ -357,16 +358,17 @@ p_rel <- rel_pairs |>
     data = predicted_rel,
     mapping = aes(num_vars, r),
     size = 1,
-    color = "#FFD966"
+    color = "black"
   ) +
   geom_line(
     data = predicted_rel,
     mapping = aes(num_vars, r),
-    linetype = "dotted",
-    color = "#FFD966"
+    linetype = "dashed",
+    color = "black"
   ) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
-  ggpubr::theme_pubclean() +
+  ggpubr::theme_pubr() +
+  theme(panel.grid.major.y = element_line(linetype = "dotted")) +
   labs(x = "Number of Tasks", y = "Correlation Between Pairs")
 
 fit_rapm <- nls(
@@ -401,22 +403,23 @@ p_cor_ramp <- cor_rapm_sampled |>
     data = predicted_rapm,
     mapping = aes(num_vars, r),
     size = 1,
-    color = "#FFD966"
+    color = "black"
   ) +
   geom_line(
     data = predicted_rapm,
     mapping = aes(num_vars, r),
-    linetype = "dotted",
-    color = "#FFD966"
+    linetype = "dashed",
+    color = "black"
   ) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
-  scale_color_manual(values = color_traits) +
-  ggpubr::theme_pubclean() +
+  scale_color_grey() +
+  ggpubr::theme_pubr() +
+  theme(panel.grid.major.y = element_line(linetype = "dotted")) +
   labs(x = "Number of Tasks", y = "Correlation with RAPM")
 
 p <- p_rel / p_cor_ramp +
   plot_annotation(tag_levels = "A")
-ggsave(fs::path(path_ms_fig, "task_influence_behav_only.png"), p, width = 10, height = 6)
+ggsave(fs::path(path_ms_fig, "task_influence_behav_only.png"), p, width = 10, height = 8)
 ```
 
 ```{r}
