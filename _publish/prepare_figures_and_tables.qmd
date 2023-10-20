@@ -69,7 +69,7 @@ average_correlation <- function(x) tanh(mean(atanh(x)))
 ```
 
 ```{r}
-#| label: descriptive-statistics
+#| label: fig-supp-1&2
 
 targets::tar_load(
   c(subjs_info_clean, indices_wider_clean, indices_clean),
@@ -122,21 +122,16 @@ p_hist <- indices |>
   facet_wrap(~ abbr_name, scales = "free_x", ncol = 4) +
   ggpubr::theme_pubr() +
   labs(x = "Score", y = "Count")
-ggsave(fs::path(path_ms_fig, "hist_all_tasks.png"), p_hist, width = 12, height = 10)
-```
-
-```{r}
-#| label: cfa-statistics
-
-tar_load(data_subsamples, store = store_preproc_behav)
-tar_load(fit_spearman, store = store_preproc_behav)
-tar_load(fit_bifac, store = store_preproc_behav)
+ggsave(fs::path(path_ms_fig, "fig-supp-1.png"), p_hist, width = 12, height = 10)
 
 p_miss <- indices_wider_clean |>
   select(all_of(task_name_abbr)) |>
   naniar::vis_miss() +
   theme(axis.text.x = element_text(angle = 90))
-ggsave(fs::path(path_ms_fig, "missing_pattern.png"), p_miss, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "fig-supp-2.png"), p_miss, width = 8, height = 6)
+
+path_fig_1 <- fs::path(path_ms_fig, "fig-1")
+if (!fs::dir_exists(path_fig_1)) fs::dir_create(path_fig_1)
 
 p_corrmat <- indices_wider_clean |>
   select(all_of(task_name_abbr)) |>
@@ -148,7 +143,20 @@ p_corrmat <- indices_wider_clean |>
   ) +
   scale_x_discrete(position = "top") +
   theme(axis.text.x.top = element_text(hjust = 0), aspect.ratio = 1)
-ggsave(fs::path(path_ms_fig, "cfa_task_corrs.pdf"), p_corrmat, width = 10, height = 8)
+ggsave(
+  fs::path(path_fig_1, "fig-1-corrmat.pdf"), 
+  p_corrmat, 
+  width = 10, 
+  height = 8
+)
+```
+
+```{r}
+#| label: fig-1
+
+tar_load(data_subsamples, store = store_preproc_behav)
+tar_load(fit_spearman, store = store_preproc_behav)
+tar_load(fit_bifac, store = store_preproc_behav)
 
 vss_stats <- data_subsamples[[1]] |>
   select(-sub_id) |>
@@ -167,14 +175,10 @@ p_nfact <- vss_stats$vss.stats |>
     name = "Empirical BIC"
   ) +
   ggpubr::theme_pubr()
-ggsave(fs::path(path_ms_fig, "cfa_nfact.pdf"), p_nfact, width = 6, height = 8)
-
-p_cfa_prep <- p_corrmat + p_nfact +
-  plot_annotation(tag_levels = "A")
-ggsave(fs::path(path_ms_fig, "cfa_prep.png"), p_cfa_prep, width = 12, height = 6)
+ggsave(fs::path(path_fig_1, "fig-1-nfact.pdf"), p_nfact, width = 6, height = 8)
 
 cairo_pdf(
-  filename = fs::path(path_ms_fig, "cfa_struct_spearman.pdf"),
+  filename = fs::path(path_fig_1, "fig-1-spearman.pdf"),
   width = 8, height = 16
 )
 semPlot::semPaths(
@@ -194,7 +198,7 @@ dev.off()
 
 group_struct <- parameterTable(fit_bifac) |> filter(op == "=~", lhs != "g")
 cairo_pdf(
-  filename = fs::path(path_ms_fig, "cfa_struct_bifac.pdf"),
+  filename = fs::path(path_fig_1, "fig-1-bifac.pdf"),
   width = 8, height = 16
 )
 semPlot::semPaths(
@@ -228,7 +232,7 @@ bind_rows(
 ```
 
 ```{r}
-#| label: single-task-loading-gca
+#| label: fig-supp-3
 
 tar_load(fit_spearman, store = store_gca_tasksel)
 tar_load(r_with_gca_s, store = store_gca_tasksel)
@@ -239,16 +243,19 @@ p_loading <- loadings(fit_spearman) |>
   arrange(desc(f1)) |>
   mutate(abbr_name = as_factor(abbr_name)) |>
   ggplot(aes(abbr_name, f1)) +
-  geom_point() +
-  ggpubr::theme_pubclean() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_bar(stat = "identity", color = "black", fill = NA) +
+  ggpubr::theme_pubr() +
+  theme(
+    panel.grid.major.y = element_line(linetype = "dotted"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
   labs(x = "Task Indicator", y = "GCA Loading")
 p_expvars <- r_with_gca_s |>
-  mutate(r2 = r^2) |>
+  mutate(r2 = r^2, direction = as_factor(direction)) |>
   ggplot(aes(num_task, r2, color = direction)) +
   geom_point() +
   geom_line() +
-  ggthemes::scale_color_few(
+  scale_color_grey(
     name = "Direction", 
     labels = c(desc = "Highest First", asc = "Lowest First")
   ) +
@@ -257,16 +264,17 @@ p_expvars <- r_with_gca_s |>
     breaks = scales::breaks_width(3)
   ) +
   scale_y_continuous(name = "Explained Variance") +
-  ggpubr::theme_pubclean()
+  ggpubr::theme_pubr() +
+  theme(panel.grid.major.y = element_line(linetype = "dotted"))
 p_single <- p_loading / p_expvars + plot_annotation(tag_levels = "A")
 ggsave(
-  fs::path(path_ms_fig, "p_single.png"), p_single, 
+  fs::path(path_ms_fig, "fig-supp-3.png"), p_single, 
   width = 8, height = 6
 )
 ```
 
 ```{r}
-#| label: influence-on-reliabilty-validity
+#| label: fig-2
 
 # composite reliability
 p_comp_rel <- tar_read(comp_rel, store = store_gca_numtasks) |>
@@ -363,7 +371,7 @@ p_rel <- rel_pairs |>
   geom_line(
     data = predicted_rel,
     mapping = aes(num_vars, r),
-    linetype = "dashed",
+    linetype = "longdash",
     color = "black"
   ) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
@@ -387,17 +395,9 @@ p_cor_ramp <- cor_rapm_sampled |>
   ggplot(aes(num_vars, r)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
-  geomtextpath::geom_texthline(
-    aes(
-      yintercept = r,
-      # https://github.com/AllanCameron/geomtextpath/issues/75
-      label = gsub("-", "\u2212", meas_trait[trait], fixed = T),
-      color = trait
-    ),
-    cor_rapm_gca,
-    hjust = 0,
-    linetype = "dashed",
-    show.legend = FALSE
+  geom_hline(
+    aes(yintercept = r, linetype = trait),
+    cor_rapm_gca
   ) +
   geom_point(
     data = predicted_rapm,
@@ -408,22 +408,26 @@ p_cor_ramp <- cor_rapm_sampled |>
   geom_line(
     data = predicted_rapm,
     mapping = aes(num_vars, r),
-    linetype = "dashed",
+    linetype = "longdash",
     color = "black"
   ) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
-  scale_color_grey() +
+  rlang::exec(
+    scale_linetype_manual, 
+    !!!scale_meas_trait(1:2), 
+    values = lty_traits
+  ) +
   ggpubr::theme_pubr() +
   theme(panel.grid.major.y = element_line(linetype = "dotted")) +
   labs(x = "Number of Tasks", y = "Correlation with RAPM")
 
 p <- p_rel / p_cor_ramp +
   plot_annotation(tag_levels = "A")
-ggsave(fs::path(path_ms_fig, "task_influence_behav_only.png"), p, width = 10, height = 8)
+ggsave(fs::path(path_ms_fig, "fig-2.png"), p, width = 8, height = 6)
 ```
 
 ```{r}
-#| label: benchmark-cpm
+#| label: fig-3-and-fig-supp-4
 
 # prepare data ----
 cpm_pred <- targets::tar_read(
@@ -497,7 +501,7 @@ p <- p_hypers / p_cond +
   plot_layout(heights = c(1, 2)) +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
-ggsave(fs::path(path_ms_fig, "bench_cpm.png"), p, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "fig-3.png"), p, width = 8, height = 6)
 
 # plot in supplementary ----
 p_hypers_parcel <- pred_hypers |>
@@ -533,7 +537,7 @@ p_parcel <- p_hypers_parcel / p_cond_parcel +
   plot_layout(heights = c(1, 2), guides = "collect") +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
-ggsave(fs::path(path_ms_fig, "bench_cpm_with_parcels.png"), p_parcel, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "fig-supp-4.png"), p_parcel, width = 8, height = 6)
 
 # extra check ----
 p_duration <- pred_cond |>
@@ -552,7 +556,7 @@ ggsave(fs::path(path_ms_fig, "bench_cpm_duration.png"), p_duration, width = 8, h
 ```
 
 ```{r}
-#| label: neural-prediction
+#| label: fig-4-and-fig-supp-5
 
 preds_main <- targets::tar_read(
   cpm_pred,
@@ -589,21 +593,20 @@ p_pred_trend <- preds_sampled |>
   ggplot(aes(num_vars, estimate)) +
   ggdist::stat_slabinterval() +
   ggdist::stat_dots(side = "left") +
-  geomtextpath::geom_texthline(
-    aes(
-      color = trait,
-      yintercept = estimate,
-      label = gsub("-", "\u2212", meas_trait[trait], fixed = T)
-    ),
-    preds_main,
-    hjust = 0,
-    linetype = "dashed",
-    show.legend = FALSE
+  geom_hline(
+    aes(linetype = trait, yintercept = estimate),
+    preds_main
   ) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
-  scale_color_manual(values = color_traits) +
+  rlang::exec(
+    scale_linetype_manual, 
+    !!!scale_meas_trait(), 
+    values = lty_traits
+  ) +
   ggpubr::theme_pubr() +
-  theme(legend.position = c(0.8, 0.2)) +
+  theme(
+    panel.grid.major.y = element_line(linetype = "dotted")
+  ) +
   labs(x = "Number of Tasks", y = "CPM Performance")
 
 dice_clean <- targets::tar_read(
@@ -623,12 +626,13 @@ p_dice_avg <- dice_clean |>
   ggdist::stat_dots(side = "left") +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
   ggpubr::theme_pubr() +
+  theme(panel.grid.major.y = element_line(linetype = "dotted")) +
   labs(x = "Number of Tasks", y = "Dice Similarity")
 
 p <- p_pred_trend + p_dice_avg +
   plot_layout(widths = c(2, 1)) +
   plot_annotation(tag_levels = "A")
-ggsave(fs::path(path_ms_fig, "pred_cpm_dice_avg.png"), p, width = 8, height = 4)
+ggsave(fs::path(path_ms_fig, "fig-4.png"), p, width = 8, height = 4)
 
 datasummary(
   Factor(num_vars) ~ estimate * (Median + SD + Max + Min),
@@ -678,7 +682,7 @@ p_dice_supp <- dice_clean_supp |>
     )
   ) +
   labs(x = "Number of Tasks", y = "Dice Similarity")
-ggsave(fs::path(path_ms_fig, "dice_supp.png"), p_dice_supp, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "fig-supp-5.png"), p_dice_supp, width = 8, height = 6)
 ```
 
 ```{r}
@@ -772,6 +776,9 @@ adj_mat_pool <- brain_masks |>
     row = as.integer(droplevels(model_type)),
     col = as.integer(trait)
   )
+# prepare figure path
+path_fig_5 <- fs::path(path_ms_fig, "fig-5")
+if (!fs::dir_exists(path_fig_5)) fs::dir_create(path_fig_5)
 ```
 
 ```{r}
@@ -872,101 +879,70 @@ ggsave(fs::path(path_ms_fig, "network-similarity.pdf"), width = 12, height = 3)
 ```
 
 ```{python}
-#| label: plot-markers
+#| label: fig-5-markers
 
 import os
+import pathlib
 import numpy as np
 import pandas as pd
 from nilearn import plotting
 import matplotlib.pyplot as plt
 
-fig = plt.figure()
-gs = fig.add_gridspec(nrows=2, ncols=3, wspace=0.1, hspace=0)
-axes = gs.subplots()
-
 # Compute node degree values (dummy values for demonstration)
-for row in range(2):
-  for col in range(3):
-    ax = axes[row, col]
-    cur_adj_mat = r.adj_mat_pool.query('row == @row + 1 & col == @col + 1').to_dict(orient='records')[0]
+for idx_row in range(2):
+  for idx_col in range(3):
+    cur_adj_mat = (
+      r.adj_mat_pool
+       .query('row == @idx_row + 1 & col == @idx_col + 1')
+       .to_dict(orient='records')[0]
+    )
     model_type = cur_adj_mat['model_type']
     node_degree = cur_adj_mat['node_degree']
+    row = cur_adj_mat['row']
+    col = cur_adj_mat['col']
     if model_type == "pos":
       cmap = plt.cm.Reds
     else:
       cmap = plt.cm.Blues
+    fig = plt.figure()
     plotting.plot_markers(
       node_degree,
       r.roi_coords,
       node_cmap=cmap,
       colorbar=True,
-      axes=ax
+      figure=fig
     )
+    fig.set_size_inches(w=4, h=2)
+    fig.savefig(
+      os.path.join(
+        r.path_fig_5, 
+        f"fig-5_row-{row}_col-{col}_markers.pdf"
+      )
+    )
+    plt.close(fig)
+```
 
-# set column and row titles
-title_rows = r.model_types[1:]
-title_cols = r.meas_trait
-pad = 10
-for ax, title_col in zip(axes[0], title_cols):
-  ax.set_title(title_col, size='xx-large')
+```{r}
+#| label: fig-5-enrich
 
-for i, ax, title_row in zip(range(2), axes[:,0], title_rows):
-  ax.annotate(
-    title_row,
-    xy=(0, 0.5),
-    xytext=(-ax.yaxis.labelpad - pad, 0),
-    textcoords='offset points',
-    size='xx-large', rotation=90,
-    ha='center', va='center'
+adj_mat_pool |> 
+  pwalk(
+    \(adj_mat, row, col, model_type, ...) {
+      file_name <- fs::path(
+        path_fig_5,
+        str_glue("fig-5_row-{row}_col-{col}_enrich.pdf")
+      )
+      cairo_pdf(file_name, width = 4, height = 4)
+      visualize_corrplot(
+        adj_mat,
+        model_type = model_type,
+        labels = roi_info$label,
+        which = "enrich",
+        tl.col = "black"
+      )
+      dev.off()
+    }
   )
-
-fig.set_size_inches(20, 6)
-fig.savefig(
-  os.path.join(r.path_ms_fig, "network-nodes-wide.pdf"),
-  dpi=100, bbox_inches='tight'
-)
-fig.clear()
-```
-
-```{r}
-#| label: plot-chord-ctb
-
-cairo_pdf(fs::path(path_ms_fig, "network-chord.pdf"), width = 8, height = 12)
-arrange_plots(
-  visualize_chord,
-  adj_mat_pool,
-  roi_info = roi_info,
-  link_val = "enrich",
-  add_legend = TRUE
-)
-dev.off()
-
-cairo_pdf(fs::path(path_ms_fig, "network-chord-nohemi.pdf"), width = 8, height = 12)
-arrange_plots(
-  visualize_chord,
-  adj_mat_pool,
-  roi_info = roi_info,
-  link_val = "enrich",
-  add_legend = TRUE,
-  group_by_hemi = FALSE
-)
-dev.off()
-```
-
-```{r}
-#| label: plot-enrichment
-
-cairo_pdf(fs::path(path_ms_fig, "network-corrplot-wide.pdf"), width = 12, height = 8)
-arrange_plots(
-  visualize_corrplot,
-  adj_mat_pool,
-  labels = roi_info$label,
-  which = "enrich",
-  tl.col = "black",
-  tl.cex = 1.4,
-  cex_title = 1.6
-)
-dev.off()
 ```
 
 ```{r}

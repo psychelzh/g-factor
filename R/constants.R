@@ -126,11 +126,20 @@ color_traits <- c(
   bifac = "#d95f02",
   rapm = "#7570b3"
 )
-scale_meas_trait <- list(
-  name = "Trait Measure",
-  limits = names(meas_trait),
-  labels = meas_trait
+lty_traits <- c(
+  spearman = "dashed",
+  bifac = "dotted",
+  rapm = "dotdash"
 )
+scale_meas_trait <- function(index = NULL) {
+  index <- index %||% seq_along(meas_trait)
+  meas_trait <- meas_trait[index]
+  list(
+    name = "Trait Measure",
+    limits = names(meas_trait),
+    labels = meas_trait
+  )
+}
 
 # scales for binarize parameters
 binarize_methods <- c(
