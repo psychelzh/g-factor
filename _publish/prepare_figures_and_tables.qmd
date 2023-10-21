@@ -144,9 +144,9 @@ p_corrmat <- indices_wider_clean |>
   scale_x_discrete(position = "top") +
   theme(axis.text.x.top = element_text(hjust = 0), aspect.ratio = 1)
 ggsave(
-  fs::path(path_fig_1, "fig-1-corrmat.pdf"), 
-  p_corrmat, 
-  width = 10, 
+  fs::path(path_fig_1, "fig-1-corrmat.pdf"),
+  p_corrmat,
+  width = 10,
   height = 8
 )
 ```
@@ -237,7 +237,7 @@ bind_rows(
 tar_load(fit_spearman, store = store_gca_tasksel)
 tar_load(r_with_gca_s, store = store_gca_tasksel)
 p_loading <- loadings(fit_spearman) |>
-  unclass() |> 
+  unclass() |>
   as_tibble(rownames = "task_index") |>
   left_join(config_task_index, by = "task_index") |>
   arrange(desc(f1)) |>
@@ -256,11 +256,11 @@ p_expvars <- r_with_gca_s |>
   geom_point() +
   geom_line() +
   scale_color_grey(
-    name = "Direction", 
+    name = "Direction",
     labels = c(desc = "Highest First", asc = "Lowest First")
   ) +
   scale_x_continuous(
-    name = "Number of Tasks", 
+    name = "Number of Tasks",
     breaks = scales::breaks_width(3)
   ) +
   scale_y_continuous(name = "Explained Variance") +
@@ -268,7 +268,7 @@ p_expvars <- r_with_gca_s |>
   theme(panel.grid.major.y = element_line(linetype = "dotted"))
 p_single <- p_loading / p_expvars + plot_annotation(tag_levels = "A")
 ggsave(
-  fs::path(path_ms_fig, "fig-supp-3.png"), p_single, 
+  fs::path(path_ms_fig, "fig-supp-3.png"), p_single,
   width = 8, height = 6
 )
 ```
@@ -413,8 +413,8 @@ p_cor_ramp <- cor_rapm_sampled |>
   ) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
   rlang::exec(
-    scale_linetype_manual, 
-    !!!scale_meas_trait(1:2), 
+    scale_linetype_manual,
+    !!!scale_meas_trait(1:2),
     values = lty_traits
   ) +
   ggpubr::theme_pubr() +
@@ -424,6 +424,11 @@ p_cor_ramp <- cor_rapm_sampled |>
 p <- p_rel / p_cor_ramp +
   plot_annotation(tag_levels = "A")
 ggsave(fs::path(path_ms_fig, "fig-2.png"), p, width = 8, height = 6)
+ggsave(
+  fs::path(path_ms_fig, "fig-2.tif"), p,
+  width = 8, height = 6,
+  device = "tiff", dpi = 300
+)
 ```
 
 ```{r}
@@ -502,6 +507,11 @@ p <- p_hypers / p_cond +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
 ggsave(fs::path(path_ms_fig, "fig-3.png"), p, width = 8, height = 6)
+ggsave(
+  fs::path(path_ms_fig, "fig-3.tif"), p,
+  width = 8, height = 6,
+  device = "tiff", dpi = 300
+)
 
 # plot in supplementary ----
 p_hypers_parcel <- pred_hypers |>
@@ -599,8 +609,8 @@ p_pred_trend <- preds_sampled |>
   ) +
   scale_x_continuous(breaks = scales::breaks_width(2)) +
   rlang::exec(
-    scale_linetype_manual, 
-    !!!scale_meas_trait(), 
+    scale_linetype_manual,
+    !!!scale_meas_trait(),
     values = lty_traits
   ) +
   ggpubr::theme_pubr() +
@@ -633,6 +643,11 @@ p <- p_pred_trend + p_dice_avg +
   plot_layout(widths = c(2, 1)) +
   plot_annotation(tag_levels = "A")
 ggsave(fs::path(path_ms_fig, "fig-4.png"), p, width = 8, height = 4)
+ggsave(
+  fs::path(path_ms_fig, "fig-4.tif"), p,
+  width = 8, height = 4,
+  device = "tiff", dpi = 300
+)
 
 datasummary(
   Factor(num_vars) ~ estimate * (Median + SD + Max + Min),
@@ -915,7 +930,7 @@ for idx_row in range(2):
     fig.set_size_inches(w=4, h=2)
     fig.savefig(
       os.path.join(
-        r.path_fig_5, 
+        r.path_fig_5,
         f"fig-5_row-{row}_col-{col}_markers.pdf"
       )
     )
@@ -925,7 +940,7 @@ for idx_row in range(2):
 ```{r}
 #| label: fig-5-enrich
 
-adj_mat_pool |> 
+adj_mat_pool |>
   pwalk(
     \(adj_mat, row, col, model_type, ...) {
       file_name <- fs::path(
