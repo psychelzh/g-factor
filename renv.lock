@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.3.1",
+    "Version": "4.3.2",
     "Repositories": [
       {
         "Name": "BioCsoft",
@@ -3267,6 +3267,25 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "a555924add98c99d2f411e37e7d25e9f"
+    },
+    "preproc.iquizoo": {
+      "Package": "preproc.iquizoo",
+      "Version": "2.5.2",
+      "Source": "Repository",
+      "Repository": "https://psychelzh.r-universe.dev",
+      "Requirements": [
+        "R",
+        "dplyr",
+        "pracma",
+        "purrr",
+        "rlang",
+        "stringr",
+        "tibble",
+        "tidyr",
+        "utils",
+        "vctrs"
+      ],
+      "Hash": "0793cfb79474ed121711f6cb04ef4b6d"
     },
     "prettyunits": {
       "Package": "prettyunits",

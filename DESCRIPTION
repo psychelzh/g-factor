@@ -40,6 +40,7 @@ Imports:
     patchwork,
     performance,
     pracma,
+    preproc.iquizoo (>= 2.5.2),
     proxy,
     psych,
     qs,
@@ -49,9 +50,10 @@ Imports:
     tarchetypes,
     targets,
     writexl
+Remotes:
+    psychelzh/preproc.iquizoo,
+    TimTeaFan/dplyover,
+    yunshiuan/label4MRI
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Remotes: 
-    TimTeaFan/dplyover,
-    yunshiuan/label4MRI
