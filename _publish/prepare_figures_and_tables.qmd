@@ -28,43 +28,6 @@ match_abbr <- function(tasks) {
 }
 
 # helper functions
-arrange_plots <- function(plot_fun, adj_mat_pool, ..., cex_title = 1) {
-  add_custom_title <- function(text, where = c("row", "column")) {
-    where <- match.arg(where)
-    if (where == "row") {
-      side <- 2
-      at <- grconvertY(0.5, "npc", "nic")
-    } else {
-      side <- 3
-      at <- grconvertX(0.5, "npc", "nic")
-    }
-    mtext(text, side = side, line = 0, at = at, outer = TRUE, cex = cex_title)
-  }
-  par(oma = c(0, 2, 2, 0), mfrow = c(2, 3), mar = c(0, 0, 0, 0) + 0.1)
-  for (idx_row in 1:2) {
-    for (idx_col in 1:3) {
-      cur_adj_mat <- adj_mat_pool |>
-        filter(row == idx_row, col == idx_col)
-      plot_fun(
-        cur_adj_mat$adj_mat[[1]], ...,
-        model_type = cur_adj_mat$model_type
-      )
-      # add column and row annotations
-      text_model_type <- model_types[[cur_adj_mat$model_type]]
-      text_meas_trait <- meas_trait[[cur_adj_mat$trait]]
-      if (idx_row == 1) {
-        add_custom_title(text_meas_trait, "column")
-        if (idx_col == 1) {
-          add_custom_title(text_model_type, "row")
-        }
-      } else {
-        if (idx_col == 1) {
-          add_custom_title(text_model_type, "row")
-        }
-      }
-    }
-  }
-}
 average_correlation <- function(x) tanh(mean(atanh(x)))
 ```
 
