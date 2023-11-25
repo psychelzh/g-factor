@@ -64,6 +64,47 @@ gca_tasksel <- tarchetypes::tar_map(
     )
   )
 )
+schema_rel <- tidyr::expand_grid(
+  type = c("high", "low"),
+  idx_rsmp = seq_len(100)
+) |>
+  dplyr::reframe(
+    purrr::map2(
+      type, idx_rsmp,
+      ~ withr::with_seed(
+        digest::digest2int(paste0(.x, .y)),
+        data.frame(
+          # always 5 tasks each
+          id_pairs = rep(c(1, 2), 5),
+          idx_vars = sample.int(5 * 2)
+        )
+      )
+    ) |>
+      purrr::list_rbind(),
+    .by = c(type, idx_rsmp)
+  ) |>
+  tidyr::chop(idx_vars)
+gca_rel <- tarchetypes::tar_map(
+  values = schema_rel,
+  names = c(type, id_pairs, idx_rsmp),
+  list(
+    tar_target(
+      data_names,
+      tibble(
+        tasks = loadings(fit_spearman)[, 1] |>
+          sort(decreasing = type == "high") |>
+          names() |>
+          _[idx_vars] |>
+          list()
+      )
+    ),
+    include_g_fitting(
+      indices_wider_clean,
+      data_names,
+      include_comp_rel = FALSE
+    )
+  )
+)
 
 # targets pipeline ----
 list(
@@ -87,5 +128,11 @@ list(
     r_with_gca_s,
     gca_tasksel,
     names(schema_tasksel)
+  ),
+  gca_rel,
+  combine_targets(
+    scores_g,
+    gca_rel,
+    c("type", "id_pairs", "idx_rsmp")
   )
 )
