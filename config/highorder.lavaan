@@ -1,0 +1,5 @@
+g =~ Speed + WM + Memory + Shifting
+Speed =~  + ANTI + CRT + SRT + STOPSIG + STROOP + PCPT.mrt
+WM =~  + OSPAN + SSPAN + THREEBACK + KPTRK + PLOT
+Memory =~  + CHGDTN + FN + SYMMEM + TWOBACK + MST + PCPT.dprime
+Shifting =~  + SIZELIFE + COLSHP + NUMLET

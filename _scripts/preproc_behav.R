@@ -163,31 +163,36 @@ list(
   ),
   # part III: factor analysis ----
   tar_target(data_subsamples, split_data_solomon(indices_wider_clean)),
-  tarchetypes::tar_file_read(
-    mdl_bifac,
-    "config/bifac.lavaan",
-    read = readLines(!!.x)
-  ),
-  tar_target(
-    fit_bifac,
-    cfa(
-      mdl_bifac,
-      data_subsamples[[2]],
-      missing = "ml",
-      orthogonal = TRUE,
-      std.ov = TRUE,
-      std.lv = TRUE
+  tarchetypes::tar_map(
+    values = data.frame(
+      type = c("bifac", "highorder")
+    ),
+    tarchetypes::tar_file_read(
+      mdl,
+      fs::path("config", paste0(type, ".lavaan")),
+      read = readLines(!!.x)
+    ),
+    tar_target(
+      fit,
+      cfa(
+        mdl,
+        data_subsamples[[2]],
+        missing = "ml",
+        orthogonal = type == "bifac",
+        std.ov = TRUE,
+        std.lv = TRUE
+      )
+    ),
+    tar_target(
+      fit_meas,
+      fitMeasures(fit) |>
+        unclass() |>
+        as_tibble_row()
+    ),
+    tar_target(
+      comp_rel,
+      calc_comp_rel(fit)
     )
-  ),
-  tar_target(
-    fit_meas_bifac,
-    fitMeasures(fit_bifac) |>
-      unclass() |>
-      as_tibble_row()
-  ),
-  tar_target(
-    comp_rel_bifac,
-    calc_comp_rel(fit_bifac)
   ),
   tar_target(
     fit_spearman,
@@ -203,21 +208,28 @@ list(
     calc_comp_rel(fit_spearman)
   ),
   # part IV: prepare all the scores ----
-  tar_target(
-    scores_bifac,
-    bind_cols(
-      select(indices_wider_clean, sub_id),
-      cfa(
-        mdl_bifac,
-        indices_wider_clean,
-        missing = "ml",
-        orthogonal = TRUE,
-        std.ov = TRUE,
-        std.lv = TRUE
-      ) |>
-        lavPredict() |>
-        unclass() |>
-        as_tibble()
+  tarchetypes::tar_map(
+    values = tibble::tibble(
+      type = c("bifac", "highorder"),
+      mdl = rlang::syms(paste0("mdl_", type))
+    ),
+    names = type,
+    tar_target(
+      scores,
+      bind_cols(
+        select(indices_wider_clean, sub_id),
+        cfa(
+          mdl,
+          indices_wider_clean,
+          missing = "ml",
+          orthogonal = type == "bifac",
+          std.ov = TRUE,
+          std.lv = TRUE
+        ) |>
+          lavPredict() |>
+          unclass() |>
+          as_tibble()
+      )
     )
   ),
   tar_target(
