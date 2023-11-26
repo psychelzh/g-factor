@@ -41,11 +41,7 @@ preproc_crt <- function(data) {
   )
 }
 preproc_srt <- function(data) {
-  data |>
-    summarise(
-      mrt = median(Response),
-      .by = id_cols()
-    )
+  summarise(data, mrt = median(Response), .by = id_cols())
 }
 
 preproc_filtering <- function(data) {
@@ -76,12 +72,10 @@ preproc_ltm <- function(data) {
 
 #' Complex Span
 preproc_ospan <- function(data) {
-  data |>
-    select(all_of(c(id_cols(), score = "ospan_total")))
+  select(data, c(id_cols(), score = "ospan_total"))
 }
 preproc_sspan <- function(data) {
-  data |>
-    select(all_of(c(id_cols(), score = "sspan_total")))
+  select(data, c(id_cols(), score = "sspan_total"))
 }
 
 preproc_nback <- function(data) {
