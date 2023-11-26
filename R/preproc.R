@@ -1,15 +1,9 @@
 # preproc functions ----
-#' Anti-Saccade Task
-#'
-#' This task is relatively hard
 preproc_antisac <- function(data) {
   calc_spd_acc(data, .by = id_cols())
 }
 
 #' Switch Cost
-#'
-#' These tasks are relative easy, subjects with a low total accuracy is screened
-#' out.
 preproc_shifting <- function(data) {
   data |>
     filter(task_switch != "filler") |>
@@ -79,6 +73,7 @@ preproc_ltm <- function(data) {
       .by = id_cols()
     )
 }
+
 #' Complex Span
 preproc_ospan <- function(data) {
   data |>
@@ -89,7 +84,6 @@ preproc_sspan <- function(data) {
     select(all_of(c(id_cols(), score = "sspan_total")))
 }
 
-#' N-back
 preproc_nback <- function(data) {
   preproc.iquizoo::nback(data, .by = id_cols())
 }
@@ -113,7 +107,6 @@ preproc_spst <- function(data) {
 }
 
 preproc_stopsignal <- function(data) {
-  # remove negative ssd subjects
   ssd <- data |>
     filter(is_stop == 1) |>
     group_by(across(all_of(c(id_cols(), "stair_case")))) |>
