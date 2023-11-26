@@ -1,73 +1,70 @@
+# preproc functions ----
 #' Anti-Saccade Task
 #'
 #' This task is relatively hard
 preproc_antisac <- function(data) {
-  data |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(sum(acc == 1) > qbinom(0.95, n(), 1 / 3)) |>
-    ungroup() |>
-    calc_spd_acc(.by = id_cols())
+  calc_spd_acc(data, .by = id_cols())
 }
 
 #' Switch Cost
 #'
 #' These tasks are relative easy, subjects with a low total accuracy is screened
 #' out.
-preproc_cateswitch <- function(data) {
-  data |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
-    ungroup() |>
-    calc_cost()
-}
 preproc_shifting <- function(data) {
   data |>
-    group_by(across(all_of(id_cols()))) |>
-    mutate(
-      last_task = lag(task),
-      task_switch = case_when(
-        is.na(last_task) ~ "filler",
-        task == last_task ~ "repeat",
-        TRUE ~ "switch"
-      )
+    filter(task_switch != "filler") |>
+    calc_spd_acc(
+      name_rt = "rt",
+      name_acc = "acc",
+      .by = c(id_cols(), "task_switch")
     ) |>
-    ungroup() |>
-    preproc_cateswitch()
+    pivot_longer(
+      -any_of(c(id_cols(), "task_switch")),
+      names_to = "index_name",
+      values_to = "index_value"
+    ) |>
+    pivot_wider(
+      names_from = task_switch,
+      values_from = index_value
+    ) |>
+    mutate(
+      cost = `switch` - `repeat`,
+      .keep = "unused"
+    ) |>
+    pivot_wider(
+      names_from = index_name,
+      names_prefix = "switch_cost_",
+      values_from = cost
+    )
 }
 
 preproc_crt <- function(data) {
-  data |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(mean(Correct == 1) > 0.8) |>
-    ungroup() |>
-    calc_spd_acc(
-      name_rt = "Response_Time",
-      name_acc = "Correct",
-      .by = id_cols()
-    )
+  calc_spd_acc(
+    data,
+    name_rt = "Response_Time",
+    name_acc = "Correct",
+    .by = id_cols()
+  )
 }
 preproc_srt <- function(data) {
   data |>
-    group_by(across(all_of(id_cols()))) |>
     summarise(
       mrt = median(Response),
-      .groups = "drop"
+      .by = id_cols()
     )
 }
 
 preproc_filtering <- function(data) {
   data |>
-    replace_na(list(acc = 0)) |>
-    filter(
-      sum(acc == 1) > qbinom(0.95, n(), 0.5),
-      .by = all_of(id_cols())
-    ) |>
-    group_by(pick(all_of(c(id_cols(), "rotated")))) |>
+    group_by(pick(c(id_cols(), "rotated"))) |>
     summarise(
       pc = mean(acc == 1),
       .groups = "drop_last"
     ) |>
-    summarise(k = 2 * (sum(pc) - 1))
+    summarise(
+      k = 2 * (sum(pc) - 1),
+      .groups = "drop"
+    )
 }
 
 #' Long-term Memory
@@ -75,9 +72,6 @@ preproc_filtering <- function(data) {
 #' "FNRecog, KRecog"
 preproc_ltm <- function(data) {
   data |>
-    group_by(across(id_cols())) |>
-    filter(mean(is.na(resp) | resp == 0) < 0.1) |>
-    ungroup() |>
     mutate(type_sig = if_else(type == "old", "s", "n")) |>
     calc_auc_ltm(
       name_type = "type_sig",
@@ -88,47 +82,16 @@ preproc_ltm <- function(data) {
 #' Complex Span
 preproc_ospan <- function(data) {
   data |>
-    filter(math_error < 15) |>
     select(all_of(c(id_cols(), score = "ospan_total")))
 }
 preproc_sspan <- function(data) {
   data |>
-    filter(symm_error < 9) |>
     select(all_of(c(id_cols(), score = "sspan_total")))
 }
 
 #' N-back
-preproc_twoback <- function(data) {
-  data |>
-    group_by(across(all_of(c(id_cols(), "block")))) |>
-    mutate(base_loc = lag(loc, 2)) |>
-    ungroup() |>
-    mutate(
-      type = case_when(
-        is.na(base_loc) ~ "filler",
-        loc == base_loc ~ "same",
-        TRUE ~ "diff"
-      ),
-      # no response means error
-      acc = coalesce(acc, 0)
-    ) |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
-    ungroup() |>
-    preproc.iquizoo::nback(.by = id_cols())
-}
-preproc_threeback <- function(data) {
-  data |>
-    filter(!is.na(type)) |>
-    mutate(
-      type = if_else(type == "match", "same", "diff"),
-      # no response means error
-      acc = coalesce(acc, 0)
-    ) |>
-    group_by(across(all_of(id_cols()))) |>
-    filter(sum(acc == 1) > qbinom(0.95, n(), 0.5)) |>
-    ungroup() |>
-    preproc.iquizoo::nback(.by = id_cols())
+preproc_nback <- function(data) {
+  preproc.iquizoo::nback(data, .by = id_cols())
 }
 
 preproc_spst <- function(data) {
@@ -151,24 +114,21 @@ preproc_spst <- function(data) {
 
 preproc_stopsignal <- function(data) {
   # remove negative ssd subjects
-  data_clean <- data |>
-    mutate(ssd = if_else(ssd < 100 & is_stop == 1, 100, ssd))
-  ssd <- data_clean |>
+  ssd <- data |>
     filter(is_stop == 1) |>
     group_by(across(all_of(c(id_cols(), "stair_case")))) |>
     summarise(ssd = summarise_ssd(ssd), .groups = "drop_last") |>
     summarise(mssd = mean(ssd), .groups = "drop")
-  rt_go <- data_clean |>
+  rt_go <- data |>
     filter(is_stop == 1) |>
-    group_by(across(all_of(c(id_cols())))) |>
     summarise(
       pe_stop = mean(resp != "none"),
-      .groups = "drop"
+      .by = id_cols()
     ) |>
     inner_join(
-      data_clean |>
+      data |>
         filter(is_stop == 0) |>
-        group_nest(across(all_of(id_cols()))),
+        nest(.by = id_cols()),
       by = id_cols()
     ) |>
     mutate(
@@ -179,34 +139,11 @@ preproc_stopsignal <- function(data) {
     ) |>
     select(-data)
   inner_join(rt_go, ssd, by = id_cols()) |>
-    mutate(ssrt = rt_nth - mssd / 1000) |>
-    filter(
-      rt_nth > 0,
-      between(pe_stop, 0.25, 0.75)
-    )
+    mutate(ssrt = rt_nth - mssd / 1000)
 }
 
 preproc_stroop <- function(data) {
   data |>
-    mutate(across(everything(), unname)) |>
-    filter(
-      sum(acc == 1) > qbinom(0.95, n(), 0.25),
-      .by = id_cols()
-    ) |>
-    mutate(
-      char = case_match(
-        char,
-        "红" ~ "r",
-        "黄" ~ "y",
-        "绿" ~ "g",
-        "蓝" ~ "b"
-      ),
-      type = if_else(
-        color == char,
-        "con",
-        "inc"
-      )
-    ) |>
     calc_spd_acc(
       name_rt = "rt",
       name_acc = "acc",
@@ -334,8 +271,9 @@ regress_covariates <- function(data, subjs_info,
     select(all_of(names(data)))
 }
 
-screen_data <- function(data) {
-  data |>
+# data cleaning functions ----
+wrangle_data <- function(data, task) {
+  data <- data |>
     distinct(across(all_of(id_cols()))) |>
     group_by(sub_id) |>
     # keep the last commit only
@@ -348,6 +286,105 @@ screen_data <- function(data) {
     ) |>
     ungroup() |>
     left_join(data, by = id_cols())
+  switch(task,
+    "Filtering" = data |>
+      # no response means error
+      mutate(acc = coalesce(acc, 0)),
+    "ShiftingColor" = ,
+    "ShiftNumber" = data |>
+      mutate(
+        task_switch = case_when(
+          is.na(lag(task)) ~ "filler",
+          task == lag(task) ~ "repeat",
+          .default = "switch"
+        ),
+        .by = id_cols()
+      ),
+    "WM3" = data |>
+      filter(!is.na(type)) |>
+      mutate(
+        type = if_else(type == "match", "same", "diff"),
+        # no response means error
+        acc = coalesce(acc, 0)
+      ),
+    "spatial_2back" = data |>
+      mutate(
+        base_loc = lag(loc, 2),
+        .by = c(id_cols(), "block")
+      ) |>
+      mutate(
+        type = case_when(
+          is.na(base_loc) ~ "filler",
+          loc == base_loc ~ "same",
+          TRUE ~ "diff"
+        ),
+        # no response means error
+        acc = coalesce(acc, 0)
+      ),
+    "StopSignal" = data |>
+      # nonpositive ssds are artifact and should be actually 100ms
+      mutate(ssd = if_else(ssd < 100 & is_stop == 1, 100, ssd)),
+    "Stroop" = data |>
+      mutate(across(everything(), unname)) |>
+      mutate(
+        char = case_match(
+          char,
+          "红" ~ "r",
+          "黄" ~ "y",
+          "绿" ~ "g",
+          "蓝" ~ "b"
+        ),
+        type = if_else(color == char, "con", "inc")
+      ),
+    data
+  )
+}
+
+screen_subjs <- function(data, task, chance) {
+  if (!is.na(chance)) {
+    return(
+      data |>
+        summarise(
+          is_valid = sum(acc == 1) > qbinom(0.95, n(), chance),
+          .by = id_cols()
+        )
+    )
+  }
+  switch(task,
+    "CRT" = data |>
+      summarise(
+        is_valid = mean(Correct == 1) > 0.8,
+        .by = id_cols()
+      ),
+    "FNRecog" = ,
+    "KRecog" = data |>
+      summarise(
+        is_valid = mean(is.na(resp) | resp == 0) < 0.1,
+        .by = id_cols()
+      ),
+    "OSpan" = data |>
+      summarise(
+        is_valid = math_error < 15,
+        .by = id_cols()
+      ),
+    "SSpan" = data |>
+      summarise(
+        is_valid = symm_error < 9,
+        .by = id_cols()
+      ),
+    "StopSignal" = data |>
+      filter(is_stop == 1) |>
+      summarise(
+        is_valid = between(mean(resp != "none"), 0.25, 0.75),
+        .by = id_cols()
+      ),
+    # treat all subjects as valid by default
+    data |>
+      summarise(
+        is_valid = TRUE,
+        .by = id_cols()
+      )
+  )
 }
 
 clean_indices <- function(indices, indices_selection) {
@@ -435,40 +472,6 @@ calc_auc_ltm <- function(data,
     summarise(
       auc = DescTools::AUC(p_fa, p_hit),
       .groups = "drop"
-    )
-}
-
-calc_cost <- function(data,
-                      name_acc = "acc",
-                      name_rt = "rt",
-                      name_switch = "task_switch",
-                      value_repeat = "repeat",
-                      value_switch = "switch",
-                      value_filler = "filler") {
-  data |>
-    filter(.data[[name_switch]] != value_filler) |>
-    calc_spd_acc(
-      name_rt = name_rt,
-      name_acc = name_acc,
-      .by = c(id_cols(), name_switch)
-    ) |>
-    pivot_longer(
-      -any_of(c(id_cols(), name_switch)),
-      names_to = "index_name",
-      values_to = "index_value"
-    ) |>
-    pivot_wider(
-      names_from = all_of(name_switch),
-      values_from = index_value
-    ) |>
-    mutate(
-      cost = .data[[value_switch]] - .data[[value_repeat]],
-      .keep = "unused"
-    ) |>
-    pivot_wider(
-      names_from = index_name,
-      names_prefix = "switch_cost_",
-      values_from = cost
     )
 }
 

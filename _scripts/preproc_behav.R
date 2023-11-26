@@ -23,28 +23,35 @@ task_preproc <- readr::read_csv(
   here::here("config/task_preproc.csv"),
   show_col_types = FALSE
 ) |>
-  tidyr::drop_na() |>
+  dplyr::filter(!is.na(preproc)) |>
   dplyr::mutate(preproc = rlang::syms(paste0("preproc_", preproc)))
 preproc_behav <- tarchetypes::tar_map(
   task_preproc,
   names = task,
-  list(
-    tar_target(
-      indices,
-      preproc(data_clean) |>
-        pivot_longer(
-          -any_of(id_cols()),
-          names_to = "index",
-          values_to = "score"
-        ) |>
-        select(-task_datetime)
-    ),
-    tarchetypes::tar_file_read(
-      data,
-      fs::path("data/behav", sprintf("%s.arrow", task)),
-      read = arrow::read_feather(!!.x)
-    ),
-    tar_target(data_clean, screen_data(data))
+  tar_target(
+    file,
+    fs::path("data/behav", sprintf("%s.arrow", task)),
+    format = "file_fast"
+  ),
+  tar_target(
+    data_clean,
+    wrangle_data(arrow::read_feather(file), task)
+  ),
+  tar_target(indices_origin, preproc(data_clean)),
+  tar_target(
+    users_clean,
+    screen_subjs(data_clean, task, chance)
+  ),
+  tar_target(
+    indices,
+    indices_origin |>
+      semi_join(filter(users_clean, is_valid), by = "sub_id") |>
+      pivot_longer(
+        -any_of(id_cols()),
+        names_to = "index",
+        values_to = "score"
+      ) |>
+      select(-task_datetime)
   )
 )
 
@@ -126,14 +133,16 @@ list(
   ),
   tarchetypes::tar_combine(
     indices,
-    preproc_behav[[1]],
+    preproc_behav$indices,
     command = bind_rows(
       !!!.x,
       .id = "task"
     ) |>
       mutate(task = str_remove(task, "indices_")) |>
-      left_join(task_preproc, by = "task") |>
-      select(-preproc) |>
+      left_join(
+        select(task_preproc, task, disp_name),
+        by = "task"
+      ) |>
       bind_rows(
         indices_keepTrack,
         indices_FM,
