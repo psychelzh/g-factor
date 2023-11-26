@@ -1,6 +1,9 @@
 project_preproc_behav:
   script: _scripts/preproc_behav.R
   store: _targets/preproc_behav
+project_behav_reliability:
+  script: _scripts/behav_reliability.R
+  store: _targets/behav_reliability
 project_preproc_neural:
   script: _scripts/preproc_neural.R
   store: _targets/preproc_neural
