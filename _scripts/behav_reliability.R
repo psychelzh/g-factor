@@ -28,14 +28,13 @@ config_rel <- readr::read_csv(
   show_col_types = FALSE
 ) |>
   dplyr::left_join(indices, by = "task") |>
-  dplyr::mutate(preproc = rlang::syms(preproc))
+  dplyr::mutate(
+    preproc = rlang::syms(preproc),
+    file = rlang::syms(paste0("file_", disp_name))
+  )
 split_half <- tarchetypes::tar_map(
   dplyr::filter(config_rel, method == "odd-even"),
   names = disp_name,
-  tar_target(
-    file,
-    fs::path("data", "behav", data_file)
-  ),
   tar_target(
     data_splitted,
     arrow::read_feather(file) |>
@@ -54,10 +53,6 @@ split_half <- tarchetypes::tar_map(
 stop_signal <- tarchetypes::tar_map(
   dplyr::filter(config_rel, task == "StopSignal"),
   names = disp_name,
-  tar_target(
-    file,
-    fs::path("data", "behav", data_file)
-  ),
   tar_target(
     data_splitted,
     arrow::read_feather(file) |>
@@ -78,10 +73,6 @@ keep_track <- tarchetypes::tar_map(
   dplyr::filter(config_rel, task == "keepTrack"),
   names = disp_name,
   tar_target(
-    file,
-    fs::path("data", "behav", data_file)
-  ),
-  tar_target(
     indices,
     readr::read_csv(file, show_col_types = FALSE)
   ),
@@ -92,6 +83,14 @@ keep_track <- tarchetypes::tar_map(
 )
 
 list(
+  tarchetypes::tar_eval(
+    tar_target(
+      file,
+      fs::path("data", "behav", data_file),
+      format = "file"
+    ),
+    values = config_rel
+  ),
   split_half,
   stop_signal,
   keep_track,
