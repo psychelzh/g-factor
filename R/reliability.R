@@ -41,7 +41,6 @@ calc_alpha <- function(indices) {
 
 preproc_span <- function(data) {
   data |>
-    type_convert() |>
     summarise(
       score = sum(span_total),
       .by = id_cols()
