@@ -439,7 +439,7 @@ p_rel <- scores_g |>
     .by = c(type, idx_rsmp)
   ) |>
   ggplot(aes(type, r)) +
-  geom_boxplot() +
+  geom_boxplot(width = 0.5) +
   ggbeeswarm::geom_beeswarm(size = 0.5) +
   scale_x_discrete(
     name = NULL,
@@ -461,7 +461,7 @@ p <- wrap_plots(A = p_loading, B = p_expvars, C = p_rel, design = layout) +
   plot_annotation(tag_levels = "A")
 ggsave(
   fs::path(path_ms_fig, "fig-s5.png"), p,
-  width = 8, height = 6
+  width = 9, height = 6.5
 )
 ```
 
