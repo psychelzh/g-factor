@@ -32,7 +32,7 @@ average_correlation <- function(x) tanh(mean(atanh(x)))
 ```
 
 ```{r}
-#| label: fig-supp-1&2
+#| label: fig-s1&s2
 
 targets::tar_load(
   c(subjs_info_clean, indices_wider_clean, indices_clean),
@@ -115,11 +115,17 @@ ggsave(
 ```
 
 ```{r}
-#| label: fig-1
+#| label: fig-1&fig-s3
 
-tar_load(data_subsamples, store = store_preproc_behav)
-tar_load(fit_spearman, store = store_preproc_behav)
-tar_load(fit_bifac, store = store_preproc_behav)
+tar_load(
+  c(
+    data_subsamples,
+    fit_spearman,
+    fit_bifac,
+    fit_highorder
+  ),
+  store = store_preproc_behav
+)
 
 vss_stats <- data_subsamples[[1]] |>
   select(-sub_id) |>
@@ -185,83 +191,45 @@ semPlot::semPaths(
 )
 dev.off()
 
+ragg::agg_png(
+  filename = fs::path(path_ms_fig, "fig-s3.png"),
+  width = 480, height = 960, res = 360
+)
+semPlot::semPaths(
+  fit_highorder,
+  whatLabels = "std",
+  layout = "tree2",
+  rotation = 2,
+  intercepts = FALSE,
+  nCharNodes = 0,
+  nodeLabels = c(
+    match_abbr(group_struct$rhs),
+    "g",
+    unique(group_struct$lhs)
+  ),
+  sizeMan = 5,
+  sizeMan2 = 3.5,
+  edge.label.cex = 0.5,
+  exoCov = FALSE,
+  residuals = TRUE
+)
+dev.off()
+
 bind_rows(
   spearman = tar_read(fit_meas_spearman, store = store_preproc_behav),
   bifactor = tar_read(fit_meas_bifac, store = store_preproc_behav),
+  highorder = tar_read(fit_meas_highorder, store = store_preproc_behav),
   .id = "model"
 ) |>
-  select(model, df = df, RMSEA = rmsea, SRMR = srmr, CFI = cfi, TLI = tli) |>
+  select(
+    model, X2 = chisq, df = df,
+    RMSEA = rmsea, SRMR = srmr, CFI = cfi, TLI = tli
+  ) |>
   writexl::write_xlsx(fs::path(path_ms_tbl, "fit_meas.xlsx"))
 ```
 
 ```{r}
-#| label: fig-supp-3
-
-tar_load(fit_spearman, store = store_gca_tasksel)
-tar_load(r_with_gca_s, store = store_gca_tasksel)
-p_loading <- loadings(fit_spearman) |>
-  unclass() |>
-  as_tibble(rownames = "task_index") |>
-  left_join(config_task_index, by = "task_index") |>
-  arrange(desc(f1)) |>
-  mutate(abbr_name = as_factor(abbr_name)) |>
-  ggplot(aes(abbr_name, f1)) +
-  geom_bar(stat = "identity", color = "black", fill = NA) +
-  ggpubr::theme_pubr() +
-  theme(
-    panel.grid.major.y = element_line(linetype = "dotted"),
-    axis.text.x = element_text(angle = 45, hjust = 1)
-  ) +
-  labs(x = "Task Indicator", y = "GCA Loading")
-p_expvars <- r_with_gca_s |>
-  mutate(r2 = r^2, direction = as_factor(direction)) |>
-  ggplot(aes(num_task, r2, color = direction)) +
-  geom_point() +
-  geom_line() +
-  scale_color_grey(
-    name = "Direction",
-    labels = c(desc = "Highest First", asc = "Lowest First")
-  ) +
-  scale_x_continuous(
-    name = "Number of Tasks",
-    breaks = scales::breaks_width(3)
-  ) +
-  scale_y_continuous(name = "Explained Variance") +
-  ggpubr::theme_pubr() +
-  theme(panel.grid.major.y = element_line(linetype = "dotted"))
-p_single <- p_loading / p_expvars + plot_annotation(tag_levels = "A")
-ggsave(
-  fs::path(path_ms_fig, "fig-supp-3.png"), p_single,
-  width = 8, height = 6
-)
-```
-
-```{r}
-#| label: fig-2
-
-# composite reliability
-p_comp_rel <- tar_read(comp_rel, store = store_gca_numtasks) |>
-  ggplot(aes(num_vars, prop, group = factor(num_vars))) +
-  # geom_violin() +
-  geom_boxplot() +
-  geomtextpath::geom_texthline(
-    yintercept = tar_read(comp_rel_spearman, store = store_preproc_behav),
-    linetype = "dotted",
-    hjust = 0,
-    color = "black",
-    label = "All"
-  ) +
-  scale_x_continuous(breaks = scales::breaks_width(3)) +
-  ggpubr::theme_pubr() +
-  labs(x = "Number of Tasks", y = "Variance Explained")
-ggsave(fs::path(path_ms_fig, "com_rel.png"), p_comp_rel, width = 8, height = 6)
-
-datasummary(
-  Factor(num_vars) ~ prop * (Mean + SD + Min + Max),
-  tar_read(comp_rel, store = store_gca_numtasks),
-  fmt = 3,
-  output = fs::path(path_ms_tbl, "com_rel.xlsx")
-)
+#| label: fig-2&s4
 
 # visualize pairwise correlation and correlation with RAPM
 rel_pairs <- tar_read(scores_g, store = store_gca_numtasks) |>
@@ -392,10 +360,111 @@ ggsave(
   width = 8, height = 6,
   device = "tiff", dpi = 300
 )
+
+cor_gca_sampled <- tar_read(scores_g, store = store_gca_numtasks) |>
+  unnest(scores) |>
+  inner_join(
+    bind_rows(
+      spearman = tar_read(scores_spearman, store = store_preproc_behav),
+      bifac = tar_read(scores_bifac, store = store_preproc_behav),
+      .id = "trait"
+    ),
+    by = "sub_id",
+    suffix = c("_sample", "_total"),
+    relationship = "many-to-many"
+  ) |>
+  mutate(trait = factor(trait, names(meas_trait), meas_trait) |> fct_drop()) |>
+  summarise(
+    r = cor(g_sample, g_total, use = "pairwise"),
+    .by = c(num_vars, id_pairs, idx_rsmp, trait)
+  )
+datasummary(
+  Factor(num_vars) ~ r * (Median + SD + Min + Max),
+  cor_gca_sampled,
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "cor_gca_sampled.xlsx")
+)
+p_cor_gca <- cor_gca_sampled |>
+  ggplot(aes(num_vars, r)) +
+  ggdist::stat_slabinterval() +
+  ggdist::stat_dots(side = "left") +
+  facet_grid(rows = vars(trait)) +
+  ggpubr::theme_pubr() +
+  theme(panel.grid.major.y = element_line(linetype = "dotted")) +
+  labs(x = "Number of Tasks", y = "Correlation")
+ggsave(fs::path(path_ms_fig, "fig-s4.png"), p_cor_gca, width = 8, height = 4)
 ```
 
 ```{r}
-#| label: fig-3-and-fig-supp-4
+#| label: fig-s5
+
+tar_load(fit_spearman, store = store_gca_tasksel)
+tar_load(r_with_gca_s, store = store_gca_tasksel)
+tar_load(scores_g, store = store_gca_tasksel)
+p_loading <- loadings(fit_spearman) |>
+  unclass() |>
+  as_tibble(rownames = "task_index") |>
+  left_join(config_task_index, by = "task_index") |>
+  arrange(desc(f1)) |>
+  mutate(abbr_name = as_factor(abbr_name)) |>
+  ggplot(aes(abbr_name, f1)) +
+  geom_bar(stat = "identity", color = "black", fill = NA) +
+  ggpubr::theme_pubr() +
+  theme(
+    panel.grid.major.y = element_line(linetype = "dotted"),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  labs(x = "Task Indicator", y = "GCA Loading")
+p_expvars <- r_with_gca_s |>
+  mutate(r2 = r^2, direction = as_factor(direction)) |>
+  ggplot(aes(num_task, r2, color = direction)) +
+  geom_point() +
+  geom_line() +
+  scale_color_grey(
+    name = "Direction",
+    labels = c(desc = "Highest First", asc = "Lowest First")
+  ) +
+  scale_x_continuous(
+    name = "Number of Tasks",
+    breaks = scales::breaks_width(3)
+  ) +
+  scale_y_continuous(name = "Explained Variance") +
+  ggpubr::theme_pubr() +
+  theme(panel.grid.major.y = element_line(linetype = "dotted"))
+p_rel <- scores_g |>
+  summarise(
+    r = cor(scores[[1]]$g, scores[[2]]$g),
+    .by = c(type, idx_rsmp)
+  ) |>
+  ggplot(aes(type, r)) +
+  geom_boxplot() +
+  ggbeeswarm::geom_beeswarm(size = 0.5) +
+  scale_x_discrete(
+    name = NULL,
+    labels = c(
+      "high" = "High g-loaded",
+      "low" = "Low g-loaded"
+    )
+  ) +
+  ylab("Correlation between pairs") +
+  ggpubr::theme_pubr() +
+  theme(
+    panel.grid.major.y = element_line(linetype = "dotted")
+  )
+layout <- "
+AAACC
+BBBBB
+"
+p <- wrap_plots(A = p_loading, B = p_expvars, C = p_rel, design = layout) +
+  plot_annotation(tag_levels = "A")
+ggsave(
+  fs::path(path_ms_fig, "fig-s5.png"), p,
+  width = 8, height = 6
+)
+```
+
+```{r}
+#| label: fig-3-and-fig-s6
 
 # prepare data ----
 cpm_pred <- targets::tar_read(
@@ -510,7 +579,7 @@ p_parcel <- p_hypers_parcel / p_cond_parcel +
   plot_layout(heights = c(1, 2), guides = "collect") +
   plot_annotation(tag_levels = "A") &
   theme(legend.position = "bottom")
-ggsave(fs::path(path_ms_fig, "fig-supp-4.png"), p_parcel, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "fig-s6.png"), p_parcel, width = 8, height = 6)
 
 # extra check ----
 p_duration <- pred_cond |>
@@ -529,7 +598,7 @@ ggsave(fs::path(path_ms_fig, "bench_cpm_duration.png"), p_duration, width = 8, h
 ```
 
 ```{r}
-#| label: fig-4-and-fig-supp-5
+#| label: fig-4-and-fig-s7
 
 preds_main <- targets::tar_read(
   cpm_pred,
@@ -660,7 +729,7 @@ p_dice_supp <- dice_clean_supp |>
     )
   ) +
   labs(x = "Number of Tasks", y = "Dice Similarity")
-ggsave(fs::path(path_ms_fig, "fig-supp-5.png"), p_dice_supp, width = 8, height = 6)
+ggsave(fs::path(path_ms_fig, "fig-s7.png"), p_dice_supp, width = 8, height = 6)
 ```
 
 ```{r}
@@ -1006,4 +1075,33 @@ nodes_degree_sorted |>
     ba.label = as.integer(str_extract(ba.label, "\\d+"))
   ) |>
   writexl::write_xlsx(fs::path(path_ms_tbl, "top_nodes.xlsx"))
+```
+
+```{r}
+#| label: dropped
+#| eval: false
+
+# composite reliability
+p_comp_rel <- tar_read(comp_rel, store = store_gca_numtasks) |>
+  ggplot(aes(num_vars, prop, group = factor(num_vars))) +
+  # geom_violin() +
+  geom_boxplot() +
+  geomtextpath::geom_texthline(
+    yintercept = tar_read(comp_rel_spearman, store = store_preproc_behav),
+    linetype = "dotted",
+    hjust = 0,
+    color = "black",
+    label = "All"
+  ) +
+  scale_x_continuous(breaks = scales::breaks_width(3)) +
+  ggpubr::theme_pubr() +
+  labs(x = "Number of Tasks", y = "Variance Explained")
+ggsave(fs::path(path_ms_fig, "com_rel.png"), p_comp_rel, width = 8, height = 6)
+
+datasummary(
+  Factor(num_vars) ~ prop * (Mean + SD + Min + Max),
+  tar_read(comp_rel, store = store_gca_numtasks),
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "com_rel.xlsx")
+)
 ```
