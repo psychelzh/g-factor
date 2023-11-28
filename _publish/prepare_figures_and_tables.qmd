@@ -29,6 +29,44 @@ match_abbr <- function(tasks) {
 
 # helper functions
 average_correlation <- function(x) tanh(mean(atanh(x)))
+fit_mdl <- function(mdl, data) {
+  cfa(
+    mdl,
+    data,
+    missing = "ml",
+    orthogonal = TRUE,
+    std.ov = TRUE,
+    std.lv = TRUE
+  )
+}
+visualize_model <- function(fit, ..., hierarchical = TRUE, name_g = "GCA") {
+  params <- filter(parameterTable(fit), op == "=~")
+  labels <- if (!hierarchical) {
+     c(match_abbr(params$rhs), name_g)
+  } else {
+    params <- filter(params, lhs != "g")
+    c(
+      match_abbr(params$rhs),
+      name_g,
+      unique(params$lhs)
+    )
+  }
+  semPlot::semPaths(
+    fit,
+    whatLabels = "std",
+    layout = "tree2",
+    rotation = 2,
+    intercepts = FALSE,
+    nCharNodes = 0,
+    nodeLabels = labels,
+    sizeMan = 5,
+    sizeMan2 = 3.5,
+    edge.label.cex = 0.5,
+    exoCov = FALSE,
+    residuals = TRUE,
+    ...
+  )
+}
 ```
 
 ```{r}
@@ -150,44 +188,22 @@ cairo_pdf(
   filename = fs::path(path_fig_1, "fig-1-spearman.pdf"),
   width = 8, height = 16
 )
-semPlot::semPaths(
+visualize_model(
   fit_spearman$nf1,
-  whatLabels = "std",
-  rotation = 2,
-  layout = "tree2",
-  nodeLabels = c(match_abbr(rownames(loadings(fit_spearman))), "GCA-S"),
-  intercepts = FALSE,
-  nCharNodes = 0,
-  sizeMan = 5,
-  sizeMan2 = 3.5,
-  edge.label.cex = 0.5,
-  residuals = TRUE
+  hierarchical = FALSE,
+  name_g = "GCA-S"
 )
 dev.off()
 
-group_struct <- parameterTable(fit_bifac) |> filter(op == "=~", lhs != "g")
 cairo_pdf(
   filename = fs::path(path_fig_1, "fig-1-bifac.pdf"),
   width = 8, height = 16
 )
-semPlot::semPaths(
+visualize_model(
   fit_bifac,
-  whatLabels = "std",
-  layout = "tree2",
-  rotation = 2,
-  nodeLabels = c(
-    match_abbr(group_struct$rhs),
-    "GCA-B",
-    unique(group_struct$lhs)
-  ),
-  intercepts = FALSE,
-  bifactor = "g",
-  nCharNodes = 0,
-  sizeMan = 5,
-  sizeMan2 = 3.5,
-  edge.label.cex = 0.5,
-  exoCov = FALSE,
-  residuals = TRUE
+  hierarchical = TRUE,
+  name_g = "GCA-B",
+  bifactor = "g"
 )
 dev.off()
 
@@ -195,23 +211,9 @@ ragg::agg_png(
   filename = fs::path(path_ms_fig, "fig-s3.png"),
   width = 480, height = 960, res = 360
 )
-semPlot::semPaths(
+visualize_model(
   fit_highorder,
-  whatLabels = "std",
-  layout = "tree2",
-  rotation = 2,
-  intercepts = FALSE,
-  nCharNodes = 0,
-  nodeLabels = c(
-    match_abbr(group_struct$rhs),
-    "g",
-    unique(group_struct$lhs)
-  ),
-  sizeMan = 5,
-  sizeMan2 = 3.5,
-  edge.label.cex = 0.5,
-  exoCov = FALSE,
-  residuals = TRUE
+  hierarchical = TRUE
 )
 dev.off()
 
@@ -1075,6 +1077,62 @@ nodes_degree_sorted |>
     ba.label = as.integer(str_extract(ba.label, "\\d+"))
   ) |>
   writexl::write_xlsx(fs::path(path_ms_tbl, "top_nodes.xlsx"))
+```
+
+```{r}
+#| label: alt-models
+
+tar_load(data_subsamples, store = store_preproc_behav)
+# try adding inhibition
+mdl_m1 <- "
+g =~ +ANTI+SIZELIFE+CRT+CHGDTN+FN+SYMMEM+OSPAN+COLSHP+NUMLET+TWOBACK+MST+SRT+SSPAN+STOPSIG+STROOP+THREEBACK+KPTRK+PCPT.mrt+PCPT.dprime+PLOT
+Speed =~ + CRT + SRT  + PCPT.mrt
+Inh =~ ANTI + STOPSIG + STROOP
+WM =~  + OSPAN + SSPAN + THREEBACK + KPTRK + PLOT
+Memory =~  + CHGDTN + FN + SYMMEM + TWOBACK + MST + PCPT.dprime
+Shifting =~  + SIZELIFE + COLSHP + NUMLET
+"
+mdl_m2 <- "
+g =~ +ANTI+SIZELIFE+CRT+CHGDTN+FN+SYMMEM+OSPAN+COLSHP+NUMLET+TWOBACK+MST+SRT+SSPAN+STOPSIG+STROOP+THREEBACK+KPTRK+PCPT.mrt+PCPT.dprime+PLOT
+Speed =~ + ANTI + CRT + SRT + STOPSIG + STROOP + PCPT.mrt
+WM =~  + OSPAN + SSPAN + THREEBACK + TWOBACK + KPTRK + PLOT
+Memory =~  + CHGDTN + FN + SYMMEM + MST + PCPT.dprime
+Shifting =~  + SIZELIFE + COLSHP + NUMLET
+"
+fit_m1 <- fit_mdl(mdl_m1, data_subsamples[[2]])
+fit_m2 <- fit_mdl(mdl_m2, data_subsamples[[2]])
+ragg::agg_png(
+  fs::path(path_ms_fig, "fig-rev1.png"),
+  width = 480, height = 960, res = 300
+)
+visualize_model(
+  fit_m1,
+  hierarchical = TRUE,
+  bifactor = "g"
+)
+dev.off()
+ragg::agg_png(
+  fs::path(path_ms_fig, "fig-rev2.png"),
+  width = 480, height = 960, res = 300
+)
+visualize_model(
+  fit_m2,
+  hierarchical = TRUE,
+  bifactor = "g"
+)
+dev.off()
+
+bind_rows(
+  bifactor = tar_read(fit_meas_bifac, store = store_preproc_behav),
+  M1 = as_tibble_row(unclass(fitmeasures(fit_m1))),
+  M2 = as_tibble_row(unclass(fitmeasures(fit_m2))),
+  .id = "model"
+) |>
+  select(
+    model, X2 = chisq, df = df,
+    RMSEA = rmsea, SRMR = srmr, CFI = cfi, TLI = tli
+  ) |>
+  writexl::write_xlsx(fs::path(path_ms_tbl, "fit_meas_rev.xlsx"))
 ```
 
 ```{r}
