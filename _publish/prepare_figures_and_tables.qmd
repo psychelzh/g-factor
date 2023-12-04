@@ -77,6 +77,10 @@ targets::tar_load(
   store = store_preproc_behav
 )
 subjs_combined <- scan(here::here(file_subjs_combined))
+batch_real <- c("2", "3", "12", "15", "16")
+subjs_real_total <- subjs_info_clean |> 
+  semi_join(indices_clean, by = "sub_id") |> 
+  filter((sub_id %/% 1000) %in% batch_real)
 
 descr_behav <- subjs_info_clean |>
   semi_join(indices_wider_clean, by = "sub_id") |>
