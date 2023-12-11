@@ -363,8 +363,9 @@ p <- p_rel / p_cor_ramp +
 ggsave(fs::path(path_ms_fig, "fig-2.png"), p, width = 8, height = 6)
 ggsave(
   fs::path(path_ms_fig, "fig-2.tif"), p,
-  width = 8, height = 6,
-  device = "tiff", dpi = 300
+  width = 18, height = 13, units = "cm",
+  device = "tiff", dpi = 600,
+  compression = "lzw"
 )
 
 cor_gca_sampled <- tar_read(scores_g, store = store_gca_numtasks) |>
@@ -547,8 +548,9 @@ p <- p_hypers / p_cond +
 ggsave(fs::path(path_ms_fig, "fig-3.png"), p, width = 8, height = 6)
 ggsave(
   fs::path(path_ms_fig, "fig-3.tif"), p,
-  width = 8, height = 6,
-  device = "tiff", dpi = 300
+  width = 18, height = 13, units = "cm",
+  device = "tiff", dpi = 600,
+  compression = "lzw"
 )
 
 # plot in supplementary ----
@@ -683,8 +685,9 @@ p <- p_pred_trend + p_dice_avg +
 ggsave(fs::path(path_ms_fig, "fig-4.png"), p, width = 8, height = 4)
 ggsave(
   fs::path(path_ms_fig, "fig-4.tif"), p,
-  width = 8, height = 4,
-  device = "tiff", dpi = 300
+  width = 18, height = 9, units = "cm",
+  device = "tiff", dpi = 600,
+  compression = "lzw"
 )
 
 datasummary(
