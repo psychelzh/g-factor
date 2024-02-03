@@ -8,7 +8,7 @@
 <link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="../site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.3.450">
+  <meta name="generator" content="quarto-1.4.549">
 
   <meta name="author" content="Liang Zhang">
   <meta name="dcterms.date" content="2023-06-30">
@@ -34,6 +34,7 @@
     div.csl-bib-body { }
     div.csl-entry {
       clear: both;
+      margin-bottom: 0em;
     }
     .hanging-indent div.csl-entry {
       margin-left:2em;
@@ -56,6 +57,11 @@
   <link href="../site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
   <link href="../site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
   <script async="" src="https://hypothes.is/embed.js"></script>
+  <script>
+    window.document.addEventListener("DOMContentLoaded", function (_event) {
+      document.body.classList.add('hypothesis-enabled');
+    });
+  </script>
   <style type="text/css">
 
   .callout {
@@ -177,7 +183,8 @@
   }
 
   .callout.callout-titled .callout-body > .callout-content > :last-child {
-    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
   }
 
   .callout.callout-titled .callout-icon::before {
@@ -399,7 +406,7 @@ Liang Zhang
 <section id="diagram-of-g-and-its-relatives" class="slide level2">
 <h2>Diagram of g and its Relatives</h2>
 
-<img data-src="images/mental-ability-diagram.png" class="r-stretch quarto-figure-center"><p class="caption">Conceptual relationships among mental abilities, intelligence, IQ, and the g-factor <span class="citation" data-cites="theinte2013">(<a href="#/references" role="doc-biblioref" onclick=""><em><em>The intelligent brain</em>, 2013</em></a>)</span></p><aside class="notes">
+<img data-src="images/mental-ability-diagram.png" class="quarto-figure quarto-figure-center r-stretch"><p class="caption">Conceptual relationships among mental abilities, intelligence, IQ, and the g-factor <span class="citation" data-cites="theinte2013">(<a href="#/references" role="doc-biblioref" onclick=""><em><em>The intelligent brain</em>, 2013</em></a>)</span></p><aside class="notes">
 <p>Savants are those with very high specific abilities but no general intelligence (e.g., Kim Peek, AI of current days).</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -446,14 +453,14 @@ Liang Zhang
 <div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/johnson2004.png"></p>
+<p><img data-src="images/johnson2004.png" class="quarto-figure quarto-figure-center"></p>
 <figcaption>Test batteries used</figcaption>
 </figure>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/one-g-three-battery.png"></p>
+<p><img data-src="images/one-g-three-battery.png" class="quarto-figure quarto-figure-center"></p>
 <figcaption>Consistency between g estimated from three batteries <span class="citation" data-cites="johnson2004">(<a href="#/references" role="doc-biblioref" onclick=""><em>Johnson, 2004</em></a>)</span></figcaption>
 </figure>
 </div>
@@ -466,14 +473,14 @@ Liang Zhang
 <div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/johnson2008.png"></p>
+<p><img data-src="images/johnson2008.png" class="quarto-figure quarto-figure-center"></p>
 <figcaption>Test Batteries Used</figcaption>
 </figure>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/one-g-five-battery.png"></p>
+<p><img data-src="images/one-g-five-battery.png" class="quarto-figure quarto-figure-center"></p>
 <figcaption>Consistency between g estimated from five batteries <span class="citation" data-cites="johnson2008">(<a href="#/references" role="doc-biblioref" onclick=""><em>Johnson, 2008</em></a>)</span></figcaption>
 </figure>
 </div>
@@ -565,16 +572,22 @@ Liang Zhang
 <section id="explained-variance" class="slide level2">
 <h2>Explained Variance</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-var-exp-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;1: <strong>Variance Explained by the g Factor.</strong> The horizontal line gives the variance explained by the g factor estimated from all the tasks.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-var-exp-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;1: <strong>Variance Explained by the g Factor.</strong> The horizontal line gives the variance explained by the g factor estimated from all the tasks.
+</p></section>
 <section id="correlation-with-rapm" class="slide level2">
 <h2>Correlation with RAPM</h2>
 
 <!-- ## High RAPM Correlation tasks -->
-<img data-src="main_results_files/figure-revealjs/fig-g-raven-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;2: <strong>Correlation with Raven’s Advanced Progressive Matrices (RAPM) scores</strong>. The horizontal line is the correlation between gF score estimated from all task indices and RAPM.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-g-raven-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;2: <strong>Correlation with Raven’s Advanced Progressive Matrices (RAPM) scores</strong>. The horizontal line is the correlation between gF score estimated from all task indices and RAPM.
+</p></section>
 <section id="correlation-between-estimated-g-in-pairwise-sampling" class="slide level2 smaller">
 <h2>Correlation between estimated g in Pairwise Sampling</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-g-pair-cor-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;3: <strong>The correlation between g scores estimated from each pair of sampling.</strong> For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.</p><aside class="notes">
+<img data-src="main_results_files/figure-revealjs/fig-g-pair-cor-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;3: <strong>The correlation between g scores estimated from each pair of sampling.</strong> For each sampling, a pair of equal-number tasks are drawed without replacement. So the maximal number of tasks will be 10, and this figure shows that the correlations between the paired g scores increase as the number of tasks increase.
+</p><aside class="notes">
 <p>Seemingly the correlation reaches a plateau? But I am doubting here.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -596,17 +609,23 @@ Liang Zhang
 <section id="cpm-hyperparamters-checking" class="slide level2">
 <h2>CPM hyperparamters checking</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-bench-cpm-hypers-1.png" width="1536" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;4: Compare different CPM hyper-parameters. We chose a threshhold method based on alpha level of correlation and a threshhold level at 0.01.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-bench-cpm-hypers-1.png" width="1536" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;4: Compare different CPM hyper-parameters. We chose a threshhold method based on alpha level of correlation and a threshhold level at 0.01.
+</p></section>
 <section id="find-the-best-task-condition-to-predict-intelligence" class="slide level2 smaller">
 <h2>Find the best task condition to predict intelligence</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-bench-cpm-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;5: Using CPM method to predict Raven score by FC from different states, we found that task-induced (i.e.&nbsp;n-back task) showed best performance, though combing task and resting states using the first principal component showed comparable performance. What’s more, global signal regression will enhance the performance, whereas different parcellation showed comparable performance.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-bench-cpm-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;5: Using CPM method to predict Raven score by FC from different states, we found that task-induced (i.e.&nbsp;n-back task) showed best performance, though combing task and resting states using the first principal component showed comparable performance. What’s more, global signal regression will enhance the performance, whereas different parcellation showed comparable performance.
+</p></section>
 <section id="prediction-trending" class="slide level2">
 <h2>Prediction Trending</h2>
 
 <!-- ## High Neural Correlation Tasks {.smaller} -->
 <!-- TODO: this is not the best method for domain checking -->
-<img data-src="main_results_files/figure-revealjs/fig-pred-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;6: <strong>Prediction Trending (based on CPM)</strong>.</p><aside class="notes">
+<img data-src="main_results_files/figure-revealjs/fig-pred-trend-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;6: <strong>Prediction Trending (based on CPM)</strong>.
+</p><aside class="notes">
 <ul>
 <li>Reaction times tasks are most predictable from neural data, but we should notice the difference with the high RAPM tasks.</li>
 <li>Here we will appeal to the definition of g factor. g factor is the ability that is domain-general and cannot be estimated from only several domain-specific tasks.</li>
@@ -626,12 +645,16 @@ Liang Zhang
 <section id="similarity-between-predictive-network-of-pairs" class="slide level2">
 <h2>Similarity Between Predictive Network of Pairs</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-dice-value-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;7: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> The edges are kept when given proportion of resamples selected. Here only the results from task state are shown.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-dice-value-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;7: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> The edges are kept when given proportion of resamples selected. Here only the results from task state are shown.
+</p></section>
 <section id="similarity-between-predictive-network-of-pairs-1" class="slide level2">
 <h2>Similarity Between Predictive Network of Pairs</h2>
 
 <!-- ## A Caveat -->
-<img data-src="main_results_files/figure-revealjs/fig-dice-count-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;8: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> Only the most selected of given number of edges are kept. Here only the results from task state are shown.</p></section></section>
+<img data-src="main_results_files/figure-revealjs/fig-dice-count-1.png" width="1152" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;8: <strong>Dice coefficient between each pair of predictive network in pairwise sampling.</strong> Only the most selected of given number of edges are kept. Here only the results from task state are shown.
+</p></section></section>
 <section>
 <section id="model-g-with-the-highest-loading-tasks" class="title-slide slide level1 center">
 <h1>Model g with the Highest Loading Tasks</h1>
@@ -640,11 +663,15 @@ Liang Zhang
 <section id="trends-by-number-of-kept-tasks" class="slide level2 smaller">
 <h2>Trends by Number of Kept tasks</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-tasksel-neural-correlation-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;9: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp.&nbsp;when adding low g loading tasks.</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-tasksel-neural-correlation-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;9: The correlation between g factor scores and brain functional connectivity reaches plateau after 6 variables of largest factor loading were included, whereas that of RAPM scores reaches plateau after 13 variables. This might indicate that more variables might not necesssarily be beneficial to the measure of g-factor estimation, esp.&nbsp;when adding low g loading tasks.
+</p></section>
 <section id="single-task-benchmark" class="slide level2">
 <h2>Single Task Benchmark</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-single-tasks-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;10: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model.</p></section></section>
+<img data-src="main_results_files/figure-revealjs/fig-single-tasks-1.png" width="768" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;10: Correlation with brain FC for single tasks. The tasks are ordered by the factor loading in one g factor model.
+</p></section></section>
 <section>
 <section id="model-selected-networks-analysis" class="title-slide slide level1 center">
 <h1>Model-selected Networks Analysis</h1>
@@ -652,115 +679,165 @@ Liang Zhang
 </section>
 <section id="node-degree-shen268" class="slide level2 smaller">
 <h2>Node Degree (Shen268)</h2>
-<div id="fig-markers-nn268" class="cell quarto-layout-panel">
-<figure>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nn268-1" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-1.png" data-ref-parent="fig-markers-nn268" width="634"></p>
-<figcaption>(a) G Overall, Pos-Corr Network</figcaption>
+<div id="fig-markers-nn268" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-markers-nn268-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-nn268" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-nn268-1" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-nn268-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-nn268-1.png" data-ref-parent="fig-markers-nn268" width="634">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-nn268-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) G Overall, Pos-Corr Network
+</figcaption>
 </figure>
 </div>
 </div>
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nn268-2" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-2.png" data-ref-parent="fig-markers-nn268" width="634"></p>
-<figcaption>(b) G Overall, Neg-Corr Network</figcaption>
-</figure>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-nn268" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-nn268-2" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-nn268-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-nn268-2.png" data-ref-parent="fig-markers-nn268" width="634">
 </div>
-</div>
-</div>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nn268-3" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-3.png" data-ref-parent="fig-markers-nn268" width="634"></p>
-<figcaption>(c) RAPM, Pos-Corr Network</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-nn268-4" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-nn268-4.png" data-ref-parent="fig-markers-nn268" width="634"></p>
-<figcaption>(d) RAPM, Neg-Corr Network</figcaption>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-nn268-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) G Overall, Neg-Corr Network
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p></p><figcaption>Figure&nbsp;11: Markers Plotting (top 500 edges)</figcaption><p></p>
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-nn268" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-nn268-3" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-nn268-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-nn268-3.png" data-ref-parent="fig-markers-nn268" width="634">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-nn268-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) RAPM, Pos-Corr Network
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-nn268" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-nn268-4" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-nn268-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-nn268-4.png" data-ref-parent="fig-markers-nn268" width="634">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-nn268-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(d) RAPM, Neg-Corr Network
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-markers-nn268-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Markers Plotting (top 500 edges)
+</figcaption>
 </figure>
 </div>
 </section>
 <section id="chord-diagram-shen268" class="slide level2 smaller">
 <h2>Chord Diagram (Shen268)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-mask-chord-nn268-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;12: Chord diagram of top 500 edges</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-mask-chord-nn268-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;12: Chord diagram of top 500 edges
+</p></section>
 <section id="network-contribution-shen268" class="slide level2 smaller">
 <h2>Network Contribution (Shen268)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-ctb-nn268-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;13: Contribution of Networks</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-ctb-nn268-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;13: Contribution of Networks
+</p></section>
 <section id="node-degree-power264" class="slide level2 smaller">
 <h2>Node Degree (Power264)</h2>
-<div id="fig-markers-Power264" class="cell quarto-layout-panel">
-<figure>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-Power264-1" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-1.png" data-ref-parent="fig-markers-Power264" width="634"></p>
-<figcaption>(a) G Overall, Pos-Corr Network</figcaption>
+<div id="fig-markers-Power264" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig">
+<div aria-describedby="fig-markers-Power264-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-Power264" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-Power264-1" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-Power264-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-Power264-1.png" data-ref-parent="fig-markers-Power264" width="634">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-Power264-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) G Overall, Pos-Corr Network
+</figcaption>
 </figure>
 </div>
 </div>
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-Power264-2" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-2.png" data-ref-parent="fig-markers-Power264" width="634"></p>
-<figcaption>(b) G Overall, Neg-Corr Network</figcaption>
-</figure>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-Power264" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-Power264-2" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-Power264-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-Power264-2.png" data-ref-parent="fig-markers-Power264" width="634">
 </div>
-</div>
-</div>
-<div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-Power264-3" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-3.png" data-ref-parent="fig-markers-Power264" width="634"></p>
-<figcaption>(c) RAPM, Pos-Corr Network</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output-display quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
-<div id="fig-markers-Power264-4" class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="main_results_files/figure-revealjs/fig-markers-Power264-4.png" data-ref-parent="fig-markers-Power264" width="634"></p>
-<figcaption>(d) RAPM, Neg-Corr Network</figcaption>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-Power264-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) G Overall, Neg-Corr Network
+</figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p></p><figcaption>Figure&nbsp;14: Markers Plotting (top 500 edges)</figcaption><p></p>
+<div class="quarto-layout-row">
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-Power264" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-Power264-3" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-Power264-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-Power264-3.png" data-ref-parent="fig-markers-Power264" width="634">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-Power264-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) RAPM, Pos-Corr Network
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-markers-Power264" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-markers-Power264-4" class="quarto-figure quarto-figure-center quarto-float">
+<figure class="quarto-float quarto-subfloat-fig">
+<div aria-describedby="fig-markers-Power264-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img data-src="main_results_files/figure-revealjs/fig-markers-Power264-4.png" data-ref-parent="fig-markers-Power264" width="634">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-markers-Power264-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(d) RAPM, Neg-Corr Network
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-markers-Power264-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: Markers Plotting (top 500 edges)
+</figcaption>
 </figure>
 </div>
 </section>
 <section id="chord-diagram-power264" class="slide level2 smaller">
 <h2>Chord Diagram (Power264)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-mask-chord-Power264-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;15: Chord diagram of top 500 edges</p></section>
+<img data-src="main_results_files/figure-revealjs/fig-mask-chord-Power264-9.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;15: Chord diagram of top 500 edges
+</p></section>
 <section id="network-contribution-power264" class="slide level2 smaller">
 <h2>Network Contribution (Power264)</h2>
 
-<img data-src="main_results_files/figure-revealjs/fig-ctb-Power264-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">Figure&nbsp;16: Contribution of Networks</p></section></section>
+<img data-src="main_results_files/figure-revealjs/fig-ctb-Power264-1.png" width="960" class="r-stretch quarto-figure-center"><p class="caption">
+Figure&nbsp;16: Contribution of Networks
+</p></section></section>
 <section id="references" class="title-slide slide level1 smaller scrollable">
 <h1>References</h1>
 
+<div class="quarto-auto-generated-content">
 <div class="footer footer-default">
 
 </div>
-<div id="refs" class="references csl-bib-body hanging-indent" data-line-spacing="2" role="list">
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
 <div id="ref-thecamb2021" class="csl-entry" role="listitem">
 Barbey, A. K., Karama, S., &amp; Haier, R. J. (Eds.). (2021). The cambridge handbook of intelligence and cognitive neuroscience (1st ed.). Cambridge University Press. <a href="https://doi.org/10.1017/9781108635462">https://doi.org/10.1017/9781108635462</a>
 </div>
@@ -828,7 +905,6 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
       Reveal.initialize({
 'controlsAuto': true,
 'previewLinksAuto': false,
-'smaller': false,
 'pdfSeparateFragments': false,
 'autoAnimateEasing': "ease",
 'autoAnimateDuration': 1,
@@ -1025,10 +1101,10 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
           event.initEvent("slideenter", true, true);
           window.document.dispatchEvent(event);
         }
-    
+
         function fireSlideChanged(previousSlide, currentSlide) {
           fireSlideEnter();
-    
+
           // dispatch for shiny
           if (window.jQuery) {
             if (previousSlide) {
@@ -1039,7 +1115,7 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
             }
           }
         }
-    
+
         // hookup for slidy
         if (window.w3c_slidy) {
           window.w3c_slidy.add_observer(function (slide_num) {
@@ -1047,10 +1123,10 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
             fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
           });
         }
-    
+
       })();
     </script>
-    
+
     <script id="quarto-html-after-body" type="application/javascript">
     window.document.addEventListener("DOMContentLoaded", function (event) {
       const toggleBodyColorMode = (bsSheetEl) => {
@@ -1127,10 +1203,9 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
         // clear code selection
         e.clearSelection();
       });
-      function tippyHover(el, contentFn) {
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
-          content: contentFn,
           maxWidth: 500,
           delay: 100,
           arrow: false,
@@ -1140,8 +1215,17 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
           interactive: true,
           interactiveBorder: 10,
           theme: 'light-border',
-          placement: 'bottom-start'
+          placement: 'bottom-start',
         };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
           config['offset'] = [0,0];
           config['maxWidth'] = 700;
         window.tippy(el, config); 

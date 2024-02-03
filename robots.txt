@@ -1,1 +1,1 @@
-Sitemap: https://github.com/psychelzh/g-factor/sitemap.xml
+Sitemap: https://psychelzh.github.io/g-factor/sitemap.xml
