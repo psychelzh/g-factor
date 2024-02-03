@@ -29,20 +29,18 @@ match_abbr <- function(tasks) {
 
 # helper functions
 average_correlation <- function(x) tanh(mean(atanh(x)))
-fit_mdl <- function(mdl, data) {
-  cfa(
-    mdl,
-    data,
-    missing = "ml",
-    orthogonal = TRUE,
-    std.ov = TRUE,
-    std.lv = TRUE
+
+fit_curve <- function(x, y) {
+  nls(
+    y ~ eta1 * (1 - exp(theta - eta2 * x)),
+    start = list(eta1 = 1, eta2 = 0.01, theta = 0)
   )
 }
+
 visualize_model <- function(fit, ..., hierarchical = TRUE, name_g = "GCA") {
   params <- filter(parameterTable(fit), op == "=~")
   labels <- if (!hierarchical) {
-     c(match_abbr(params$rhs), name_g)
+    c(match_abbr(params$rhs), name_g)
   } else {
     params <- filter(params, lhs != "g")
     c(
@@ -67,6 +65,62 @@ visualize_model <- function(fit, ..., hierarchical = TRUE, name_g = "GCA") {
     ...
   )
 }
+
+geom_dots_slab <- function() {
+  list(
+    ggdist::stat_dots(side = "left"),
+    ggdist::stat_slabinterval()
+  )
+}
+
+geom_point_line <- function(data, mapping) {
+  list(
+    geom_point(
+      data = data,
+      mapping = mapping,
+      size = 1,
+      color = "grey"
+    ),
+    geom_line(
+      data = data,
+      mapping = mapping,
+      linetype = "longdash",
+      color = "grey"
+    )
+  )
+}
+
+geom_annotate <- function(x, y,
+                          label = "全部20个指标",
+                          nudge_x = 0.2,
+                          nudge_y = 0.05) {
+  data <- tibble(x = x, y = y)
+  mapping <- aes(x, y)
+  list(
+    geom_point(
+      data = data,
+      mapping = mapping,
+      shape = "square open",
+      size = 2
+    ),
+    ggrepel::geom_text_repel(
+      data = data,
+      mapping = mapping,
+      label = label,
+      nudge_x = nudge_x,
+      nudge_y = nudge_y
+    )
+  )
+}
+
+pretty_axes <- function(name_x, name_y, width_x = 5, width_y = 0.2) {
+  list(
+    scale_x_continuous(name_x, breaks = scales::breaks_width(width_x)),
+    scale_y_continuous(name_y, breaks = scales::breaks_width(width_y)),
+    ggpubr::theme_pubr() +
+      theme(panel.grid.major.y = element_line(linetype = "dotted"))
+  )
+}
 ```
 
 ```{r}
@@ -78,8 +132,8 @@ targets::tar_load(
 )
 subjs_combined <- scan(here::here(file_subjs_combined))
 batch_real <- c("2", "3", "12", "15", "16")
-subjs_real_total <- subjs_info_clean |> 
-  semi_join(indices_clean, by = "sub_id") |> 
+subjs_real_total <- subjs_info_clean |>
+  semi_join(indices_clean, by = "sub_id") |>
   filter((sub_id %/% 1000) %in% batch_real)
 
 descr_behav <- subjs_info_clean |>
@@ -237,7 +291,8 @@ bind_rows(
 ```{r}
 #| label: fig-2&s4
 
-# visualize pairwise correlation and correlation with RAPM
+# prepare data ----
+# pair reliability
 rel_pairs <- tar_read(scores_g, store = store_gca_numtasks) |>
   group_by(num_vars, idx_rsmp) |>
   filter(n() == 2) |>
@@ -245,12 +300,20 @@ rel_pairs <- tar_read(scores_g, store = store_gca_numtasks) |>
     r = cor(scores[[1]]$g, scores[[2]]$g, use = "pairwise"),
     .groups = "drop"
   )
-datasummary(
-  Factor(num_vars) ~ r * (Median + SD + Min + Max),
-  rel_pairs,
-  fmt = 3,
-  output = fs::path(path_ms_tbl, "rel_pairs.xlsx")
+fit_rel <- with(rel_pairs, fit_curve(num_vars, r))
+predicted_rel <- tibble(
+  num_vars = seq(3, 40),
+  r = predict(fit_rel, list(x = num_vars))
 )
+# composite reliability
+tar_load(comp_rel, store = store_gca_numtasks)
+fit_comp_rel <- with(comp_rel, fit_curve(num_vars, prop))
+predicted_comp_rel <- tibble(
+  num_vars = seq(3, 40),
+  prop = predict(fit_comp_rel, list(x = num_vars))
+)
+
+# correlation with RAPM
 cor_rapm_gca <- bind_rows(
   spearman = tar_read(scores_spearman, store = store_preproc_behav),
   bifac = tar_read(scores_bifac, store = store_preproc_behav),
@@ -276,98 +339,84 @@ cor_rapm_sampled <- tar_read(scores_g, store = store_gca_numtasks) |>
     r_fisher = atanh(r),
     .by = c(num_vars, id_pairs, idx_rsmp)
   )
+fit_rapm <- with(cor_rapm_sampled, fit_curve(num_vars, r))
+predicted_rapm <- tibble(
+  num_vars = seq(3, 40),
+  r = predict(fit_rapm, list(x = num_vars))
+)
+
+# tables ----
+datasummary(
+  Factor(num_vars) ~ r * (Median + SD + Min + Max),
+  rel_pairs,
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "rel_pairs.xlsx")
+)
+datasummary(
+  Factor(num_vars) ~ prop * (Median + SD + Min + Max),
+  comp_rel,
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "comp_rel.xlsx")
+)
 datasummary(
   Factor(num_vars) ~ r * (Median + SD + Min + Max),
   cor_rapm_sampled,
   fmt = 3,
   output = fs::path(path_ms_tbl, "cor_rapm_sampled.xlsx")
 )
+datasummary(
+  Factor(num_vars) ~ r * (Median + SD + Min + Max),
+  cor_gca_sampled,
+  fmt = 3,
+  output = fs::path(path_ms_tbl, "cor_gca_sampled.xlsx")
+)
 
-fit_rel <- nls(
-  r ~ eta1 * (1 - exp(-eta2 * num_vars)),
-  data = rel_pairs,
-  start = list(eta1 = 1, eta2 = 0.01),
-  lower = c(eta1 = 0, eta2 = 0),
-  algorithm = "port"
-)
-pred_range_rel <- seq(3, 40)
-predicted_rel <- tibble(
-  num_vars = pred_range_rel,
-  r = predict(fit_rel, list(num_vars = pred_range_rel))
-)
+# figures ----
 p_rel <- rel_pairs |>
   ggplot(aes(num_vars, r)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  geom_point(
+  geom_dots_slab() +
+  geom_point_line(
     data = predicted_rel,
-    mapping = aes(num_vars, r),
-    size = 1,
-    color = "black"
+    mapping = aes(num_vars, r)
   ) +
-  geom_line(
-    data = predicted_rel,
-    mapping = aes(num_vars, r),
-    linetype = "longdash",
-    color = "black"
-  ) +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
-  ggpubr::theme_pubr() +
-  theme(panel.grid.major.y = element_line(linetype = "dotted")) +
-  labs(x = "Number of Tasks", y = "Correlation Between Pairs")
+  pretty_axes(name_x = "任务指标数目", name_y = "配对间的相关")
 
-fit_rapm <- nls(
-  r ~ eta1 * (1 - exp(-eta2 * num_vars)),
-  data = cor_rapm_sampled,
-  start = list(eta1 = 1, eta2 = 0.01),
-  lower = c(eta1 = 0, eta2 = 0),
-  algorithm = "port"
-)
-pred_range_rapm <- seq(3, 40)
-predicted_rapm <- tibble(
-  num_vars = pred_range_rapm,
-  r = predict(fit_rapm, list(num_vars = pred_range_rapm))
-)
+p_comp_rel <- comp_rel |>
+  ggplot(aes(num_vars, prop)) +
+  geom_dots_slab() +
+  geom_point_line(
+    data = predicted_comp_rel,
+    mapping = aes(num_vars, prop)
+  ) +
+  geom_annotate(
+    x = 20,
+    y = tar_read(
+      comp_rel_spearman,
+      store = store_preproc_behav
+    ),
+    nudge_y = 0.08
+  ) +
+  pretty_axes(name_x = "任务指标数目", name_y = "组合信度")
+
 p_cor_ramp <- cor_rapm_sampled |>
   ggplot(aes(num_vars, r)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  geom_hline(
-    aes(yintercept = r, linetype = trait),
-    cor_rapm_gca
-  ) +
-  geom_point(
+  geom_dots_slab() +
+  geom_point_line(
     data = predicted_rapm,
-    mapping = aes(num_vars, r),
-    size = 1,
-    color = "black"
+    mapping = aes(num_vars, r)
   ) +
-  geom_line(
-    data = predicted_rapm,
-    mapping = aes(num_vars, r),
-    linetype = "longdash",
-    color = "black"
+  geom_annotate(
+    x = 20,
+    y = with(cor_rapm_gca, r[trait == "spearman"])
   ) +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
-  rlang::exec(
-    scale_linetype_manual,
-    !!!scale_meas_trait(1:2),
-    values = lty_traits
-  ) +
-  ggpubr::theme_pubr() +
-  theme(panel.grid.major.y = element_line(linetype = "dotted")) +
-  labs(x = "Number of Tasks", y = "Correlation with RAPM")
+  pretty_axes(name_x = "任务指标数目", name_y = "与瑞文的相关")
 
-p <- p_rel / p_cor_ramp +
-  plot_annotation(tag_levels = "A")
-ggsave(fs::path(path_ms_fig, "fig-2.png"), p, width = 8, height = 6)
-ggsave(
-  fs::path(path_ms_fig, "fig-2.tif"), p,
-  width = 18, height = 13, units = "cm",
-  device = "tiff", dpi = 600,
-  compression = "lzw"
-)
+p <- p_rel / p_comp_rel / p_cor_ramp +
+  plot_annotation(tag_levels = "A") +
+  plot_layout(axis_titles = "collect_x")
+ggsave(fs::path(path_ms_fig, "fig-2-thesis.png"), p, width = 8, height = 8)
 
+# use g scores based on all tasks as criterion ----
 cor_gca_sampled <- tar_read(scores_g, store = store_gca_numtasks) |>
   unnest(scores) |>
   inner_join(
@@ -385,12 +434,6 @@ cor_gca_sampled <- tar_read(scores_g, store = store_gca_numtasks) |>
     r = cor(g_sample, g_total, use = "pairwise"),
     .by = c(num_vars, id_pairs, idx_rsmp, trait)
   )
-datasummary(
-  Factor(num_vars) ~ r * (Median + SD + Min + Max),
-  cor_gca_sampled,
-  fmt = 3,
-  output = fs::path(path_ms_tbl, "cor_gca_sampled.xlsx")
-)
 p_cor_gca <- cor_gca_sampled |>
   ggplot(aes(num_vars, r)) +
   ggdist::stat_slabinterval() +
@@ -514,15 +557,15 @@ p_hypers <- pred_hypers |>
   filter(parcel == "nn268") |>
   ggplot(aes(factor(thresh_level), all)) +
   geom_boxplot(width = 0.4) +
-  scale_x_discrete(name = "Threshold Level") +
+  scale_x_discrete(name = "阈值水平") +
   scale_y_continuous(
-    name = "CPM Performance",
+    name = "预测表现",
     breaks = scales::breaks_width(0.02)
   ) +
   facet_grid(
     cols = vars(thresh_method),
     labeller = labeller(
-      thresh_method = thresh_methods
+      thresh_method = thresh_methods_cn
     ),
     scales = "free_x"
   ) +
@@ -531,21 +574,20 @@ p_cond <- pred_cond |>
   filter(parcel == "nn268", type == "Equal Duration") |>
   ggplot(aes(cond, all)) +
   geom_boxplot(width = 0.4) +
-  rlang::exec(scale_x_discrete, !!!scale_conds) +
+  rlang::exec(scale_x_discrete, !!!scale_conds_cn) +
   scale_y_continuous(
-    name = "CPM Performance",
+    name = "预测表现",
     breaks = scales::breaks_width(0.03)
   ) +
   facet_grid(
     cols = vars(gsr),
-    labeller = labeller(gsr = gsrs)
+    labeller = labeller(gsr = gsrs_cn)
   ) +
   ggpubr::theme_pubr()
-p <- p_hypers / p_cond +
-  plot_layout(heights = c(1, 2)) +
-  plot_annotation(tag_levels = "A") &
-  theme(legend.position = "bottom")
-ggsave(fs::path(path_ms_fig, "fig-3.png"), p, width = 8, height = 6)
+p <- p_hypers + p_cond +
+  plot_layout(axis_titles = "collect", widths = c(1.2, 1)) +
+  plot_annotation(tag_levels = "A")
+ggsave(fs::path(path_ms_fig, "fig-3-thesis.png"), p, width = 12, height = 5)
 ggsave(
   fs::path(path_ms_fig, "fig-3.tif"), p,
   width = 18, height = 13, units = "cm",
@@ -608,6 +650,7 @@ ggsave(fs::path(path_ms_fig, "bench_cpm_duration.png"), p_duration, width = 8, h
 ```{r}
 #| label: fig-4-and-fig-s7
 
+# prepare data ----
 preds_main <- targets::tar_read(
   cpm_pred,
   store = store_cpm_main
@@ -638,26 +681,11 @@ preds_sampled <- targets::tar_read(
       any_of(c(names(config), names(hypers_cpm)))
     )
   )
-
-p_pred_trend <- preds_sampled |>
-  ggplot(aes(num_vars, estimate)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  geom_hline(
-    aes(linetype = trait, yintercept = estimate),
-    preds_main
-  ) +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
-  rlang::exec(
-    scale_linetype_manual,
-    !!!scale_meas_trait(),
-    values = lty_traits
-  ) +
-  ggpubr::theme_pubr() +
-  theme(
-    panel.grid.major.y = element_line(linetype = "dotted")
-  ) +
-  labs(x = "Number of Tasks", y = "CPM Performance")
+fit_pred <- with(preds_sampled, fit_curve(num_vars, estimate))
+predicted_pred <- tibble(
+  num_vars = seq(3, 40),
+  estimate = predict(fit_pred, list(x = num_vars))
+)
 
 dice_clean <- targets::tar_read(
   dice_mask_pairs,
@@ -667,22 +695,51 @@ dice_clean <- targets::tar_read(
   filter(
     parcel == "nn268",
     binarize_method == "prob",
-    binarize_level == 0.95,
+    binarize_level == 0.5, # stricter levels cause too many 0 values
     cond == "nbackrun1"
   )
+fit_dice <- with(dice_clean, fit_curve(num_vars, dice_avg))
+predicted_dice <- tibble(
+  num_vars = seq(3, 40),
+  dice_avg = predict(fit_dice, list(x = num_vars))
+)
+
+# figures ----
+p_pred_trend <- preds_sampled |>
+  ggplot(aes(num_vars, estimate)) +
+  geom_dots_slab() +
+  geom_point_line(
+    data = predicted_pred,
+    mapping = aes(num_vars, estimate)
+  ) +
+  geom_annotate(
+    x = 20,
+    y = with(preds_main, estimate[trait == "spearman"])
+  ) +
+  geomtextpath::geom_texthline(
+    yintercept = with(preds_main, estimate[trait == "rapm"]),
+    linetype = "dashed",
+    label = "瑞文推理",
+    # https://github.com/AllanCameron/geomtextpath/issues/73
+    family = "Noto Sans SC",
+    hjust = 0,
+    vjust = -0.1
+  ) +
+  pretty_axes("任务指标数目", "预测表现", width_y = 0.1)
+
 p_dice_avg <- dice_clean |>
   ggplot(aes(num_vars, dice_avg)) +
-  ggdist::stat_slabinterval() +
-  ggdist::stat_dots(side = "left") +
-  scale_x_continuous(breaks = scales::breaks_width(2)) +
-  ggpubr::theme_pubr() +
-  theme(panel.grid.major.y = element_line(linetype = "dotted")) +
-  labs(x = "Number of Tasks", y = "Dice Similarity")
+  geom_dots_slab() +
+  geom_point_line(
+    data = predicted_dice,
+    mapping = aes(num_vars, dice_avg)
+  ) +
+  pretty_axes("任务指标数目", "配对间选边相似度")
 
-p <- p_pred_trend + p_dice_avg +
-  plot_layout(widths = c(2, 1)) +
+p <- p_pred_trend / p_dice_avg +
+  plot_layout(axis_titles = "collect") +
   plot_annotation(tag_levels = "A")
-ggsave(fs::path(path_ms_fig, "fig-4.png"), p, width = 8, height = 4)
+ggsave(fs::path(path_ms_fig, "fig-4-thesis.png"), p, width = 8, height = 6)
 ggsave(
   fs::path(path_ms_fig, "fig-4.tif"), p,
   width = 18, height = 9, units = "cm",
@@ -690,6 +747,7 @@ ggsave(
   compression = "lzw"
 )
 
+# tables ----
 datasummary(
   Factor(num_vars) ~ estimate * (Median + SD + Max + Min),
   preds_sampled,
@@ -702,7 +760,7 @@ datasummary(
   fs::path(path_ms_tbl, "dice_clean.xlsx")
 )
 
-# supplementary
+# supplementary ----
 dice_clean_supp <- targets::tar_read(
   dice_mask_pairs,
   store = store_gca_numtasks
@@ -1089,6 +1147,16 @@ nodes_degree_sorted |>
 ```{r}
 #| label: alt-models
 
+fit_mdl <- function(mdl, data) {
+  cfa(
+    mdl,
+    data,
+    missing = "ml",
+    orthogonal = TRUE,
+    std.ov = TRUE,
+    std.lv = TRUE
+  )
+}
 tar_load(data_subsamples, store = store_preproc_behav)
 # try adding inhibition
 mdl_m1 <- "

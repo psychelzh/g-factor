@@ -56,6 +56,7 @@ scale_sites <- list(
 )
 
 # scales for neural parameters
+# note these are all discrete values, so `limits` is used to specify the order
 conds <- c(
   nbackrun1 = "Task",
   rest = "Resting",
@@ -65,6 +66,16 @@ scale_conds <- list(
   name = "Task Condition",
   limits = names(conds),
   labels = conds
+)
+conds_cn <- c(
+  nbackrun1 = "任务态",
+  rest = "静息态",
+  latent = "潜在网络"
+)
+scale_conds_cn <- list(
+  name = "任务条件",
+  limits = names(conds_cn),
+  labels = conds_cn
 )
 parcels <- c(
   nn268 = "Shen268",
@@ -93,6 +104,15 @@ scale_gsrs <- list(
   limits = names(gsrs),
   labels = gsrs
 )
+gsrs_cn <- c(
+  with = "有GSR",
+  without = "无GSR"
+)
+scale_gsrs_cn <- list(
+  name = "全局信号回归",
+  limits = names(gsrs),
+  labels = gsrs_cn
+)
 
 # scales for CPM parameters
 thresh_methods <- c(
@@ -103,6 +123,15 @@ scale_thresh_methods <- list(
   name = "Edge Threshold Method",
   limits = names(thresh_methods),
   labels = thresh_methods
+)
+thresh_methods_cn <- c(
+  alpha = "置信水平",
+  sparsity = "稀疏度"
+)
+scale_thresh_methods_cn <- list(
+  name = "阈值方法",
+  limits = names(thresh_methods),
+  labels = thresh_methods_cn
 )
 model_types <- c(
   all = "Combined Model",
