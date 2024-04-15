@@ -8,7 +8,7 @@
 <link href="../site_libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="../site_libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.4.549">
+  <meta name="generator" content="quarto-1.4.553">
 
   <meta name="author" content="Liang Zhang">
   <meta name="dcterms.date" content="2023-06-30">
@@ -406,7 +406,7 @@ Liang Zhang
 <section id="diagram-of-g-and-its-relatives" class="slide level2">
 <h2>Diagram of g and its Relatives</h2>
 
-<img data-src="images/mental-ability-diagram.png" class="quarto-figure quarto-figure-center r-stretch"><p class="caption">Conceptual relationships among mental abilities, intelligence, IQ, and the g-factor <span class="citation" data-cites="theinte2013">(<a href="#/references" role="doc-biblioref" onclick=""><em><em>The intelligent brain</em>, 2013</em></a>)</span></p><aside class="notes">
+<img data-src="images/mental-ability-diagram.png" class="r-stretch quarto-figure-center"><p class="caption">Conceptual relationships among mental abilities, intelligence, IQ, and the g-factor <span class="citation" data-cites="theinte2013">(<a href="#/references" role="doc-biblioref" onclick=""><em><em>The intelligent brain</em>, 2013</em></a>)</span></p><aside class="notes">
 <p>Savants are those with very high specific abilities but no general intelligence (e.g., Kim Peek, AI of current days).</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -453,14 +453,14 @@ Liang Zhang
 <div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/johnson2004.png" class="quarto-figure quarto-figure-center"></p>
+<p><img data-src="images/johnson2004.png"></p>
 <figcaption>Test batteries used</figcaption>
 </figure>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/one-g-three-battery.png" class="quarto-figure quarto-figure-center"></p>
+<p><img data-src="images/one-g-three-battery.png"></p>
 <figcaption>Consistency between g estimated from three batteries <span class="citation" data-cites="johnson2004">(<a href="#/references" role="doc-biblioref" onclick=""><em>Johnson, 2004</em></a>)</span></figcaption>
 </figure>
 </div>
@@ -473,14 +473,14 @@ Liang Zhang
 <div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/johnson2008.png" class="quarto-figure quarto-figure-center"></p>
+<p><img data-src="images/johnson2008.png"></p>
 <figcaption>Test Batteries Used</figcaption>
 </figure>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="images/one-g-five-battery.png" class="quarto-figure quarto-figure-center"></p>
+<p><img data-src="images/one-g-five-battery.png"></p>
 <figcaption>Consistency between g estimated from five batteries <span class="citation" data-cites="johnson2008">(<a href="#/references" role="doc-biblioref" onclick=""><em>Johnson, 2008</em></a>)</span></figcaption>
 </figure>
 </div>
@@ -1203,6 +1203,24 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
         // clear code selection
         e.clearSelection();
       });
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp("https:\/\/psychelzh\.github\.io\/g-factor\/");
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
       function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
         const config = {
           allowHTML: true,
@@ -1239,7 +1257,11 @@ Thompson, W. K., Barch, D. M., Bjork, J. M., Gonzalez, R., Nagel, B. J., Nixon, 
           try { href = new URL(href).hash; } catch {}
           const id = href.replace(/^#\/?/, "");
           const note = window.document.getElementById(id);
-          return note.innerHTML;
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
         });
       }
       const findCites = (el) => {
