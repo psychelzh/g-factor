@@ -3,6 +3,14 @@
     "Version": "4.3.2",
     "Repositories": [
       {
+        "Name": "CRAN",
+        "URL": "https://mirrors.tuna.tsinghua.edu.cn/CRAN"
+      },
+      {
+        "Name": "psychelzh",
+        "URL": "https://psychelzh.r-universe.dev"
+      },
+      {
         "Name": "BioCsoft",
         "URL": "https://bioconductor.org/packages/3.17/bioc"
       },
@@ -21,14 +29,6 @@
       {
         "Name": "BioCbooks",
         "URL": "https://bioconductor.org/packages/3.17/books"
-      },
-      {
-        "Name": "psychelzh",
-        "URL": "https://psychelzh.r-universe.dev"
-      },
-      {
-        "Name": "CRAN",
-        "URL": "https://mirrors.tuna.tsinghua.edu.cn/CRAN"
       }
     ]
   },
@@ -1119,15 +1119,9 @@
     },
     "crew": {
       "Package": "crew",
-      "Version": "0.4.0.9001",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "crew",
-      "RemoteUsername": "wlandau",
-      "RemotePkgRef": "wlandau/crew",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "492ee3be06ee5a7546acb191c2de90034a5cdbbf",
+      "Version": "0.9.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -2781,9 +2775,9 @@
     },
     "mirai": {
       "Package": "mirai",
-      "Version": "0.10.0.9001",
+      "Version": "0.12.0",
       "Source": "Repository",
-      "Repository": "https://shikokuchuo.r-universe.dev",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "nanonext"
@@ -2916,9 +2910,9 @@
     },
     "nanonext": {
       "Package": "nanonext",
-      "Version": "0.10.0.9005",
+      "Version": "0.12.0",
       "Source": "Repository",
-      "Repository": "https://shikokuchuo.r-universe.dev",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -3270,9 +3264,9 @@
     },
     "preproc.iquizoo": {
       "Package": "preproc.iquizoo",
-      "Version": "2.5.2",
+      "Version": "2.8.1",
       "Source": "Repository",
-      "Repository": "https://psychelzh.r-universe.dev",
+      "Repository": "psychelzh",
       "Requirements": [
         "R",
         "dplyr",
