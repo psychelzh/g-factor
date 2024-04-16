@@ -40,7 +40,7 @@ include_g_fitting <- function(indices, df_ov,
                               include_comp_rel = TRUE,
                               name_suffix = NULL) {
   add_suffix <- function(name) {
-    if (!is.null(name_suffix)){
+    if (!is.null(name_suffix)) {
       name <- paste(name, name_suffix, sep = "_")
     }
     name
