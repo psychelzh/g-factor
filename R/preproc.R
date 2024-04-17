@@ -415,6 +415,11 @@ reshape_data_wider <- function(indices, name_score = "score") {
     )
 }
 
+shuffle_data <- function(data, id_cols = "sub_id") {
+  data[[id_cols]] <- sample(data[[id_cols]])
+  data
+}
+
 # helper functions ----
 id_cols <- function() {
   c("file", "sub_id", "task_datetime")
