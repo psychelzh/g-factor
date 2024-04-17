@@ -208,6 +208,22 @@ ggsave(
   width = 10,
   height = 8
 )
+
+p_hist_corr <- indices_wider_clean |>
+  select(all_of(task_name_abbr)) |> 
+  corrr::correlate() |> 
+  corrr::stretch(remove.dups = TRUE, na.rm = TRUE) |> 
+  ggplot(aes(r)) +
+  geom_histogram(fill = "grey") +
+  geom_point(y = 0, shape = "|") +
+  labs(x = "相关系数", y = "频数") +
+  ggpubr::theme_pubr()
+ggsave(
+  fs::path(path_ms_fig, "fig-hist-corr.png"),
+  p_hist_corr,
+  width = 8,
+  height = 4
+)
 ```
 
 ```{r}
@@ -411,6 +427,11 @@ p_cor_ramp <- cor_rapm_sampled |>
   ) +
   pretty_axes(name_x = "任务指标数目", name_y = "与瑞文的相关")
 
+p_rels <- p_rel / p_comp_rel + 
+  plot_annotation(tag_levels = "A") +
+  plot_layout(axis_titles = "collect_x")
+ggsave(fs::path(path_ms_fig, "fig-rels-defense.png"), p_rels, width = 8, height = 6)
+
 p <- p_rel / p_comp_rel / p_cor_ramp +
   plot_annotation(tag_levels = "A") +
   plot_layout(axis_titles = "collect_x")
@@ -517,6 +538,7 @@ ggsave(
 #| label: fig-3-and-fig-s6
 
 # prepare data ----
+tar_load(cpm_pred_perm, store = store_cpm_bench)
 cpm_pred <- targets::tar_read(
   cpm_pred,
   store = store_cpm_bench
@@ -554,7 +576,7 @@ pred_cond <- cpm_pred |>
 
 # plot in main text ----
 p_hypers <- pred_hypers |>
-  filter(parcel == "nn268") |>
+  filter(parcel == "nn268", index == "rapm") |>
   ggplot(aes(factor(thresh_level), all)) +
   geom_boxplot(width = 0.4) +
   scale_x_discrete(name = "阈值水平") +
@@ -571,7 +593,7 @@ p_hypers <- pred_hypers |>
   ) +
   ggpubr::theme_pubr()
 p_cond <- pred_cond |>
-  filter(parcel == "nn268", type == "Equal Duration") |>
+  filter(parcel == "nn268", index == "rapm") |>
   ggplot(aes(cond, all)) +
   geom_boxplot(width = 0.4) +
   rlang::exec(scale_x_discrete, !!!scale_conds_cn) +
@@ -594,6 +616,37 @@ ggsave(
   device = "tiff", dpi = 600,
   compression = "lzw"
 )
+p_cond <- pred_cond |>
+  filter(parcel == "nn268", gsr == "with") |>
+  summarise(all = mean(all), .by = c(cond, index)) |>
+  left_join(
+    cpm_pred_perm |> 
+      nest(.by = c(cond, index)) |> 
+      mutate(cond = str_remove(cond, "eq")),
+    by = c("cond", "index")
+  ) |> 
+  mutate(p_perm = map2_dbl(data, all, ~ mean(.x$all >= .y))) |> 
+  select(cond, index, all, p_perm) |>
+  rstatix::add_significance(
+    p.col = "p_perm",
+    cutpoints = c(0, 0.001, 0.01, 0.05, 1),
+    symbols = c("***", "**", "*", "ns")
+  ) |> 
+  ggplot(aes(fct_reorder(cond, desc(all)), all, fill = index)) +
+  geom_col(position = position_dodge(width = 0.8), width = 0.6) +
+  geom_text(
+    aes(label = p_perm.signif),
+    position = position_dodge(width = 0.8)
+  ) +
+  scale_x_discrete(name = "磁共振条件", labels = conds_cn) +
+  # rlang::exec(scale_x_discrete, !!!scale_conds_cn) +
+  scale_y_continuous(name = "预测表现") +
+  scale_fill_grey(
+    name = NULL,
+    labels = c(rapm = "瑞文高级推理", spearman = "一般认知能力")
+  ) +
+  ggpubr::theme_pubr()
+ggsave(fs::path(path_ms_fig, "fig-fmri-conds.png"), p_cond, width = 8, height = 6)
 
 # plot in supplementary ----
 p_hypers_parcel <- pred_hypers |>
@@ -797,6 +850,18 @@ p_dice_supp <- dice_clean_supp |>
   ) +
   labs(x = "Number of Tasks", y = "Dice Similarity")
 ggsave(fs::path(path_ms_fig, "fig-s7.png"), p_dice_supp, width = 8, height = 6)
+
+p_dice_supp <- dice_clean_supp |>
+  filter(parcel == "nn268") |> 
+  pivot_wider(names_from = model_type, values_from = dice) |>
+  mutate(dice = (pos + neg) / 2) |>
+  ggplot(aes(num_vars, dice)) +
+  geom_dots_slab() +
+  scale_x_continuous(breaks = scales::breaks_width(2)) +
+  ggpubr::theme_pubr() +
+  facet_grid(cols = vars(binarize_level)) +
+  labs(x = "任务指标数目", y = "配对间选边相似度")
+ggsave(fs::path(path_ms_fig, "fig-thesis-dice-supp.png"), p_dice_supp, width = 8, height = 4)
 ```
 
 ```{r}
