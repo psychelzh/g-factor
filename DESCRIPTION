@@ -51,7 +51,7 @@ Imports:
     targets,
     writexl
 Remotes:
-    psychelzh/preproc.iquizoo,
+    iquizoo/preproc.iquizoo,
     TimTeaFan/dplyover,
     yunshiuan/label4MRI
 Encoding: UTF-8
