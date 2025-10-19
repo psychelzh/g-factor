@@ -11,7 +11,7 @@
     "href": "posts/main_results.html#intelligence-and-g",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Intelligence and g",
-    "text": "Intelligence and g\n\n\nGeneral intelligence (i.e., g-factor) was first proposed by Spearman (1904) to account for the “positive manifold” phenomenon of cognitive tests.\nGiven the term “intelligence” is hard to define and easily leads to confusion, many researchers (see Jensen (1998)) focused on the g (i.e., general intelligence) (Barbey, 2021; Haier, 2017).\nCurrent cognitive scientists also defined intelligence as general cognitive ability (Barbey, 2021), which can be derived by multiple cognitive tasks"
+    "text": "Intelligence and g\n\nGeneral intelligence (i.e., g-factor) was first proposed by Spearman (1904) to account for the “positive manifold” phenomenon of cognitive tests.\nGiven the term “intelligence” is hard to define and easily leads to confusion, many researchers (see Jensen (1998)) focused on the g (i.e., general intelligence) (Barbey, 2021; Haier, 2017).\nCurrent cognitive scientists also defined intelligence as general cognitive ability (Barbey, 2021), which can be derived by multiple cognitive tasks"
   },
   {
     "objectID": "posts/main_results.html#diagram-of-g-and-its-relatives",
@@ -25,14 +25,14 @@
     "href": "posts/main_results.html#measure-of-g",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Measure of g",
-    "text": "Measure of g\n\n\nTwo major influences: sampling of participants and sampling of cognitive tasks\nHere we focus on the issue of tasks sampling\n\nFactor analysis method\nTask sampling representativeness"
+    "text": "Measure of g\n\nTwo major influences: sampling of participants and sampling of cognitive tasks\nHere we focus on the issue of tasks sampling\n\nFactor analysis method\nTask sampling representativeness"
   },
   {
     "objectID": "posts/main_results.html#factor-modeling",
     "href": "posts/main_results.html#factor-modeling",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Factor Modeling",
-    "text": "Factor Modeling\n\n\nThere are several different factor analysis modeling method:\n\nSpearman Model\nBifactor Model\nOrthogonalized Hierarchical Model\n\nJensen (1998) found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000. Here we just focus the classical Spearman model for its simplicity."
+    "text": "Factor Modeling\n\nThere are several different factor analysis modeling method:\n\nSpearman Model\nBifactor Model\nOrthogonalized Hierarchical Model\n\nJensen (1998) found that the g-factor scores is extremely stable among different methods, with correlation coefficients ranging from 0.991 to 1.000. Here we just focus the classical Spearman model for its simplicity."
   },
   {
     "objectID": "posts/main_results.html#invariance-of-g",
@@ -60,7 +60,7 @@
     "href": "posts/main_results.html#research-questions",
     "title": "The neural substrates of general cognitive ability based on multiple cognitive tasks",
     "section": "Research Questions",
-    "text": "Research Questions\n\n\nHow the number of tasks affect the measure of g?\n\nMore reliable and more valid?\n\nCan neural predictability be improved by including more tasks?\n\nMore predictable and shows more reliable predicting networks?\n\nWhat are the exact neural substrate of g based on multiple cognitive tasks?"
+    "text": "Research Questions\n\nHow the number of tasks affect the measure of g?\n\nMore reliable and more valid?\n\nCan neural predictability be improved by including more tasks?\n\nMore predictable and shows more reliable predicting networks?\n\nWhat are the exact neural substrate of g based on multiple cognitive tasks?"
   },
   {
     "objectID": "posts/main_results.html#cognitive-tasks",
@@ -193,7 +193,7 @@
     "href": "index.html",
     "title": "Intelligence and Its Neural Correlates",
     "section": "",
-    "text": "The neural substrates of general cognitive ability based on multiple cognitive tasks\n\n\n\n\n\n\n\n\n\n\n\nJun 30, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\nBenchmark Neural Predictability of G-factor\n\n\n\n\n\n\n\n\n\n\n\nMay 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\nNo matching items"
+    "text": "The neural substrates of general cognitive ability based on multiple cognitive tasks\n\n\n\n\n\n\n\n\nJun 30, 2023\n\n\nLiang Zhang\n\n\n\n\n\n\n\n\n\n\n\n\nBenchmark Neural Predictability of G-factor\n\n\n\n\n\n\n\n\nMay 10, 2023\n\n\nLiang Zhang\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/bench_cpm.html#configurations",
